@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+  <html lang="de">
+  <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Protocol 16 – Schließfach-Code</title>
+  <style>
+    :root {
+      /* Commerzbank Farbwerte, Stand 08.2025 */
+      --bg: #002E3C;        /* Ozean-Petrol, Brand Primary 2 */
+    --panel: #304D4A;     /* Abstufung Ozean-Petrol/Sand, Gradation 1 */
+    --accent: #FFD700;    /* Gelb, Brand Primary 1 */
+          --text: #F1EFED;      /* Sand, Brand Primary 3 */
+          --text-muted: #A0AEAC; /* Abstufung Ozean-Petrol/Sand, Gradation 4 */
+          --success: #008932;   /* Funktionsfarbe Success */
+    --danger: #C5000E;    /* Funktionsfarbe Error */
+          --border: #537173;    /* Abstufung Ozean-Petrol/Sand, Gradation 2 */
+}
+  * { box-sizing: border-box; }
+  body {
+        margin: 0;
+    min-height: 100vh;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, "Segoe UI", Arial, sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+}
+  .screen { display: none; width: 100%; max-width: 360px; }
+  .screen.active { display: block; }
+  .card {
+        background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px 24px;
+    text-align: center;
+  }
+  .label {
+        font-size: 13px;
+    color: var(--text-muted);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+}
+  .display { display: flex; gap: 10px; justify-content: center; margin-bottom: 16px; }
+  .digit-box {
+        width: 52px;
+    height: 62px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    font-weight: 600;
+    background: rgba(255,255,255,0.03);
+}
+  .status { min-height: 24px; font-size: 14px; font-weight: 600; margin-bottom: 16px; color: var(--text-muted); }
+  .status.success { color: var(--success); }
+  .status.danger { color: var(--danger); }
+  .pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .pad button {
+        height: 56px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: rgba(255,255,255,0.04);
+    color: var(--text);
+    font-size: 18px;
+    cursor: pointer;
+  }
+  .pad button:hover { background: rgba(255,255,255,0.09); }
+  .pad button:active { transform: scale(0.96); }
+  h1 { font-size: 20px; color: var(--accent); margin: 0 0 12px; }
+  p { color: var(--text-muted); font-size: 15px; line-height: 1.6; margin: 0; }
+</style>
+  </head>
+  <body>
+
+  <div id="screen-code" class="screen active">
+    <div class="card">
+      <div class="label">Team <span id="team-label">07</span> &middot; Protocol 16</div>
+      <div class="display" id="display"></div>
+      <div class="status" id="status"></div>
+      <div class="pad" id="pad"></div>
+    </div>
+  </div>
+
+  <div id="screen-result" class="screen">
+    <div class="card" style="text-align:left;">
+      <h1 style="text-align:center;">Protocol verified</h1>
+      <p style="margin-bottom:12px;"><strong style="color:var(--text);">Bestätigte Fakten:</strong><br>Neuer Produktionsstandort Polen &middot; Finanzierung 60&nbsp;% extern / 40&nbsp;% Eigenmittel &middot; reales Währungsrisiko in USD, CNY, PLN, GBP.</p>
+    <p style="margin-bottom:12px;"><strong style="color:var(--text);">Erkannte Manipulationen:</strong><br>„Keine Währungsrisiken“ und „vollständig digital ohne Spezialisten“ widersprechen den Quellen.</p>
+      <p style="margin-bottom:12px;"><strong style="color:var(--text);">Sherlock-Korrektur:</strong><br>Die Krypto-Aussage wurde zunächst nur als unbelegt eingestuft, ohne die echten Produktbedingungen zu berücksichtigen.</p>
+    <p><strong style="color:var(--text);">Für Modul 4 nicht verhandelbar:</strong><br>Für die Finanzierung fehlen noch Unterlagen &middot; Krypto ersetzt keine Währungsabsicherung.</p>
+    </div>
+  </div>
+
+  <script>
+    // Pro Raum anpassen: der gültige Code für dieses Schließfach
+    var CODE = "50";
+
+  // Einfache erzeugte Töne, keine Audiodateien nötig
+  var audioCtx = null;
+  function getCtx() {
+        if (!audioCtx) {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+    return audioCtx;
+  }
+  function beep(freq, duration, type, delay) {
+        var ctx = getCtx();
+    var osc = ctx.createOscillator();
+    var gain = ctx.createGain();
+    osc.type = type || 'sine';
+    osc.frequency.value = freq;
+    var start = ctx.currentTime + (delay || 0);
+    gain.gain.setValueAtTime(0.15, start);
+    gain.gain.exponentialRampToValueAtTime(0.001, start + duration);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(start);
+    osc.stop(start + duration);
+  }
+  function playClick() { beep(700, 0.06, 'sine'); }
+  function playSuccess() {
+        beep(523.25, 0.12, 'sine', 0);
+    beep(659.25, 0.12, 'sine', 0.12);
+    beep(783.99, 0.22, 'sine', 0.24);
+  }
+  function playError() {
+        beep(200, 0.25, 'sawtooth', 0);
+    beep(150, 0.3, 'sawtooth', 0.15);
+  }
+
+  var entered = "";
+  var display = document.getElementById('display');
+  var status = document.getElementById('status');
+  var pad = document.getElementById('pad');
+
+  function renderDisplay() {
+        display.innerHTML = "";
+    for (var i = 0; i < CODE.length; i++) {
+      var box = document.createElement('div');
+      box.className = 'digit-box';
+      box.textContent = entered[i] || "";
+      display.appendChild(box);
+    }
+  }
+
+  function setStatus(text, role) {
+        status.textContent = text || "";
+    status.className = 'status' + (role ? ' ' + role : '');
+  }
+
+  function press(d) {
+        if (entered.length >= CODE.length) return;
+    entered += d;
+    renderDisplay();
+    playClick();
+  }
+
+  function clearAll() {
+        entered = "";
+    renderDisplay();
+    setStatus('');
+  }
+
+  function submit() {
+        if (entered.length < CODE.length) {
+      setStatus('Bitte vollständigen Code eingeben');
+      return;
+        }
+    if (entered === CODE) {
+      playSuccess();
+      setStatus('Protocol verified', 'success');
+      setTimeout(function () {
+        document.getElementById('screen-code').classList.remove('active');
+        document.getElementById('screen-result').classList.add('active');
+      }, 600);
+    } else {
+      playError();
+      setStatus('Code ungültig, erneut versuchen', 'danger');
+      setTimeout(function () {
+        entered = "";
+        renderDisplay();
+        setStatus('');
+      }, 900);
+    }
+  }
+
+  var keys = ['1','2','3','4','5','6','7','8','9','clear','0','enter'];
+  keys.forEach(function (k) {
+        var btn = document.createElement('button');
+    if (k === 'clear') {
+      btn.textContent = 'C';
+      btn.setAttribute('aria-label', 'Löschen');
+      btn.onclick = clearAll;
+    } else if (k === 'enter') {
+      btn.textContent = 'OK';
+      btn.setAttribute('aria-label', 'Bestätigen');
+      btn.onclick = submit;
+    } else {
+      btn.textContent = k;
+      btn.onclick = function () { press(k); };
+    }
+    pad.appendChild(btn);
+  });
+
+  renderDisplay();
+</script>
+  </body>
+  </html>
+  
