@@ -77,6 +77,11 @@
     transition: transform 0.15s ease;
   }
   a.enter:hover { transform: scale(1.04); }
+      .field-label { font-size: 13px; color: var(--text-muted); margin: 24px 0 8px; }
+      #teamNumber { width: 120px; text-align: center; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: rgba(255,255,255,0.06); color: var(--text); font-size: 16px; margin-bottom: 16px; }
+      button.enter { border: none; cursor: pointer; font-family: inherit; }
+      button.enter:disabled { opacity: 0.6; cursor: default; }
+      .login-error { min-height: 18px; font-size: 13px; color: #FF8A80; margin-top: 12px; }
 </style>
 </head>
 <body>
@@ -87,7 +92,51 @@
     <div class="protocol-label">Protocol 16</div>
     <p class="sub">16 fragments. 16 teams. One goal.</p>
     <h1>Reconnect Sherlock</h1>
-    <a class="enter" href="01 Erlaeuterungsvideo.html">Enter the Mission</a>
+      <p class="field-label">Please enter your team number</p>
+        <input type="text" id="teamNumber" inputmode="numeric" placeholder="e.g. 07" maxlength="2">
+        <button class="enter" id="enterBtn" type="button">Enter the Mission</button>
+                <p class="login-error" id="loginError"></p>
   </div>
+<script>
+    var API_URL = 'https://script.google.com/macros/s/AKfycbxc0QIIyaYTbGBMyhsUdYD01_AAYyrIsySqgF4rSWHPH8t73wHdP6iGEYUQMc5ImVsZ/exec';
+    var btn = document.getElementById('enterBtn');
+    var input = document.getElementById('teamNumber');
+    var errorEl = document.getElementById('loginError');
+
+    btn.addEventListener('click', function () {
+          var team = input.value.trim();
+          if (!team || isNaN(team) || Number(team) < 1 || Number(team) > 16) {
+                  errorEl.textContent = 'Please enter a valid team number (1-16).';
+                  return;
+          }
+          btn.disabled = true;
+          btn.textContent = 'Checking...';
+          errorEl.textContent = '';
+
+          fetch(API_URL, {
+                  method: 'POST',
+                  body: new URLSearchParams({ team: team, action: 'login' })
+          })
+            .then(function (res) { return res.json(); })
+            .then(function (data) {
+                      if (data.status === 'ok') {
+                                  sessionStorage.setItem('teamNumber', team);
+                                  window.location.href = '01 Erlaeuterungsvideo.html';
+                      } else if (data.code === 'DUPLICATE') {
+                                  errorEl.textContent = 'This team number is already logged in.';
+                      } else {
+                                  errorEl.textContent = data.message || 'Login failed. Please try again.';
+                      }
+            })
+            .catch(function () {
+                      errorEl.textContent = 'Connection failed. Please check your network.';
+            })
+            .finally(function () {
+                      btn.disabled = false;
+                      btn.textContent = 'Enter the Mission';
+            });
+    });
+</script>
+  
 </body>
 </html>
