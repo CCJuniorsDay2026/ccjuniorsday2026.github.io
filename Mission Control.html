@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+  <html lang="de">
+  <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mission Control – Protocol 16</title>
+  <style>
+    :root {
+      --bg: #002E3C; --bg-deep: #001B24; --panel: #0a3a49; --accent: #FFD700;
+      --text: #F1EFED; --text-muted: #A0AEAC; --border: #537173;
+      --success: #008932; --danger: #C5000E;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+        min-height: 100vh;
+    background: radial-gradient(circle at 50% 10%, #0a4457 0%, var(--bg) 45%, var(--bg-deep) 100%);
+    color: var(--text);
+    font-family: -apple-system, "Segoe UI", Arial, sans-serif;
+    padding: 32px 24px 64px;
+}
+  .header { max-width: 1100px; margin: 0 auto 28px; text-align: center; }
+  .eyebrow { font-size: 13px; letter-spacing: 3px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; }
+  h1 { font-size: 28px; letter-spacing: 2px; color: var(--accent); margin: 0 0 8px; text-transform: uppercase; font-weight: 700; }
+  .sub { font-size: 14px; color: var(--text-muted); margin: 0; }
+  .toolbar { max-width: 1100px; margin: 0 auto 20px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+  .status-line { font-size: 13px; color: var(--text-muted); }
+  .status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--success); margin-right: 6px; }
+  .status-dot.error { background: var(--danger); }
+  button.refresh { background: var(--accent); color: #1A1500; border: none; border-radius: 999px; padding: 10px 22px; font-weight: 600; font-size: 13px; cursor: pointer; }
+  button.refresh:hover { transform: scale(1.03); }
+  .error-banner { max-width: 1100px; margin: 0 auto 16px; background: rgba(197,0,14,0.15); border: 1px solid var(--danger); color: var(--text); padding: 12px 16px; border-radius: 10px; font-size: 13px; display: none; }
+  .error-banner.show { display: block; }
+  table { max-width: 1100px; width: 100%; margin: 0 auto; border-collapse: collapse; background: var(--panel); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+  thead th { text-align: left; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); padding: 14px 16px; border-bottom: 1px solid var(--border); }
+  tbody td { padding: 14px 16px; border-bottom: 1px solid rgba(83,113,115,0.4); font-size: 14px; }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover { background: rgba(255,255,255,0.03); }
+  .team-num { font-weight: 700; color: var(--accent); font-size: 15px; }
+  .badge { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; padding: 4px 10px; border-radius: 999px; }
+  .badge.in { background: rgba(0,137,50,0.18); color: #6FE39B; }
+  .badge.out { background: rgba(160,174,172,0.12); color: var(--text-muted); }
+  .badge .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+  .muted { color: var(--text-muted); }
+  .timestamp { font-size: 12px; color: var(--text-muted); }
+  @media (max-width: 640px) {
+    table, thead, tbody, th, td, tr { display: block; }
+    thead { display: none; }
+    tbody tr { border-bottom: 1px solid var(--border); padding: 12px 16px; }
+    tbody td { border: none; padding: 4px 0; display: flex; justify-content: space-between; gap: 12px; }
+    tbody td::before { content: attr(data-label); color: var(--text-muted); font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+}
+</style>
+  </head>
+  <body>
+    <div class="header">
+      <div class="eyebrow">Protocol 16</div>
+      <h1>Mission Control</h1>
+    <p class="sub">Live-Tracking aller 16 Teams</p>
+    </div>
+
+    <div class="toolbar">
+      <div class="status-line"><span class="status-dot" id="statusDot"></span><span id="statusText">Lade…</span></div>
+      <button class="refresh" id="refreshBtn" type="button">Jetzt aktualisieren</button>
+    </div>
+
+    <div class="error-banner" id="errorBanner"></div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Team</th>
+          <th>Status</th>
+          <th>Aktuelle Aufgabe</th>
+          <th>Zuletzt gelöst</th>
+          <th>Letztes Update</th>
+      </tr>
+      </thead>
+      <tbody id="tableBody">
+      </tbody>
+    </table>
+
+  <script>
+    var API_URL = 'https://script.google.com/macros/s/AKfycbxc0QIIyaYTbGBMyhsUdYD01_AAYyrIsySqgF4rSWHPH8t73wHdP6iGEYUQMc5ImVsZ/exec';
+  var REFRESH_MS = 10000;
+  var tableBody = document.getElementById('tableBody');
+  var statusDot = document.getElementById('statusDot');
+  var statusText = document.getElementById('statusText');
+  var errorBanner = document.getElementById('errorBanner');
+  var refreshBtn = document.getElementById('refreshBtn');
+
+  function formatTime(iso) {
+        if (!iso) return '–';
+    var d = new Date(iso);
+    if (isNaN(d.getTime())) return iso;
+    return d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  }
+
+  function escapeHtml(str) {
+        var div = document.createElement('div');
+    div.textContent = str == null ? '' : String(str);
+          return div.innerHTML;
+  }
+
+  function render(teams) {
+        teams.sort(function (a, b) { return Number(a.team) - Number(b.team); });
+    var rows = teams.map(function (t) {
+      var loggedIn = !!t.locked_in_at;
+      var badge = loggedIn
+        ? '<span class="badge in"><span class="dot"></span>Eingeloggt</span>'
+        : '<span class="badge out"><span class="dot"></span>Wartet</span>';
+      var task = t.current_task ? escapeHtml(t.current_task) : '<span class="muted">–</span>';
+      var completed = t.last_completed ? escapeHtml(t.last_completed) : '<span class="muted">–</span>';
+      var updated = t.last_update ? '<span class="timestamp">' + formatTime(t.last_update) + '</span>' : '<span class="muted">–</span>';
+      return '<tr>' +
+                '<td data-label="Team"><span class="team-num">Team ' + escapeHtml(t.team) + '</span></td>' +
+                '<td data-label="Status">' + badge + '</td>' +
+                '<td data-label="Aktuelle Aufgabe">' + task + '</td>' +
+                '<td data-label="Zuletzt gelöst">' + completed + '</td>' +
+                '<td data-label="Letztes Update">' + updated + '</td>' +
+              '</tr>';
+    }).join('');
+    tableBody.innerHTML = rows;
+}
+
+  function load() {
+        statusText.textContent = 'Aktualisiere…';
+    fetch(API_URL + '?t=' + Date.now())
+            .then(function (res) { return res.json(); })
+      .then(function (data) {
+                if (data.status !== 'ok') throw new Error(data.message || 'Fehler beim Laden');
+        render(data.teams);
+        statusDot.className = 'status-dot';
+        statusText.textContent = 'Aktualisiert um ' + new Date().toLocaleTimeString('de-DE');
+        errorBanner.className = 'error-banner';
+      })
+      .catch(function (err) {
+        statusDot.className = 'status-dot error';
+        statusText.textContent = 'Verbindung fehlgeschlagen';
+        errorBanner.className = 'error-banner show';
+        errorBanner.textContent = 'Live-Daten konnten nicht geladen werden: ' + err.message + '. Letzter bekannter Stand bleibt sichtbar.';
+      });
+  }
+
+  refreshBtn.addEventListener('click', load);
+  load();
+  setInterval(load, REFRESH_MS);
+</script>
+  </body>
+  </html>
