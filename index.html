@@ -64,7 +64,7 @@
     line-height: 1.6;
     margin: 0;
   }
-  a.enter {
+  .enter {
     display: inline-block;
     padding: 14px 36px;
     background: var(--accent);
@@ -76,13 +76,13 @@
     border-radius: 999px;
     transition: transform 0.15s ease;
   }
-  a.enter:hover { transform: scale(1.04); }
-      .field-label { font-size: 13px; color: var(--text-muted); margin: 24px 0 8px; }
-      #teamNumber { width: 120px; text-align: center; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: rgba(255,255,255,0.06); color: var(--text); font-size: 16px; margin-bottom: 16px; }
-      button.enter { border: none; cursor: pointer; font-family: inherit; }
+  .enter:hover { transform: scale(1.04); }
+            .field-label { font-size: 14px; color: var(--accent); font-weight: 600; letter-spacing: 0.5px; margin: 24px 0 12px; }
+            #teamNumber { display: block; width: 140px; margin: 0 auto 18px; text-align: center; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: rgba(255,255,255,0.06); color: var(--text); font-size: 16px; }
+            button.enter { display: block; margin: 0 auto; border: none; cursor: pointer; font-family: inherit; }
       button.enter:disabled { opacity: 0.6; cursor: default; }
       .login-error { min-height: 18px; font-size: 13px; color: #FF8A80; margin-top: 12px; }
-</style>
+          </style>
 </head>
 <body>
   <div class="stage">
