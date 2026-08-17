@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+  <html lang="de">
+  <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Protocol 16 – Verbindungstest</title>
+  <style>
+    :root {
+      --bg: #002E3C; --bg-deep: #001B24; --panel: #304D4A; --accent: #FFD700;
+      --text: #F1EFED; --text-muted: #A0AEAC; --border: #537173;
+      --success: #008932; --danger: #C5000E;
+  }
+  * { box-sizing: border-box; }
+  body {
+        margin: 0; min-height: 100vh;
+    background: radial-gradient(circle at 50% 20%, #0a4457 0%, var(--bg) 45%, var(--bg-deep) 100%);
+    color: var(--text); font-family: -apple-system, "Segoe UI", Arial, sans-serif;
+    display: flex; align-items: center; justify-content: center; padding: 24px;
+}
+  .card {
+        background: var(--panel); border: 1px solid var(--border); border-radius: 16px;
+    padding: 32px 24px; max-width: 440px; width: 100%;
+}
+  .label { font-size: 13px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 20px; text-align: center; }
+  h1 { font-size: 18px; margin: 0 0 20px; text-align: center; color: var(--accent); }
+  .field { margin-bottom: 14px; }
+  .field label { display: block; font-size: 13px; color: var(--text-muted); margin-bottom: 6px; }
+  input {
+        width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border);
+    background: rgba(255,255,255,0.04); color: var(--text); font-size: 14px;
+}
+  button {
+        width: 100%; padding: 12px; border-radius: 999px; border: none;
+    background: var(--accent); color: #1A1500; font-weight: 600; font-size: 15px;
+    cursor: pointer; margin-top: 6px;
+}
+  button:disabled { opacity: 0.6; cursor: default; }
+  .result { margin-top: 20px; padding: 14px; border-radius: 10px; font-size: 14px; line-height: 1.6; display: none; }
+  .result.show { display: block; }
+  .result.success { background: rgba(0,137,50,0.15); border: 1px solid var(--success); color: var(--text); }
+  .result.error { background: rgba(197,0,14,0.15); border: 1px solid var(--danger); color: var(--text); }
+  .result strong { display: block; margin-bottom: 6px; }
+  .hint { font-size: 12px; color: var(--text-muted); margin-top: 16px; line-height: 1.5; }
+</style>
+  </head>
+  <body>
+    <div class="card">
+      <div class="label">Protocol 16 &middot; Diagnose</div>
+      <h1>Verbindungstest Google Apps Script</h1>
+
+      <div class="field">
+        <label for="url">Web-App-URL (endet auf /exec)</label>
+        <input type="text" id="url" placeholder="https://script.google.com/macros/s/…/exec">
+      </div>
+
+      <button id="testBtn">Verbindung testen</button>
+
+      <div class="result" id="result"></div>
+
+      <div class="hint">
+        Diese Seite testet nur, ob dieses Gerät/Netzwerk die Google-Apps-Script-Adresse erreichen kann – es wird nichts gespeichert. Bitte auf dem Bank-Gerät im Bank-Netzwerk ausführen.
+    </div>
+  </div>
+
+<script>
+    var btn = document.getElementById('testBtn');
+  var result = document.getElementById('result');
+  var urlInput = document.getElementById('url');
+
+  btn.addEventListener('click', function () {
+        var url = urlInput.value.trim();
+    if (!url) {
+      showResult('error', 'Bitte zuerst die Web-App-URL eintragen.');
+      return;
+    }
+    btn.disabled = true;
+    btn.textContent = 'Teste …';
+    result.className = 'result';
+
+    var started = Date.now();
+    fetch(url, { method: 'GET' })
+            .then(function (res) {
+              var ms = Date.now() - started;
+        if (!res.ok) {
+          throw new Error('Server antwortete mit Status ' + res.status);
+        }
+        return res.text().then(function (text) {
+                    return { text: text, ms: ms };
+        });
+    })
+      .then(function (data) {
+        showResult('success', 'Verbindung erfolgreich (' + data.ms + ' ms).<br>Antwort: ' + escapeHtml(data.text));
+      })
+      .catch(function (err) {
+        showResult('error', 'Verbindung fehlgeschlagen: ' + escapeHtml(err.message) + '<br>Das deutet auf eine Netzwerksperre (Proxy/Firewall) hin.');
+  })
+      .finally(function () {
+                btn.disabled = false;
+        btn.textContent = 'Verbindung testen';
+      });
+  });
+
+  function showResult(type, html) {
+        result.className = 'result show ' + type;
+    result.innerHTML = (type === 'success' ? '<strong>Erfolgreich</strong>' : '<strong>Fehlgeschlagen</strong>') + html;
+  }
+
+  function escapeHtml(str) {
+        var div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+</script>
+  </body>
+  </html>
+  
