@@ -5,316 +5,326 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Mission Control – Protocol 16</title>
 <style>
-  :root {
-    --bg: #002E3C; --bg-deep: #001B24; --panel: #0a3a49; --accent: #FFD700;
-    --text: #F1EFED; --text-muted: #A0AEAC; --border: #537173;
-    --success: #008932; --danger: #C5000E;
-  }
-  * { box-sizing: border-box; }
-  html, body { height: 100%; margin: 0; }
-  body {
-    min-height: 100vh;
-    background: radial-gradient(circle at 50% 10%, #0a4457 0%, var(--bg) 45%, var(--bg-deep) 100%);
-    color: var(--text);
-    font-family: -apple-system, "Segoe UI", Arial, sans-serif;
-    padding: 32px 24px 64px;
-  }
-  .header { max-width: 1300px; margin: 0 auto 28px; text-align: center; }
-  .eyebrow { font-size: 13px; letter-spacing: 3px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; }
-  h1 { font-size: 28px; letter-spacing: 2px; color: var(--accent); margin: 0 0 8px; text-transform: uppercase; font-weight: 700; }
-  .sub { font-size: 14px; color: var(--text-muted); margin: 0; }
-  .toolbar { max-width: 1300px; margin: 0 auto 20px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
-  .status-line { font-size: 13px; color: var(--text-muted); }
-  .status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--success); margin-right: 6px; }
-  .status-dot.error { background: var(--danger); }
-  .toolbar-actions { display: flex; gap: 12px; }
-  button.refresh { background: var(--accent); color: #1A1500; border: none; border-radius: 999px; padding: 10px 22px; font-weight: 600; font-size: 13px; cursor: pointer; }
-  button.refresh:hover { transform: scale(1.03); }
-  button.btn-outline { background: transparent; color: #FF8A80; border: 1px solid var(--danger); border-radius: 999px; padding: 10px 22px; font-weight: 600; font-size: 13px; cursor: pointer; }
-  button.btn-outline:hover { background: rgba(197,0,14,0.12); }
-  button.btn-outline:disabled { opacity: 0.5; cursor: default; }
-  .confirm-panel { max-width: 1300px; margin: 0 auto 20px; background: rgba(197,0,14,0.08); border: 1px solid var(--danger); border-radius: 12px; padding: 18px 20px; display: none; }
-  .confirm-panel.show { display: block; }
-  .confirm-panel p { margin: 0 0 12px; font-size: 13px; color: var(--text); }
-  .confirm-panel .hint { font-size: 12px; color: var(--text-muted); margin: 6px 0 0; }
-  .confirm-panel .row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
-  .confirm-panel input { flex: 1; min-width: 200px; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: rgba(255,255,255,0.06); color: var(--text); font-size: 14px; }
-  .confirm-panel .confirm-btn { background: var(--danger); color: #fff; border: none; border-radius: 999px; padding: 10px 22px; font-weight: 600; font-size: 13px; cursor: pointer; }
-  .confirm-panel .confirm-btn:disabled { opacity: 0.4; cursor: default; }
-  .confirm-panel .cancel-btn { background: transparent; color: var(--text-muted); border: 1px solid var(--border); border-radius: 999px; padding: 10px 18px; font-weight: 600; font-size: 13px; cursor: pointer; }
-  .error-banner { max-width: 1300px; margin: 0 auto 16px; background: rgba(197,0,14,0.15); border: 1px solid var(--danger); color: var(--text); padding: 12px 16px; border-radius: 10px; font-size: 13px; display: none; }
-  .error-banner.show { display: block; }
-  .table-wrap { max-width: 1300px; margin: 0 auto; overflow-x: auto; border-radius: 12px; border: 1px solid var(--border); }
-  table { width: 100%; min-width: 1100px; border-collapse: collapse; background: var(--panel); }
-  thead th { text-align: left; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); padding: 14px 16px; border-bottom: 1px solid var(--border); white-space: nowrap; }
-  tbody td { padding: 10px 16px; border-bottom: 1px solid rgba(83,113,115,0.4); font-size: 14px; }
-  tbody tr:last-child td { border-bottom: none; }
-  tbody tr:hover { background: rgba(255,255,255,0.03); }
-  .team-num { font-weight: 700; color: var(--accent); font-size: 15px; }
-  .badge { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; padding: 4px 10px; border-radius: 999px; white-space: nowrap; }
-  .badge.in { background: rgba(0,137,50,0.18); color: #6FE39B; }
-  .badge.out { background: rgba(160,174,172,0.12); color: var(--text-muted); }
-  .badge .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
-  .muted { color: var(--text-muted); }
-  .timestamp { font-size: 12px; color: var(--text-muted); white-space: nowrap; }
-  .field-input, .field-select { width: 100%; min-width: 90px; padding: 6px 8px; border-radius: 6px; border: 1px solid var(--border); background: rgba(255,255,255,0.06); color: var(--text); font-size: 13px; font-family: inherit; }
-  .field-input:focus, .field-select:focus { outline: 1px solid var(--accent); }
-  .field-saved { outline: 1px solid var(--success) !important; }
-  .progress-track { display: flex; gap: 3px; flex-wrap: wrap; max-width: 220px; }
-  .dot-step { width: 11px; height: 11px; border-radius: 3px; background: rgba(160,174,172,0.18); border: 1px solid rgba(160,174,172,0.3); flex-shrink: 0; }
-  .dot-step.done { background: var(--success); border-color: var(--success); }
-  .dot-step.active { background: var(--accent); border-color: var(--accent); }
+:root {
+--bg: #002E3C; --bg-deep: #001B24; --panel: #0a3a49; --accent: #FFD700;
+--text: #F1EFED; --text-muted: #A0AEAC; --border: #537173;
+--success: #008932; --danger: #C5000E;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+body {
+min-height: 100vh;
+background: radial-gradient(circle at 50% 10%, #0a4457 0%, var(--bg) 45%, var(--bg-deep) 100%);
+color: var(--text);
+font-family: -apple-system, "Segoe UI", Arial, sans-serif;
+padding: 32px 24px 64px;
+}
+.header { max-width: 1300px; margin: 0 auto 28px; text-align: center; }
+.eyebrow { font-size: 13px; letter-spacing: 3px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; }
+h1 { font-size: 28px; letter-spacing: 2px; color: var(--accent); margin: 0 0 8px; text-transform: uppercase; font-weight: 700; }
+.sub { font-size: 14px; color: var(--text-muted); margin: 0; }
+.toolbar { max-width: 1300px; margin: 0 auto 20px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.status-line { font-size: 13px; color: var(--text-muted); }
+.status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--success); margin-right: 6px; }
+.status-dot.error { background: var(--danger); }
+.toolbar-actions { display: flex; gap: 12px; }
+button.refresh { background: var(--accent); color: #1A1500; border: none; border-radius: 999px; padding: 10px 22px; font-weight: 600; font-size: 13px; cursor: pointer; }
+button.refresh:hover { transform: scale(1.03); }
+button.btn-outline { background: transparent; color: #FF8A80; border: 1px solid var(--danger); border-radius: 999px; padding: 10px 22px; font-weight: 600; font-size: 13px; cursor: pointer; }
+button.btn-outline:hover { background: rgba(197,0,14,0.12); }
+button.btn-outline:disabled { opacity: 0.5; cursor: default; }
+.confirm-panel { max-width: 1300px; margin: 0 auto 20px; background: rgba(197,0,14,0.08); border: 1px solid var(--danger); border-radius: 12px; padding: 18px 20px; display: none; }
+.confirm-panel.show { display: block; }
+.confirm-panel p { margin: 0 0 12px; font-size: 13px; color: var(--text); }
+.confirm-panel .hint { font-size: 12px; color: var(--text-muted); margin: 6px 0 0; }
+.confirm-panel .row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+.confirm-panel input { flex: 1; min-width: 200px; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: rgba(255,255,255,0.06); color: var(--text); font-size: 14px; }
+.confirm-panel .confirm-btn { background: var(--danger); color: #fff; border: none; border-radius: 999px; padding: 10px 22px; font-weight: 600; font-size: 13px; cursor: pointer; }
+.confirm-panel .confirm-btn:disabled { opacity: 0.4; cursor: default; }
+.confirm-panel .cancel-btn { background: transparent; color: var(--text-muted); border: 1px solid var(--border); border-radius: 999px; padding: 10px 18px; font-weight: 600; font-size: 13px; cursor: pointer; }
+.error-banner { max-width: 1300px; margin: 0 auto 16px; background: rgba(197,0,14,0.15); border: 1px solid var(--danger); color: var(--text); padding: 12px 16px; border-radius: 10px; font-size: 13px; display: none; }
+.error-banner.show { display: block; }
+.table-wrap { max-width: 1300px; margin: 0 auto; overflow-x: auto; border-radius: 12px; border: 1px solid var(--border); }
+table { width: 100%; min-width: 1100px; border-collapse: collapse; background: var(--panel); }
+thead th { text-align: left; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); padding: 14px 16px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+tbody td { padding: 10px 16px; border-bottom: 1px solid rgba(83,113,115,0.4); font-size: 14px; }
+tbody tr:last-child td { border-bottom: none; }
+tbody tr:hover { background: rgba(255,255,255,0.03); }
+tbody tr.help-active { background: rgba(197,0,14,0.16); }
+tbody tr.help-active:hover { background: rgba(197,0,14,0.22); }
+.team-num { font-weight: 700; color: var(--accent); font-size: 15px; }
+.badge { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; padding: 4px 10px; border-radius: 999px; white-space: nowrap; }
+.badge.in { background: rgba(0,137,50,0.18); color: #6FE39B; }
+.badge.out { background: rgba(160,174,172,0.12); color: var(--text-muted); }
+.badge.help { background: rgba(197,0,14,0.24); color: #FF8A80; animation: helpPulse 1.4s ease-in-out infinite; }
+.badge .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+@keyframes helpPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+.muted { color: var(--text-muted); }
+.timestamp { font-size: 12px; color: var(--text-muted); white-space: nowrap; }
+.field-input, .field-select { width: 100%; min-width: 90px; padding: 6px 8px; border-radius: 6px; border: 1px solid var(--border); background: rgba(255,255,255,0.06); color: var(--text); font-size: 13px; font-family: inherit; }
+.field-input:focus, .field-select:focus { outline: 1px solid var(--accent); }
+.field-saved { outline: 1px solid var(--success) !important; }
+.progress-track { display: flex; gap: 3px; flex-wrap: wrap; max-width: 220px; }
+.dot-step { width: 11px; height: 11px; border-radius: 3px; background: rgba(160,174,172,0.18); border: 1px solid rgba(160,174,172,0.3); flex-shrink: 0; }
+.dot-step.done { background: var(--success); border-color: var(--success); }
+.dot-step.active { background: var(--accent); border-color: var(--accent); }
 </style>
 </head>
 <body>
-  <div class="header">
-    <div class="eyebrow">Protocol 16</div>
-    <h1>Mission Control</h1>
-    <p class="sub">Live-Tracking aller 16 Teams</p>
-  </div>
+<div class="header">
+<div class="eyebrow">Protocol 16</div>
+<h1>Mission Control</h1>
+<p class="sub">Live-Tracking aller 16 Teams</p>
+</div>
 
-  <div class="toolbar">
-    <div class="status-line"><span class="status-dot" id="statusDot"></span><span id="statusText">Lade…</span></div>
-    <div class="toolbar-actions">
-      <button class="btn-outline" id="resetBtn" type="button">Zurücksetzen</button>
-      <button class="refresh" id="refreshBtn" type="button">Jetzt aktualisieren</button>
-    </div>
-  </div>
+<div class="toolbar">
+<div class="status-line"><span class="status-dot" id="statusDot"></span><span id="statusText">Lade…</span></div>
+<div class="toolbar-actions">
+<button class="btn-outline" id="resetBtn" type="button">Zurücksetzen</button>
+<button class="refresh" id="refreshBtn" type="button">Jetzt aktualisieren</button>
+</div>
+</div>
 
-  <div class="confirm-panel" id="confirmPanel">
-    <p>Setzt Tracking-Daten (Login-Status, Fortschritt, Update-Zeit) zurück – Raum, Sprache und Mission Control bleiben erhalten.</p>
-    <div class="row">
-      <input type="text" id="confirmInput" placeholder="clear all  oder  clear team 7" autocomplete="off">
-      <button class="confirm-btn" id="confirmBtn" type="button" disabled>Bestätigen</button>
-      <button class="cancel-btn" id="cancelBtn" type="button">Abbrechen</button>
-    </div>
-    <p class="hint">„clear all" setzt alle 16 Teams zurück. „clear team 7" setzt nur Team 7 zurück.</p>
-  </div>
+<div class="confirm-panel" id="confirmPanel">
+<p>Setzt Tracking-Daten (Login-Status, Fortschritt, Update-Zeit) zurück – Raum, Sprache und Mission Control bleiben erhalten.</p>
+<div class="row">
+<input type="text" id="confirmInput" placeholder="clear all oder clear team 7" autocomplete="off">
+<button class="confirm-btn" id="confirmBtn" type="button" disabled>Bestätigen</button>
+<button class="cancel-btn" id="cancelBtn" type="button">Abbrechen</button>
+</div>
+<p class="hint">„clear all" setzt alle 16 Teams zurück. „clear team 7" setzt nur Team 7 zurück.</p>
+</div>
 
-  <div class="error-banner" id="errorBanner"></div>
+<div class="error-banner" id="errorBanner"></div>
 
-  <div class="table-wrap">
-    <table>
-      <thead>
-        <tr>
-          <th>Team</th>
-          <th>Raum</th>
-          <th>Sprache</th>
-          <th>Mission Control</th>
-          <th>Status</th>
-          <th>Fortschritt</th>
-          <th>Letztes Update</th>
-        </tr>
-      </thead>
-      <tbody id="tableBody">
-      </tbody>
-    </table>
-  </div>
+<div class="table-wrap">
+<table>
+<thead>
+<tr>
+<th>Team</th>
+<th>Raum</th>
+<th>Sprache</th>
+<th>Mission Control</th>
+<th>Status</th>
+<th>Hilfe</th>
+<th>Fortschritt</th>
+<th>Letztes Update</th>
+</tr>
+</thead>
+<tbody id="tableBody">
+</tbody>
+</table>
+</div>
 
 <script>
-  var API_URL = 'https://script.google.com/macros/s/AKfycbxc0QIIyaYTbGBMyhsUdYD01_AAYyrIsySqgF4rSWHPH8t73wHdP6iGEYUQMc5ImVsZ/exec';
-  var REFRESH_MS = 10000;
-  var PAGE_COUNT = 18;
+var API_URL = 'https://script.google.com/macros/s/AKfycbxc0QIIyaYTbGBMyhsUdYD01_AAYyrIsySqgF4rSWHPH8t73wHdP6iGEYUQMc5ImVsZ/exec';
+var REFRESH_MS = 10000;
+var PAGE_COUNT = 18;
 
-  var tableBody = document.getElementById('tableBody');
-  var statusDot = document.getElementById('statusDot');
-  var statusText = document.getElementById('statusText');
-  var errorBanner = document.getElementById('errorBanner');
-  var refreshBtn = document.getElementById('refreshBtn');
-  var resetBtn = document.getElementById('resetBtn');
-  var confirmPanel = document.getElementById('confirmPanel');
-  var confirmInput = document.getElementById('confirmInput');
-  var confirmBtn = document.getElementById('confirmBtn');
-  var cancelBtn = document.getElementById('cancelBtn');
+var tableBody = document.getElementById('tableBody');
+var statusDot = document.getElementById('statusDot');
+var statusText = document.getElementById('statusText');
+var errorBanner = document.getElementById('errorBanner');
+var refreshBtn = document.getElementById('refreshBtn');
+var resetBtn = document.getElementById('resetBtn');
+var confirmPanel = document.getElementById('confirmPanel');
+var confirmInput = document.getElementById('confirmInput');
+var confirmBtn = document.getElementById('confirmBtn');
+var cancelBtn = document.getElementById('cancelBtn');
 
-  function formatTime(iso) {
-    if (!iso) return '–';
-    var d = new Date(iso);
-    if (isNaN(d.getTime())) return iso;
-    return d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-  }
+function formatTime(iso) {
+if (!iso) return '–';
+var d = new Date(iso);
+if (isNaN(d.getTime())) return iso;
+return d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+}
 
-  function escapeHtml(str) {
-    var div = document.createElement('div');
-    div.textContent = str == null ? '' : String(str);
-    return div.innerHTML;
-  }
+function escapeHtml(str) {
+var div = document.createElement('div');
+div.textContent = str == null ? '' : String(str);
+return div.innerHTML;
+}
 
-  function pageKey(n) {
-    return 'page_' + (n < 10 ? '0' + n : String(n));
-  }
+function pageKey(n) {
+return 'page_' + (n < 10 ? '0' + n : String(n));
+}
 
-  function renderProgress(t) {
-      var dots = '';
-    for (var p = 1; p <= PAGE_COUNT; p++) {
-      var val = t[pageKey(p)];
-      var cls = '';
-      var title = 'Seite ' + p + ': offen';
-      if (val === 'open') { cls = ' active'; title = 'Seite ' + p + ': in Bearbeitung'; }
-      else if (val) { cls = ' done'; title = 'Seite ' + p + ': erledigt'; }
-      dots += '<span class="dot-step' + cls + '" title="' + title + '"></span>';
-    }
-    return '<div class="progress-track">' + dots + '</div>';
-  }
+function renderProgress(t) {
+var dots = '';
+for (var p = 1; p <= PAGE_COUNT; p++) {
+var val = t[pageKey(p)];
+var cls = '';
+var title = 'Seite ' + p + ': offen';
+if (val === 'open') { cls = ' active'; title = 'Seite ' + p + ': in Bearbeitung'; }
+else if (val) { cls = ' done'; title = 'Seite ' + p + ': erledigt'; }
+dots += '<span class="dot-step' + cls + '" title="' + title + '"></span>';
+}
+return '<div class="progress-track">' + dots + '</div>';
+}
 
-  function optionsHtml(options, current) {
-    return options.map(function (opt) {
-      var sel = String(current || '') === opt.value ? ' selected' : '';
-      return '<option value="' + opt.value + '"' + sel + '>' + opt.label + '</option>';
-    }).join('');
-  }
+function optionsHtml(options, current) {
+return options.map(function (opt) {
+var sel = String(current || '') === opt.value ? ' selected' : '';
+return '<option value="' + opt.value + '"' + sel + '>' + opt.label + '</option>';
+}).join('');
+}
 
-  function render(teams) {
-    teams.sort(function (a, b) { return Number(a.team) - Number(b.team); });
-    var rows = teams.map(function (t) {
-      var loggedIn = !!t.locked_in_at;
-      var badge = loggedIn
-        ? '<span class="badge in"><span class="dot"></span>Eingeloggt</span>'
-        : '<span class="badge out"><span class="dot"></span>Wartet</span>';
-      var updated = t.last_update ? '<span class="timestamp">' + formatTime(t.last_update) + '</span>' : '<span class="muted">–</span>';
-      var sprachOptions = optionsHtml([
-        { value: '', label: '–' },
-        { value: 'Deutsch', label: 'Deutsch' },
-        { value: 'Englisch', label: 'Englisch' }
-      ], t.sprache);
-      var mcOptions = optionsHtml([
-        { value: '', label: '–' },
-        { value: '1', label: '1' },
-        { value: '2', label: '2' },
-        { value: '3', label: '3' },
-        { value: '4', label: '4' }
-      ], t.mission_control);
-      return '<tr>' +
-        '<td><span class="team-num">Team ' + escapeHtml(t.team) + '</span></td>' +
-        '<td><input class="field-input editable-field" data-team="' + escapeHtml(t.team) + '" data-field="raum" value="' + escapeHtml(t.raum) + '" placeholder="Raum"></td>' +
-        '<td><select class="field-select editable-field" data-team="' + escapeHtml(t.team) + '" data-field="sprache">' + sprachOptions + '</select></td>' +
-        '<td><select class="field-select editable-field" data-team="' + escapeHtml(t.team) + '" data-field="mission_control">' + mcOptions + '</select></td>' +
-        '<td>' + badge + '</td>' +
-        '<td>' + renderProgress(t) + '</td>' +
-        '<td>' + updated + '</td>' +
-      '</tr>';
-    }).join('');
-    tableBody.innerHTML = rows;
-    bindEditableFields();
-  }
+function render(teams) {
+teams.sort(function (a, b) { return Number(a.team) - Number(b.team); });
+var rows = teams.map(function (t) {
+var loggedIn = !!t.locked_in_at;
+var badge = loggedIn
+? '<span class="badge in"><span class="dot"></span>Eingeloggt</span>'
+: '<span class="badge out"><span class="dot"></span>Wartet</span>';
+var helpActive = !!t.hilfe_angefordert;
+var helpBadge = helpActive
+? '<span class="badge help"><span class="dot"></span>Hilfe!</span>'
+: '<span class="muted">–</span>';
+var updated = t.last_update ? '<span class="timestamp">' + formatTime(t.last_update) + '</span>' : '<span class="muted">–</span>';
+var sprachOptions = optionsHtml([
+{ value: '', label: '–' },
+{ value: 'Deutsch', label: 'Deutsch' },
+{ value: 'Englisch', label: 'Englisch' }
+], t.sprache);
+var mcOptions = optionsHtml([
+{ value: '', label: '–' },
+{ value: '1', label: '1' },
+{ value: '2', label: '2' },
+{ value: '3', label: '3' },
+{ value: '4', label: '4' }
+], t.mission_control);
+return '<tr' + (helpActive ? ' class="help-active"' : '') + '>' +
+'<td><span class="team-num">Team ' + escapeHtml(t.team) + '</span></td>' +
+'<td><input class="field-input editable-field" data-team="' + escapeHtml(t.team) + '" data-field="raum" value="' + escapeHtml(t.raum) + '" placeholder="Raum"></td>' +
+'<td><select class="field-select editable-field" data-team="' + escapeHtml(t.team) + '" data-field="sprache">' + sprachOptions + '</select></td>' +
+'<td><select class="field-select editable-field" data-team="' + escapeHtml(t.team) + '" data-field="mission_control">' + mcOptions + '</select></td>' +
+'<td>' + badge + '</td>' +
+'<td>' + helpBadge + '</td>' +
+'<td>' + renderProgress(t) + '</td>' +
+'<td>' + updated + '</td>' +
+'</tr>';
+}).join('');
+tableBody.innerHTML = rows;
+bindEditableFields();
+}
 
-  function bindEditableFields() {
-    var fields = tableBody.querySelectorAll('.editable-field');
-    fields.forEach(function (el) {
-      var eventName = el.tagName === 'SELECT' ? 'change' : 'blur';
-      el.addEventListener(eventName, function () {
-        saveField(el);
-      });
-    });
-  }
+function bindEditableFields() {
+var fields = tableBody.querySelectorAll('.editable-field');
+fields.forEach(function (el) {
+var eventName = el.tagName === 'SELECT' ? 'change' : 'blur';
+el.addEventListener(eventName, function () {
+saveField(el);
+});
+});
+}
 
-  function saveField(el) {
-    var team = el.getAttribute('data-team');
-    var field = el.getAttribute('data-field');
-    var value = el.value;
-    fetch(API_URL, {
-      method: 'POST',
-      body: new URLSearchParams({ action: 'update', team: team, field: field, value: value })
-    })
-      .then(function (res) { return res.json(); })
-      .then(function (data) {
-        if (data.status !== 'ok') throw new Error(data.message || 'Speichern fehlgeschlagen');
-        el.classList.add('field-saved');
-        setTimeout(function () { el.classList.remove('field-saved'); }, 1200);
-      })
-      .catch(function (err) {
-        errorBanner.className = 'error-banner show';
-        errorBanner.textContent = 'Speichern fehlgeschlagen: ' + err.message;
-      });
-  }
+function saveField(el) {
+var team = el.getAttribute('data-team');
+var field = el.getAttribute('data-field');
+var value = el.value;
+fetch(API_URL, {
+method: 'POST',
+body: new URLSearchParams({ action: 'update', team: team, field: field, value: value })
+})
+.then(function (res) { return res.json(); })
+.then(function (data) {
+if (data.status !== 'ok') throw new Error(data.message || 'Speichern fehlgeschlagen');
+el.classList.add('field-saved');
+setTimeout(function () { el.classList.remove('field-saved'); }, 1200);
+})
+.catch(function (err) {
+errorBanner.className = 'error-banner show';
+errorBanner.textContent = 'Speichern fehlgeschlagen: ' + err.message;
+});
+}
 
-  function isEditing() {
-    var active = document.activeElement;
-    return !!(active && active.classList && active.classList.contains('editable-field'));
-  }
+function isEditing() {
+var active = document.activeElement;
+return !!(active && active.classList && active.classList.contains('editable-field'));
+}
 
-  function load() {
-    statusText.textContent = 'Aktualisiere…';
-    fetch(API_URL + '?t=' + Date.now())
-      .then(function (res) { return res.json(); })
-      .then(function (data) {
-        if (data.status !== 'ok') throw new Error(data.message || 'Fehler beim Laden');
-        if (!isEditing()) render(data.teams);
-        statusDot.className = 'status-dot';
-        statusText.textContent = 'Aktualisiert um ' + new Date().toLocaleTimeString('de-DE');
-        errorBanner.className = 'error-banner';
-      })
-      .catch(function (err) {
-        statusDot.className = 'status-dot error';
-        statusText.textContent = 'Verbindung fehlgeschlagen';
-        errorBanner.className = 'error-banner show';
-        errorBanner.textContent = 'Live-Daten konnten nicht geladen werden: ' + err.message + '. Letzter bekannter Stand bleibt sichtbar.';
-      });
-  }
+function load() {
+statusText.textContent = 'Aktualisiere…';
+fetch(API_URL + '?t=' + Date.now())
+.then(function (res) { return res.json(); })
+.then(function (data) {
+if (data.status !== 'ok') throw new Error(data.message || 'Fehler beim Laden');
+if (!isEditing()) render(data.teams);
+statusDot.className = 'status-dot';
+statusText.textContent = 'Aktualisiert um ' + new Date().toLocaleTimeString('de-DE');
+errorBanner.className = 'error-banner';
+})
+.catch(function (err) {
+statusDot.className = 'status-dot error';
+statusText.textContent = 'Verbindung fehlgeschlagen';
+errorBanner.className = 'error-banner show';
+errorBanner.textContent = 'Live-Daten konnten nicht geladen werden: ' + err.message + '. Letzter bekannter Stand bleibt sichtbar.';
+});
+}
 
-  refreshBtn.addEventListener('click', load);
+refreshBtn.addEventListener('click', load);
 
-  resetBtn.addEventListener('click', function () {
-    confirmPanel.className = 'confirm-panel show';
-    confirmInput.value = '';
-    confirmBtn.disabled = true;
-    confirmInput.focus();
-  });
+resetBtn.addEventListener('click', function () {
+confirmPanel.className = 'confirm-panel show';
+confirmInput.value = '';
+confirmBtn.disabled = true;
+confirmInput.focus();
+});
 
-  cancelBtn.addEventListener('click', function () {
-    confirmPanel.className = 'confirm-panel';
-    confirmInput.value = '';
-  });
+cancelBtn.addEventListener('click', function () {
+confirmPanel.className = 'confirm-panel';
+confirmInput.value = '';
+});
 
-  function parseConfirm(value) {
-    var v = value.trim().toLowerCase();
-    if (v === 'clear all') return { all: true };
-    var m = v.match(/^clear team (\d{1,2})$/);
-    if (m) {
-      var n = Number(m[1]);
-      if (n >= 1 && n <= 16) return { team: n };
-    }
-    return null;
-  }
+function parseConfirm(value) {
+var v = value.trim().toLowerCase();
+if (v === 'clear all') return { all: true };
+var m = v.match(/^clear team (\d{1,2})$/);
+if (m) {
+var n = Number(m[1]);
+if (n >= 1 && n <= 16) return { team: n };
+}
+return null;
+}
 
-  confirmInput.addEventListener('input', function () {
-    confirmBtn.disabled = !parseConfirm(confirmInput.value);
-  });
+confirmInput.addEventListener('input', function () {
+confirmBtn.disabled = !parseConfirm(confirmInput.value);
+});
 
-  confirmInput.addEventListener('keydown', function (ev) {
-    if (ev.key === 'Enter' && !confirmBtn.disabled) confirmBtn.click();
-  });
+confirmInput.addEventListener('keydown', function (ev) {
+if (ev.key === 'Enter' && !confirmBtn.disabled) confirmBtn.click();
+});
 
-  confirmBtn.addEventListener('click', function () {
-    var parsed = parseConfirm(confirmInput.value);
-    if (!parsed) return;
-    confirmBtn.disabled = true;
-    confirmBtn.textContent = 'Setze zurück…';
-    var params = { action: 'reset', confirm: 'CLEAR_ALL' };
-    if (parsed.team) params.team = String(parsed.team);
-    fetch(API_URL, {
-      method: 'POST',
-      body: new URLSearchParams(params)
-    })
-      .then(function (res) { return res.json(); })
-      .then(function (data) {
-        if (data.status !== 'ok') throw new Error(data.message || 'Reset fehlgeschlagen');
-        confirmPanel.className = 'confirm-panel';
-        confirmInput.value = '';
-        load();
-      })
-      .catch(function (err) {
-        errorBanner.className = 'error-banner show';
-        errorBanner.textContent = 'Reset fehlgeschlagen: ' + err.message;
-      })
-      .finally(function () {
-        confirmBtn.disabled = false;
-        confirmBtn.textContent = 'Bestätigen';
-      });
-  });
+confirmBtn.addEventListener('click', function () {
+var parsed = parseConfirm(confirmInput.value);
+if (!parsed) return;
+confirmBtn.disabled = true;
+confirmBtn.textContent = 'Setze zurück…';
+var params = { action: 'reset', confirm: 'CLEAR_ALL' };
+if (parsed.team) params.team = String(parsed.team);
+fetch(API_URL, {
+method: 'POST',
+body: new URLSearchParams(params)
+})
+.then(function (res) { return res.json(); })
+.then(function (data) {
+if (data.status !== 'ok') throw new Error(data.message || 'Reset fehlgeschlagen');
+confirmPanel.className = 'confirm-panel';
+confirmInput.value = '';
+load();
+})
+.catch(function (err) {
+errorBanner.className = 'error-banner show';
+errorBanner.textContent = 'Reset fehlgeschlagen: ' + err.message;
+})
+.finally(function () {
+confirmBtn.disabled = false;
+confirmBtn.textContent = 'Bestätigen';
+});
+});
 
-  load();
-  setInterval(load, REFRESH_MS);
+load();
+setInterval(load, REFRESH_MS);
 </script>
 </body>
 </html>
