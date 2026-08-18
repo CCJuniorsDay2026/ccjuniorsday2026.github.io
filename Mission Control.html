@@ -63,6 +63,7 @@
   .progress-track { display: flex; gap: 3px; flex-wrap: wrap; max-width: 220px; }
   .dot-step { width: 11px; height: 11px; border-radius: 3px; background: rgba(160,174,172,0.18); border: 1px solid rgba(160,174,172,0.3); flex-shrink: 0; }
   .dot-step.done { background: var(--success); border-color: var(--success); }
+  .dot-step.active { background: var(--accent); border-color: var(--accent); }
 </style>
 </head>
 <body>
@@ -144,10 +145,14 @@
   }
 
   function renderProgress(t) {
-    var dots = '';
+      var dots = '';
     for (var p = 1; p <= PAGE_COUNT; p++) {
-      var done = !!t[pageKey(p)];
-      dots += '<span class="dot-step' + (done ? ' done' : '') + '" title="Seite ' + p + (done ? ': erledigt' : ': offen') + '"></span>';
+      var val = t[pageKey(p)];
+      var cls = '';
+      var title = 'Seite ' + p + ': offen';
+      if (val === 'open') { cls = ' active'; title = 'Seite ' + p + ': in Bearbeitung'; }
+      else if (val) { cls = ' done'; title = 'Seite ' + p + ': erledigt'; }
+      dots += '<span class="dot-step' + cls + '" title="' + title + '"></span>';
     }
     return '<div class="progress-track">' + dots + '</div>';
   }
