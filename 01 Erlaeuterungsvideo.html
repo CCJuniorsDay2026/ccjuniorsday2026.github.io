@@ -81,5 +81,12 @@
       </p>
       <a class="enter" href="Modul 1 - The Contradictory Brief.html">Enter the Mission</a>
   </div>
+  <script>
+    var API_URL = 'https://script.google.com/macros/s/AKfycbxc0QIIyaYTbGBMyhsUdYD01_AAYyrIsySqgF4rSWHPH8t73wHdP6iGEYUQMc5ImVsZ/exec';
+    var team = sessionStorage.getItem('teamNumber');
+    if (team) {
+      fetch(API_URL, { method: 'POST', body: new URLSearchParams({ team: team, action: 'progress', page: '02' }) });
+    }
+  </script>
 </body>
 </html>
