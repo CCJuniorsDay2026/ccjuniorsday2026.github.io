@@ -1,100 +1,148 @@
 <!DOCTYPE html>
-  <html lang="en">
-  <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Protocol 16 – Briefing</title>
-  <style>
-    :root {
-      --bg: #002E3C;
-    --bg-deep: #001B24;
-    --accent: #FFD700;
-          --text: #F1EFED;
-          --text-muted: #A0AEAC;
-          --border: #537173;
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Protocol 16 – Briefing</title>
+<style>
+:root {
+--bg: #002E3C;
+--bg-deep: #001B24;
+--accent: #FFD700;
+--text: #F1EFED;
+--text-muted: #A0AEAC;
+--border: #537173;
+--danger: #C5000E;
 }
-  * { box-sizing: border-box; }
-  html, body { height: 100%; }
-  body {
-        margin: 0;
-    min-height: 100vh;
-    background: radial-gradient(circle at 50% 20%, #0a4457 0%, var(--bg) 45%, var(--bg-deep) 100%);
-    color: var(--text);
-    font-family: -apple-system, "Segoe UI", Arial, sans-serif;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 24px;
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+margin: 0;
+min-height: 100vh;
+background: radial-gradient(circle at 50% 20%, #0a4457 0%, var(--bg) 45%, var(--bg-deep) 100%);
+color: var(--text);
+font-family: -apple-system, "Segoe UI", Arial, sans-serif;
+display: flex;
+align-items: center;
+justify-content: center;
+padding: 24px;
 }
-  .stage { width: 100%; max-width: 640px; text-align: center; }
-  .protocol-label {
-        font-size: 13px;
-    letter-spacing: 4px;
-    text-transform: uppercase;
-    color: var(--accent);
-    margin-bottom: 10px;
+.stage { width: 100%; max-width: 640px; text-align: center; }
+.protocol-label {
+font-size: 13px;
+letter-spacing: 4px;
+text-transform: uppercase;
+color: var(--accent);
+margin-bottom: 10px;
 }
-  h1 { font-size: 22px; font-weight: 500; margin: 0 0 24px; }
-  .video-frame {
-        position: relative;
-    width: 100%;
-    padding-top: 56.25%;
-    background: #000;
-    border-radius: 12px;
-    overflow: hidden;
-    margin-bottom: 28px;
-    border: 1px solid var(--border);
+h1 { font-size: 22px; font-weight: 500; margin: 0 0 24px; }
+.video-frame {
+position: relative;
+width: 100%;
+padding-top: 56.25%;
+background: #000;
+border-radius: 12px;
+overflow: hidden;
+margin-bottom: 28px;
+border: 1px solid var(--border);
 }
-  .video-frame iframe {
-        position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    border: 0;
+.video-frame iframe {
+position: absolute;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+border: 0;
 }
-  a.enter {
-    display: inline-block;
-    padding: 14px 36px;
-    background: var(--accent);
-    color: #1A1500;
-    font-size: 15px;
-    font-weight: 600;
-    letter-spacing: 1px;
-    text-decoration: none;
-    border-radius: 999px;
-    transition: transform 0.15s ease;
-  }
-  a.enter:hover { transform: scale(1.04); }
+a.enter {
+display: inline-block;
+padding: 14px 36px;
+background: var(--accent);
+color: #1A1500;
+font-size: 15px;
+font-weight: 600;
+letter-spacing: 1px;
+text-decoration: none;
+border-radius: 999px;
+transition: transform 0.15s ease;
+}
+a.enter:hover { transform: scale(1.04); }
+.help-btn {
+position: fixed;
+bottom: 20px;
+right: 20px;
+background: transparent;
+color: #FF8A80;
+border: 1px solid var(--danger);
+border-radius: 999px;
+padding: 10px 20px;
+font-size: 13px;
+font-weight: 600;
+cursor: pointer;
+font-family: inherit;
+transition: background 0.15s ease;
+z-index: 10;
+}
+.help-btn:hover { background: rgba(197,0,14,0.12); }
+.help-btn:disabled { opacity: 0.6; cursor: default; }
+.help-btn.active {
+background: var(--danger);
+color: #fff;
+animation: helpPulseBtn 1.4s ease-in-out infinite;
+}
+@keyframes helpPulseBtn { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
 </style>
-  </head>
-  <body>
-    <div class="stage">
-      <div class="protocol-label">Protocol 16</div>
-      <h1>Watch the briefing, then continue.</h1>
-    <div class="video-frame">
-      <!-- Testvideo, tauschen sobald finales Video feststeht -->
-        <iframe src="https://www.youtube-nocookie.com/embed/c0Yw09viCKg" title="Protocol 16 Briefing (Test)" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-      </div>
-      <p style="margin: 0 0 24px;">
-        <a href="https://youtu.be/c0Yw09viCKg" target="_blank" rel="noopener" style="color: var(--text-muted); font-size: 13px;">Video lässt sich nicht laden? Auf YouTube ansehen ↗</a>
-      </p>
-            <a class="enter" id="enterLink" href="Modul 1 - The Contradictory Brief.html">Enter the Mission</a>
-  </div>
-  <script>
-    var API_URL = 'https://script.google.com/macros/s/AKfycbxc0QIIyaYTbGBMyhsUdYD01_AAYyrIsySqgF4rSWHPH8t73wHdP6iGEYUQMc5ImVsZ/exec';
-    var team = sessionStorage.getItem('teamNumber');
-    var enterLink = document.getElementById('enterLink');
-    if (team) {
-      fetch(API_URL, { method: 'POST', body: new URLSearchParams({ team: team, action: 'progress', page: '02', status: 'open' }) });
-    }
-    if (enterLink) {
-      enterLink.addEventListener('click', function () {
-        if (team) {
-          fetch(API_URL, { method: 'POST', body: new URLSearchParams({ team: team, action: 'progress', page: '02', status: 'done' }) });
-        }
-      });
-    }
-  </script>
+</head>
+<body>
+<button id="helpBtn" class="help-btn" type="button">Hilfe anfordern</button>
+<div class="stage">
+<div class="protocol-label">Protocol 16</div>
+<h1>Watch the briefing, then continue.</h1>
+<div class="video-frame">
+<!-- Testvideo, tauschen sobald finales Video feststeht -->
+<iframe src="https://www.youtube-nocookie.com/embed/c0Yw09viCKg" title="Protocol 16 Briefing (Test)" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+</div>
+<p style="margin: 0 0 24px;">
+<a href="https://youtu.be/c0Yw09viCKg" target="_blank" rel="noopener" style="color: var(--text-muted); font-size: 13px;">Video lässt sich nicht laden? Auf YouTube ansehen ↗</a>
+</p>
+<a class="enter" id="enterLink" href="Modul 1 - The Contradictory Brief.html">Enter the Mission</a>
+</div>
+<script>
+var API_URL = 'https://script.google.com/macros/s/AKfycbxc0QIIyaYTbGBMyhsUdYD01_AAYyrIsySqgF4rSWHPH8t73wHdP6iGEYUQMc5ImVsZ/exec';
+var team = sessionStorage.getItem('teamNumber');
+var enterLink = document.getElementById('enterLink');
+if (team) {
+fetch(API_URL, { method: 'POST', body: new URLSearchParams({ team: team, action: 'progress', page: '02', status: 'open' }) });
+}
+if (enterLink) {
+enterLink.addEventListener('click', function () {
+if (team) {
+fetch(API_URL, { method: 'POST', body: new URLSearchParams({ team: team, action: 'progress', page: '02', status: 'done' }) });
+}
+});
+}
+
+var helpBtn = document.getElementById('helpBtn');
+function setHelpState(active) {
+if (!helpBtn) return;
+helpBtn.textContent = active ? 'Hilfe angefordert – abbrechen' : 'Hilfe anfordern';
+helpBtn.classList.toggle('active', !!active);
+}
+if (team && helpBtn) {
+fetch(API_URL + '?t=' + Date.now())
+.then(function (res) { return res.json(); })
+.then(function (data) {
+var mine = (data.teams || []).filter(function (t) { return Number(t.team) === Number(team); })[0];
+setHelpState(mine && mine.hilfe_angefordert);
+});
+helpBtn.addEventListener('click', function () {
+helpBtn.disabled = true;
+fetch(API_URL, { method: 'POST', body: new URLSearchParams({ team: team, action: 'help' }) })
+.then(function (res) { return res.json(); })
+.then(function (data) { setHelpState(data.hilfe_angefordert); })
+.finally(function () { helpBtn.disabled = false; });
+});
+}
+</script>
 </body>
 </html>
