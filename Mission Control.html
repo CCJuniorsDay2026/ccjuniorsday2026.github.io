@@ -1,163 +1,240 @@
 <!DOCTYPE html>
-  <html lang="de">
-  <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Mission Control – Protocol 16</title>
-  <style>
-    :root {
-      --bg: #002E3C; --bg-deep: #001B24; --panel: #0a3a49; --accent: #FFD700;
-      --text: #F1EFED; --text-muted: #A0AEAC; --border: #537173;
-      --success: #008932; --danger: #C5000E;
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mission Control – Protocol 16</title>
+<style>
+  :root {
+    --bg: #002E3C; --bg-deep: #001B24; --panel: #0a3a49; --accent: #FFD700;
+    --text: #F1EFED; --text-muted: #A0AEAC; --border: #537173;
+    --success: #008932; --danger: #C5000E;
   }
   * { box-sizing: border-box; }
   html, body { height: 100%; margin: 0; }
   body {
-        min-height: 100vh;
+    min-height: 100vh;
     background: radial-gradient(circle at 50% 10%, #0a4457 0%, var(--bg) 45%, var(--bg-deep) 100%);
     color: var(--text);
     font-family: -apple-system, "Segoe UI", Arial, sans-serif;
     padding: 32px 24px 64px;
-}
-  .header { max-width: 1100px; margin: 0 auto 28px; text-align: center; }
+  }
+  .header { max-width: 1300px; margin: 0 auto 28px; text-align: center; }
   .eyebrow { font-size: 13px; letter-spacing: 3px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; }
   h1 { font-size: 28px; letter-spacing: 2px; color: var(--accent); margin: 0 0 8px; text-transform: uppercase; font-weight: 700; }
   .sub { font-size: 14px; color: var(--text-muted); margin: 0; }
-  .toolbar { max-width: 1100px; margin: 0 auto 20px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+  .toolbar { max-width: 1300px; margin: 0 auto 20px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
   .status-line { font-size: 13px; color: var(--text-muted); }
   .status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--success); margin-right: 6px; }
   .status-dot.error { background: var(--danger); }
+  .toolbar-actions { display: flex; gap: 12px; }
   button.refresh { background: var(--accent); color: #1A1500; border: none; border-radius: 999px; padding: 10px 22px; font-weight: 600; font-size: 13px; cursor: pointer; }
   button.refresh:hover { transform: scale(1.03); }
-  .error-banner { max-width: 1100px; margin: 0 auto 16px; background: rgba(197,0,14,0.15); border: 1px solid var(--danger); color: var(--text); padding: 12px 16px; border-radius: 10px; font-size: 13px; display: none; }
+  button.btn-outline { background: transparent; color: #FF8A80; border: 1px solid var(--danger); border-radius: 999px; padding: 10px 22px; font-weight: 600; font-size: 13px; cursor: pointer; }
+  button.btn-outline:hover { background: rgba(197,0,14,0.12); }
+  button.btn-outline:disabled { opacity: 0.5; cursor: default; }
+  .confirm-panel { max-width: 1300px; margin: 0 auto 20px; background: rgba(197,0,14,0.08); border: 1px solid var(--danger); border-radius: 12px; padding: 18px 20px; display: none; }
+  .confirm-panel.show { display: block; }
+  .confirm-panel p { margin: 0 0 12px; font-size: 13px; color: var(--text); }
+  .confirm-panel .hint { font-size: 12px; color: var(--text-muted); margin: 6px 0 0; }
+  .confirm-panel .row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  .confirm-panel input { flex: 1; min-width: 200px; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: rgba(255,255,255,0.06); color: var(--text); font-size: 14px; }
+  .confirm-panel .confirm-btn { background: var(--danger); color: #fff; border: none; border-radius: 999px; padding: 10px 22px; font-weight: 600; font-size: 13px; cursor: pointer; }
+  .confirm-panel .confirm-btn:disabled { opacity: 0.4; cursor: default; }
+  .confirm-panel .cancel-btn { background: transparent; color: var(--text-muted); border: 1px solid var(--border); border-radius: 999px; padding: 10px 18px; font-weight: 600; font-size: 13px; cursor: pointer; }
+  .error-banner { max-width: 1300px; margin: 0 auto 16px; background: rgba(197,0,14,0.15); border: 1px solid var(--danger); color: var(--text); padding: 12px 16px; border-radius: 10px; font-size: 13px; display: none; }
   .error-banner.show { display: block; }
-  table { max-width: 1100px; width: 100%; margin: 0 auto; border-collapse: collapse; background: var(--panel); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
-  thead th { text-align: left; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); padding: 14px 16px; border-bottom: 1px solid var(--border); }
-  tbody td { padding: 14px 16px; border-bottom: 1px solid rgba(83,113,115,0.4); font-size: 14px; }
+  .table-wrap { max-width: 1300px; margin: 0 auto; overflow-x: auto; border-radius: 12px; border: 1px solid var(--border); }
+  table { width: 100%; min-width: 1100px; border-collapse: collapse; background: var(--panel); }
+  thead th { text-align: left; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); padding: 14px 16px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  tbody td { padding: 10px 16px; border-bottom: 1px solid rgba(83,113,115,0.4); font-size: 14px; }
   tbody tr:last-child td { border-bottom: none; }
   tbody tr:hover { background: rgba(255,255,255,0.03); }
   .team-num { font-weight: 700; color: var(--accent); font-size: 15px; }
-  .badge { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; padding: 4px 10px; border-radius: 999px; }
+  .badge { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; padding: 4px 10px; border-radius: 999px; white-space: nowrap; }
   .badge.in { background: rgba(0,137,50,0.18); color: #6FE39B; }
   .badge.out { background: rgba(160,174,172,0.12); color: var(--text-muted); }
   .badge .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
   .muted { color: var(--text-muted); }
-  .timestamp { font-size: 12px; color: var(--text-muted); }
-      .toolbar-actions { display: flex; gap: 12px; }
-      button.btn-outline { background: transparent; color: #FF8A80; border: 1px solid var(--danger); border-radius: 999px; padding: 10px 22px; font-weight: 600; font-size: 13px; cursor: pointer; }
-      button.btn-outline:hover { background: rgba(197,0,14,0.12); }
-      button.btn-outline:disabled { opacity: 0.5; cursor: default; }
-      .confirm-panel { max-width: 1100px; margin: 0 auto 20px; background: rgba(197,0,14,0.08); border: 1px solid var(--danger); border-radius: 12px; padding: 18px 20px; display: none; }
-      .confirm-panel.show { display: block; }
-      .confirm-panel p { margin: 0 0 12px; font-size: 13px; color: var(--text); }
-      .confirm-panel .row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
-      .confirm-panel input { flex: 1; min-width: 180px; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: rgba(255,255,255,0.06); color: var(--text); font-size: 14px; }
-      .confirm-panel .confirm-btn { background: var(--danger); color: #fff; border: none; border-radius: 999px; padding: 10px 22px; font-weight: 600; font-size: 13px; cursor: pointer; }
-      .confirm-panel .confirm-btn:disabled { opacity: 0.4; cursor: default; }
-      .confirm-panel .cancel-btn { background: transparent; color: var(--text-muted); border: 1px solid var(--border); border-radius: 999px; padding: 10px 18px; font-weight: 600; font-size: 13px; cursor: pointer; }
-  @media (max-width: 640px) {
-    table, thead, tbody, th, td, tr { display: block; }
-    thead { display: none; }
-    tbody tr { border-bottom: 1px solid var(--border); padding: 12px 16px; }
-    tbody td { border: none; padding: 4px 0; display: flex; justify-content: space-between; gap: 12px; }
-    tbody td::before { content: attr(data-label); color: var(--text-muted); font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
-}
+  .timestamp { font-size: 12px; color: var(--text-muted); white-space: nowrap; }
+  .field-input, .field-select { width: 100%; min-width: 90px; padding: 6px 8px; border-radius: 6px; border: 1px solid var(--border); background: rgba(255,255,255,0.06); color: var(--text); font-size: 13px; font-family: inherit; }
+  .field-input:focus, .field-select:focus { outline: 1px solid var(--accent); }
+  .field-saved { outline: 1px solid var(--success) !important; }
+  .progress-track { display: flex; gap: 3px; flex-wrap: wrap; max-width: 220px; }
+  .dot-step { width: 11px; height: 11px; border-radius: 3px; background: rgba(160,174,172,0.18); border: 1px solid rgba(160,174,172,0.3); flex-shrink: 0; }
+  .dot-step.done { background: var(--success); border-color: var(--success); }
 </style>
-  </head>
-  <body>
-    <div class="header">
-      <div class="eyebrow">Protocol 16</div>
-      <h1>Mission Control</h1>
+</head>
+<body>
+  <div class="header">
+    <div class="eyebrow">Protocol 16</div>
+    <h1>Mission Control</h1>
     <p class="sub">Live-Tracking aller 16 Teams</p>
+  </div>
+
+  <div class="toolbar">
+    <div class="status-line"><span class="status-dot" id="statusDot"></span><span id="statusText">Lade…</span></div>
+    <div class="toolbar-actions">
+      <button class="btn-outline" id="resetBtn" type="button">Zurücksetzen</button>
+      <button class="refresh" id="refreshBtn" type="button">Jetzt aktualisieren</button>
     </div>
+  </div>
 
-    <div class="toolbar">
-          <div class="status-line"><span class="status-dot" id="statusDot"></span><span id="statusText">Lade…</span></div>
-          <div class="toolbar-actions">
-                  <button class="btn-outline" id="resetBtn" type="button">Zurücksetzen</button>
-                          <button class="refresh" id="refreshBtn" type="button">Jetzt aktualisieren</button>
-                                </div>
+  <div class="confirm-panel" id="confirmPanel">
+    <p>Setzt Tracking-Daten (Login-Status, Fortschritt, Update-Zeit) zurück – Raum, Sprache und Mission Control bleiben erhalten.</p>
+    <div class="row">
+      <input type="text" id="confirmInput" placeholder="clear all  oder  clear team 7" autocomplete="off">
+      <button class="confirm-btn" id="confirmBtn" type="button" disabled>Bestätigen</button>
+      <button class="cancel-btn" id="cancelBtn" type="button">Abbrechen</button>
     </div>
+    <p class="hint">„clear all" setzt alle 16 Teams zurück. „clear team 7" setzt nur Team 7 zurück.</p>
+  </div>
 
-                                <div class="confirm-panel" id="confirmPanel">
-                                      <p>Das setzt alle 16 Teams auf den Nullzustand zurück (Login-Status, Aufgabe, Fortschritt, Update-Zeit werden gelöscht). Zum Bestätigen unten "clear all" eingeben.</p>
-                                          <div class="row">
-                                                <input type="text" id="confirmInput" placeholder="clear all" autocomplete="off">
-                                                <button class="confirm-btn" id="confirmBtn" type="button" disabled>Bestätigen</button>
-                                                      <button class="cancel-btn" id="cancelBtn" type="button">Abbrechen</button>
-                                                          </div>
-                                                          </div>
-    <div class="error-banner" id="errorBanner"></div>
+  <div class="error-banner" id="errorBanner"></div>
 
+  <div class="table-wrap">
     <table>
       <thead>
         <tr>
           <th>Team</th>
+          <th>Raum</th>
+          <th>Sprache</th>
+          <th>Mission Control</th>
           <th>Status</th>
-          <th>Aktuelle Aufgabe</th>
-          <th>Zuletzt gelöst</th>
+          <th>Fortschritt</th>
           <th>Letztes Update</th>
-      </tr>
+        </tr>
       </thead>
       <tbody id="tableBody">
       </tbody>
     </table>
+  </div>
 
-  <script>
-    var API_URL = 'https://script.google.com/macros/s/AKfycbxc0QIIyaYTbGBMyhsUdYD01_AAYyrIsySqgF4rSWHPH8t73wHdP6iGEYUQMc5ImVsZ/exec';
+<script>
+  var API_URL = 'https://script.google.com/macros/s/AKfycbxc0QIIyaYTbGBMyhsUdYD01_AAYyrIsySqgF4rSWHPH8t73wHdP6iGEYUQMc5ImVsZ/exec';
   var REFRESH_MS = 10000;
+  var PAGE_COUNT = 18;
+
   var tableBody = document.getElementById('tableBody');
   var statusDot = document.getElementById('statusDot');
   var statusText = document.getElementById('statusText');
   var errorBanner = document.getElementById('errorBanner');
   var refreshBtn = document.getElementById('refreshBtn');
-      var resetBtn = document.getElementById('resetBtn');
-      var confirmPanel = document.getElementById('confirmPanel');
-      var confirmInput = document.getElementById('confirmInput');
-      var confirmBtn = document.getElementById('confirmBtn');
-      var cancelBtn = document.getElementById('cancelBtn');
+  var resetBtn = document.getElementById('resetBtn');
+  var confirmPanel = document.getElementById('confirmPanel');
+  var confirmInput = document.getElementById('confirmInput');
+  var confirmBtn = document.getElementById('confirmBtn');
+  var cancelBtn = document.getElementById('cancelBtn');
 
   function formatTime(iso) {
-        if (!iso) return '–';
+    if (!iso) return '–';
     var d = new Date(iso);
     if (isNaN(d.getTime())) return iso;
     return d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
   }
 
   function escapeHtml(str) {
-        var div = document.createElement('div');
+    var div = document.createElement('div');
     div.textContent = str == null ? '' : String(str);
-          return div.innerHTML;
+    return div.innerHTML;
+  }
+
+  function pageKey(n) {
+    return 'page_' + (n < 10 ? '0' + n : String(n));
+  }
+
+  function renderProgress(t) {
+    var dots = '';
+    for (var p = 1; p <= PAGE_COUNT; p++) {
+      var done = !!t[pageKey(p)];
+      dots += '<span class="dot-step' + (done ? ' done' : '') + '" title="Seite ' + p + (done ? ': erledigt' : ': offen') + '"></span>';
+    }
+    return '<div class="progress-track">' + dots + '</div>';
+  }
+
+  function optionsHtml(options, current) {
+    return options.map(function (opt) {
+      var sel = String(current || '') === opt.value ? ' selected' : '';
+      return '<option value="' + opt.value + '"' + sel + '>' + opt.label + '</option>';
+    }).join('');
   }
 
   function render(teams) {
-        teams.sort(function (a, b) { return Number(a.team) - Number(b.team); });
+    teams.sort(function (a, b) { return Number(a.team) - Number(b.team); });
     var rows = teams.map(function (t) {
       var loggedIn = !!t.locked_in_at;
       var badge = loggedIn
         ? '<span class="badge in"><span class="dot"></span>Eingeloggt</span>'
         : '<span class="badge out"><span class="dot"></span>Wartet</span>';
-      var task = t.current_task ? escapeHtml(t.current_task) : '<span class="muted">–</span>';
-      var completed = t.last_completed ? escapeHtml(t.last_completed) : '<span class="muted">–</span>';
       var updated = t.last_update ? '<span class="timestamp">' + formatTime(t.last_update) + '</span>' : '<span class="muted">–</span>';
+      var sprachOptions = optionsHtml([
+        { value: '', label: '–' },
+        { value: 'Deutsch', label: 'Deutsch' },
+        { value: 'Englisch', label: 'Englisch' }
+      ], t.sprache);
+      var mcOptions = optionsHtml([
+        { value: '', label: '–' },
+        { value: '1', label: '1' },
+        { value: '2', label: '2' },
+        { value: '3', label: '3' },
+        { value: '4', label: '4' }
+      ], t.mission_control);
       return '<tr>' +
-                '<td data-label="Team"><span class="team-num">Team ' + escapeHtml(t.team) + '</span></td>' +
-                '<td data-label="Status">' + badge + '</td>' +
-                '<td data-label="Aktuelle Aufgabe">' + task + '</td>' +
-                '<td data-label="Zuletzt gelöst">' + completed + '</td>' +
-                '<td data-label="Letztes Update">' + updated + '</td>' +
-              '</tr>';
+        '<td><span class="team-num">Team ' + escapeHtml(t.team) + '</span></td>' +
+        '<td><input class="field-input editable-field" data-team="' + escapeHtml(t.team) + '" data-field="raum" value="' + escapeHtml(t.raum) + '" placeholder="Raum"></td>' +
+        '<td><select class="field-select editable-field" data-team="' + escapeHtml(t.team) + '" data-field="sprache">' + sprachOptions + '</select></td>' +
+        '<td><select class="field-select editable-field" data-team="' + escapeHtml(t.team) + '" data-field="mission_control">' + mcOptions + '</select></td>' +
+        '<td>' + badge + '</td>' +
+        '<td>' + renderProgress(t) + '</td>' +
+        '<td>' + updated + '</td>' +
+      '</tr>';
     }).join('');
     tableBody.innerHTML = rows;
-}
+    bindEditableFields();
+  }
+
+  function bindEditableFields() {
+    var fields = tableBody.querySelectorAll('.editable-field');
+    fields.forEach(function (el) {
+      var eventName = el.tagName === 'SELECT' ? 'change' : 'blur';
+      el.addEventListener(eventName, function () {
+        saveField(el);
+      });
+    });
+  }
+
+  function saveField(el) {
+    var team = el.getAttribute('data-team');
+    var field = el.getAttribute('data-field');
+    var value = el.value;
+    fetch(API_URL, {
+      method: 'POST',
+      body: new URLSearchParams({ action: 'update', team: team, field: field, value: value })
+    })
+      .then(function (res) { return res.json(); })
+      .then(function (data) {
+        if (data.status !== 'ok') throw new Error(data.message || 'Speichern fehlgeschlagen');
+        el.classList.add('field-saved');
+        setTimeout(function () { el.classList.remove('field-saved'); }, 1200);
+      })
+      .catch(function (err) {
+        errorBanner.className = 'error-banner show';
+        errorBanner.textContent = 'Speichern fehlgeschlagen: ' + err.message;
+      });
+  }
+
+  function isEditing() {
+    var active = document.activeElement;
+    return !!(active && active.classList && active.classList.contains('editable-field'));
+  }
 
   function load() {
-        statusText.textContent = 'Aktualisiere…';
+    statusText.textContent = 'Aktualisiere…';
     fetch(API_URL + '?t=' + Date.now())
-            .then(function (res) { return res.json(); })
+      .then(function (res) { return res.json(); })
       .then(function (data) {
-                if (data.status !== 'ok') throw new Error(data.message || 'Fehler beim Laden');
-        render(data.teams);
+        if (data.status !== 'ok') throw new Error(data.message || 'Fehler beim Laden');
+        if (!isEditing()) render(data.teams);
         statusDot.className = 'status-dot';
         statusText.textContent = 'Aktualisiert um ' + new Date().toLocaleTimeString('de-DE');
         errorBanner.className = 'error-banner';
@@ -171,52 +248,68 @@
   }
 
   refreshBtn.addEventListener('click', load);
-  load();
-  setInterval(load, REFRESH_MS);
-resetBtn.addEventListener('click', function () {
-        confirmPanel.className = 'confirm-panel show';
-        confirmInput.value = '';
-        confirmBtn.disabled = true;
-        confirmInput.focus();
-      });
 
-      cancelBtn.addEventListener('click', function () {
+  resetBtn.addEventListener('click', function () {
+    confirmPanel.className = 'confirm-panel show';
+    confirmInput.value = '';
+    confirmBtn.disabled = true;
+    confirmInput.focus();
+  });
+
+  cancelBtn.addEventListener('click', function () {
+    confirmPanel.className = 'confirm-panel';
+    confirmInput.value = '';
+  });
+
+  function parseConfirm(value) {
+    var v = value.trim().toLowerCase();
+    if (v === 'clear all') return { all: true };
+    var m = v.match(/^clear team (\d{1,2})$/);
+    if (m) {
+      var n = Number(m[1]);
+      if (n >= 1 && n <= 16) return { team: n };
+    }
+    return null;
+  }
+
+  confirmInput.addEventListener('input', function () {
+    confirmBtn.disabled = !parseConfirm(confirmInput.value);
+  });
+
+  confirmInput.addEventListener('keydown', function (ev) {
+    if (ev.key === 'Enter' && !confirmBtn.disabled) confirmBtn.click();
+  });
+
+  confirmBtn.addEventListener('click', function () {
+    var parsed = parseConfirm(confirmInput.value);
+    if (!parsed) return;
+    confirmBtn.disabled = true;
+    confirmBtn.textContent = 'Setze zurück…';
+    var params = { action: 'reset', confirm: 'CLEAR_ALL' };
+    if (parsed.team) params.team = String(parsed.team);
+    fetch(API_URL, {
+      method: 'POST',
+      body: new URLSearchParams(params)
+    })
+      .then(function (res) { return res.json(); })
+      .then(function (data) {
+        if (data.status !== 'ok') throw new Error(data.message || 'Reset fehlgeschlagen');
         confirmPanel.className = 'confirm-panel';
         confirmInput.value = '';
+        load();
+      })
+      .catch(function (err) {
+        errorBanner.className = 'error-banner show';
+        errorBanner.textContent = 'Reset fehlgeschlagen: ' + err.message;
+      })
+      .finally(function () {
+        confirmBtn.disabled = false;
+        confirmBtn.textContent = 'Bestätigen';
       });
+  });
 
-      confirmInput.addEventListener('input', function () {
-        confirmBtn.disabled = confirmInput.value.trim().toLowerCase() !== 'clear all';
-      });
-
-      confirmInput.addEventListener('keydown', function (ev) {
-        if (ev.key === 'Enter' && !confirmBtn.disabled) confirmBtn.click();
-      });
-
-      confirmBtn.addEventListener('click', function () {
-        confirmBtn.disabled = true;
-        confirmBtn.textContent = 'Setze zurück…';
-        fetch(API_URL, {
-          method: 'POST',
-          body: new URLSearchParams({ action: 'reset', confirm: 'CLEAR_ALL' })
-        })
-          .then(function (res) { return res.json(); })
-          .then(function (data) {
-            if (data.status !== 'ok') throw new Error(data.message || 'Reset fehlgeschlagen');
-            confirmPanel.className = 'confirm-panel';
-            confirmInput.value = '';
-            load();
-          })
-          .catch(function (err) {
-            errorBanner.className = 'error-banner show';
-            errorBanner.textContent = 'Reset fehlgeschlagen: ' + err.message;
-          })
-          .finally(function () {
-            confirmBtn.disabled = false;
-            confirmBtn.textContent = 'Bestätigen';
-          });
-      });
-  </script>
-  </body>
-  </html>
-  </html>
+  load();
+  setInterval(load, REFRESH_MS);
+</script>
+</body>
+</html>
