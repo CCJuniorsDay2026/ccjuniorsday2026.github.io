@@ -88,9 +88,14 @@ z-index: 10;
 .help-btn.active {
 background: var(--danger);
 color: #fff;
+border-color: var(--danger);
 animation: helpPulseBtn 1.4s ease-in-out infinite;
 }
-@keyframes helpPulseBtn { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+.help-btn.pending { opacity: 0.55; }
+@keyframes helpPulseBtn {
+0%, 100% { box-shadow: 0 0 0 0 rgba(197,0,14,0.55); }
+50% { box-shadow: 0 0 0 9px rgba(197,0,14,0); }
+}
 </style>
 </head>
 <body>
@@ -127,6 +132,7 @@ function setHelpState(active) {
 if (!helpBtn) return;
 helpBtn.textContent = active ? 'Help Requested – Cancel' : 'Request Help';
 helpBtn.classList.toggle('active', !!active);
+helpBtn.classList.remove('pending');
 }
 if (team && helpBtn) {
 fetch(API_URL + '?t=' + Date.now())
@@ -136,10 +142,24 @@ var mine = (data.teams || []).filter(function (t) { return Number(t.team) === Nu
 setHelpState(mine && mine.hilfe_angefordert);
 });
 helpBtn.addEventListener('click', function () {
+var wasActive = helpBtn.classList.contains('active');
 helpBtn.disabled = true;
+helpBtn.classList.add('pending');
+helpBtn.textContent = wasActive ? 'Canceling…' : 'Requesting…';
 fetch(API_URL, { method: 'POST', body: new URLSearchParams({ team: team, action: 'help' }) })
 .then(function (res) { return res.json(); })
-.then(function (data) { setHelpState(data.hilfe_angefordert); })
+.then(function (data) {
+if (data.status !== 'ok') {
+console.error('Help toggle failed:', data.message);
+setHelpState(wasActive);
+return;
+}
+setHelpState(data.hilfe_angefordert);
+})
+.catch(function (err) {
+console.error('Help toggle request failed:', err);
+setHelpState(wasActive);
+})
 .finally(function () { helpBtn.disabled = false; });
 });
 }
