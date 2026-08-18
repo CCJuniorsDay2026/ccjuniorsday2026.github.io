@@ -79,13 +79,22 @@
       <p style="margin: 0 0 24px;">
         <a href="https://youtu.be/c0Yw09viCKg" target="_blank" rel="noopener" style="color: var(--text-muted); font-size: 13px;">Video lässt sich nicht laden? Auf YouTube ansehen ↗</a>
       </p>
-      <a class="enter" href="Modul 1 - The Contradictory Brief.html">Enter the Mission</a>
+            <a class="enter" id="enterLink" href="Modul 1 - The Contradictory Brief.html">Enter the Mission</a>
   </div>
   <script>
     var API_URL = 'https://script.google.com/macros/s/AKfycbxc0QIIyaYTbGBMyhsUdYD01_AAYyrIsySqgF4rSWHPH8t73wHdP6iGEYUQMc5ImVsZ/exec';
     var team = sessionStorage.getItem('teamNumber');
+    var enterLink = document.getElementById('enterLink');
     if (team) {
-      fetch(API_URL, { method: 'POST', body: new URLSearchParams({ team: team, action: 'progress', page: '02' }) });
+      fetch(API_URL, { method: 'POST', body: new URLSearchParams({ team: team, action: 'progress', page: '02', status: 'open' }) });
+    }
+    if (enterLink) {
+      enterLink.addEventListener('click', function () {
+        if (team) {
+          fetch(API_URL, { method: 'POST', body: new URLSearchParams({ team: team, action: 'progress', page: '02', status: 'done' }) });
+        }
+      });
+    }
     }
   </script>
 </body>
