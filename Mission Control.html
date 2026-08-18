@@ -50,15 +50,18 @@ thead th { text-align: left; font-size: 12px; text-transform: uppercase; letter-
 tbody td { padding: 10px 16px; border-bottom: 1px solid rgba(83,113,115,0.4); font-size: 14px; }
 tbody tr:last-child td { border-bottom: none; }
 tbody tr:hover { background: rgba(255,255,255,0.03); }
-tbody tr.help-active { background: rgba(197,0,14,0.16); }
-tbody tr.help-active:hover { background: rgba(197,0,14,0.22); }
+tbody tr.help-active { background: rgba(197,0,14,0.28); box-shadow: inset 4px 0 0 var(--danger); }
+tbody tr.help-active:hover { background: rgba(197,0,14,0.34); }
 .team-num { font-weight: 700; color: var(--accent); font-size: 15px; }
 .badge { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; padding: 4px 10px; border-radius: 999px; white-space: nowrap; }
 .badge.in { background: rgba(0,137,50,0.18); color: #6FE39B; }
 .badge.out { background: rgba(160,174,172,0.12); color: var(--text-muted); }
-.badge.help { background: rgba(197,0,14,0.24); color: #FF8A80; animation: helpPulse 1.4s ease-in-out infinite; }
+.badge.help { background: var(--danger); color: #fff; animation: helpPulse 1.2s ease-in-out infinite; }
 .badge .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
-@keyframes helpPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+@keyframes helpPulse {
+0%, 100% { box-shadow: 0 0 0 0 rgba(197,0,14,0.6); }
+50% { box-shadow: 0 0 0 6px rgba(197,0,14,0); }
+}
 .muted { color: var(--text-muted); }
 .timestamp { font-size: 12px; color: var(--text-muted); white-space: nowrap; }
 .field-input, .field-select { width: 100%; min-width: 90px; padding: 6px 8px; border-radius: 6px; border: 1px solid var(--border); background: rgba(255,255,255,0.06); color: var(--text); font-size: 13px; font-family: inherit; }
