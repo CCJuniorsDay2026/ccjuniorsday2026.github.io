@@ -94,7 +94,7 @@ animation: helpPulseBtn 1.4s ease-in-out infinite;
 </style>
 </head>
 <body>
-<button id="helpBtn" class="help-btn" type="button">Hilfe anfordern</button>
+<button id="helpBtn" class="help-btn" type="button">Request Help</button>
 <div class="stage">
 <div class="protocol-label">Protocol 16</div>
 <h1>Watch the briefing, then continue.</h1>
@@ -125,7 +125,7 @@ fetch(API_URL, { method: 'POST', body: new URLSearchParams({ team: team, action:
 var helpBtn = document.getElementById('helpBtn');
 function setHelpState(active) {
 if (!helpBtn) return;
-helpBtn.textContent = active ? 'Hilfe angefordert – abbrechen' : 'Hilfe anfordern';
+helpBtn.textContent = active ? 'Help Requested – Cancel' : 'Request Help';
 helpBtn.classList.toggle('active', !!active);
 }
 if (team && helpBtn) {
