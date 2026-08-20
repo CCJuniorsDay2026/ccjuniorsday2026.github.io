@@ -65,13 +65,13 @@
     .symbol .hex {
       width: 100%;
       height: 100%;
-      clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
-      background: linear-gradient(135deg, #6fb7c9, #1e5866);
+      border-radius: 50%;
+      background: radial-gradient(circle at 50% 50%, #ff5a4d 0%, #C5000E 55%, rgba(197,0,14,0) 100%);
       animation: hexPulse 2.4s ease-in-out infinite;
     }
     @keyframes hexPulse {
-      0%, 100% { filter: drop-shadow(0 0 8px rgba(111,183,201,0.5)); transform: scale(1); }
-      50% { filter: drop-shadow(0 0 22px rgba(111,183,201,0.9)); transform: scale(1.05); }
+      0%, 100% { filter: drop-shadow(0 0 8px rgba(197,0,14,0.5)); transform: scale(1); }
+      50% { filter: drop-shadow(0 0 22px rgba(197,0,14,0.9)); transform: scale(1.05); }
     }
     .start-audio-btn {
       display: inline-flex;
@@ -222,7 +222,7 @@
       <div class="protocol-label">Protocol 16</div>
       <div class="kicker">Task 1 &middot; Case Globex Toys</div>
       <h1>Moratti&rsquo;s Message</h1>
-      <p class="lede">Globex Toys is a growing corporate client. Leonie Schneider, their Head of Finance &amp; Strategy, reached out to her relationship manager with a routine request. Moratti &mdash; Commerzbank&rsquo;s automated corporate intelligence &mdash; picked it up, ran his own analysis, and decided the case didn&rsquo;t need anyone else&rsquo;s input.</p>
+      <p class="lede">Globex Toys is a growing corporate client. Leonie Schneider, their Head of Finance &amp; Strategy, reached out to her relationship manager with a routine request. Moratti has slipped into Commerzbank&rsquo;s systems and claims to be its automated corporate intelligence. He picked up the case, ran his own analysis, and decided it didn&rsquo;t need anyone else&rsquo;s input.</p>
       <p class="lede">Moratti has already sent his own version of the client briefing &mdash; without asking anyone. Listen to what he has to say. Then decide for yourselves what to trust.</p>
 
       <div class="audio-frame">
