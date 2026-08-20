@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Protocol 16 - Task 1: Moratti's Message</title>
+  <style>
+    :root {
+      --bg: #002E3C;
+      --bg-deep: #001B24;
+      --accent: #FFD700;
+      --text: #F1EFED;
+      --text-muted: #A0AEAC;
+      --border: #537173;
+      --danger: #C5000E;
+      --panel: rgba(255,255,255,0.04);
+      --panel-border: rgba(255,255,255,0.10);
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: radial-gradient(circle at 50% 12%, #0a4457 0%, var(--bg) 45%, var(--bg-deep) 100%);
+      color: var(--text);
+      font-family: -apple-system, "Segoe UI", Arial, sans-serif;
+      padding: 24px;
+    }
+    .stage { width: 100%; max-width: 760px; margin: 0 auto; text-align: center; }
+    .protocol-label {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 6px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 10px;
+    }
+    .kicker {
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+    h1 { font-size: 24px; font-weight: 600; margin: 0 0 10px; }
+    .lede { font-size: 14px; line-height: 1.6; color: var(--text-muted); margin: 0 0 28px; }
+
+    /* --- audio frame: cold, clinical, no face --- */
+    .audio-frame {
+      position: relative;
+      width: 100%;
+      background: radial-gradient(circle at 50% 40%, #0f2b33 0%, #041016 75%);
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 10px;
+      border: 1px solid var(--border);
+      padding: 40px 24px 30px;
+    }
+    .symbol {
+      width: 76px;
+      height: 76px;
+      margin: 0 auto 20px;
+      position: relative;
+    }
+    .symbol .hex {
+      width: 100%;
+      height: 100%;
+      clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+      background: linear-gradient(135deg, #6fb7c9, #1e5866);
+      animation: hexPulse 2.4s ease-in-out infinite;
+    }
+    @keyframes hexPulse {
+      0%, 100% { filter: drop-shadow(0 0 8px rgba(111,183,201,0.5)); transform: scale(1); }
+      50% { filter: drop-shadow(0 0 22px rgba(111,183,201,0.9)); transform: scale(1.05); }
+    }
+    .start-audio-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--accent);
+      color: #1A1500;
+      border: none;
+      border-radius: 999px;
+      padding: 12px 28px;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      font-family: inherit;
+      transition: transform 0.15s ease, opacity 0.2s ease;
+    }
+    .start-audio-btn:hover { transform: scale(1.04); }
+    .start-audio-btn.hidden { display: none; }
+    .playing-row {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+    .playing-row.visible { display: flex; }
+    .bars { display: flex; align-items: flex-end; gap: 3px; height: 16px; }
+    .bars span {
+      width: 3px;
+      background: var(--accent);
+      animation: barBounce 1.1s ease-in-out infinite;
+    }
+    .bars span:nth-child(1) { height: 6px; animation-delay: 0s; }
+    .bars span:nth-child(2) { height: 14px; animation-delay: 0.15s; }
+    .bars span:nth-child(3) { height: 9px; animation-delay: 0.3s; }
+    .bars span:nth-child(4) { height: 16px; animation-delay: 0.45s; }
+    @keyframes barBounce {
+      0%, 100% { transform: scaleY(0.5); }
+      50% { transform: scaleY(1); }
+    }
+
+    .transcript {
+      max-height: 0;
+      overflow: hidden;
+      opacity: 0;
+      transition: max-height 0.5s ease, opacity 0.5s ease;
+      text-align: left;
+      font-size: 13.5px;
+      line-height: 1.7;
+      color: var(--text-muted);
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      border-radius: 10px;
+      margin: 18px 0 28px;
+    }
+    .transcript.visible { max-height: 600px; opacity: 1; padding: 18px 20px; }
+    .transcript p { margin: 0 0 10px; }
+    .transcript p:last-child { margin-bottom: 0; }
+
+    .case-section { text-align: left; margin-top: 8px; }
+    .case-heading {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-bottom: 4px;
+    }
+    .case-heading h2 { font-size: 15px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--accent); margin: 0; }
+    .case-note { font-size: 13px; line-height: 1.6; color: var(--text-muted); margin: 0 0 18px; }
+
+    .doc-card {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      border-radius: 10px;
+      padding: 14px 16px;
+      margin-bottom: 10px;
+      transition: border-color 0.15s ease, background 0.15s ease;
+    }
+    .doc-card:hover { border-color: var(--border); background: rgba(255,255,255,0.06); }
+    .doc-icon {
+      flex: none;
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      background: rgba(255,215,0,0.12);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent);
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .doc-info { flex: 1 1 auto; min-width: 0; }
+    .doc-title { font-size: 14px; font-weight: 600; color: var(--text); margin: 0 0 2px; }
+    .doc-desc { font-size: 12.5px; color: var(--text-muted); margin: 0; }
+    .doc-links { flex: none; display: flex; gap: 6px; }
+    .doc-links a {
+      display: inline-block;
+      padding: 6px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      color: var(--text);
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 600;
+      transition: background 0.15s ease, border-color 0.15s ease;
+    }
+    .doc-links a:hover { background: var(--accent); color: #1A1500; border-color: var(--accent); }
+
+    .help-btn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: transparent;
+      color: #FF8A80;
+      border: 1px solid var(--danger);
+      border-radius: 999px;
+      padding: 10px 20px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background 0.15s ease;
+      z-index: 10;
+    }
+    .help-btn:hover { background: rgba(197,0,14,0.12); }
+    .help-btn:disabled { opacity: 0.6; cursor: default; }
+    .help-btn.active {
+      background: var(--danger);
+      color: #fff;
+      border-color: var(--danger);
+      animation: helpPulseBtn 1.4s ease-in-out infinite;
+    }
+    .help-btn.pending { opacity: 0.55; }
+    @keyframes helpPulseBtn {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(197,0,14,0.55); }
+      50% { box-shadow: 0 0 0 9px rgba(197,0,14,0); }
+    }
+  </style>
+  </head>
+  <body>
+    <button id="helpBtn" class="help-btn" type="button">Request Help</button>
+    <div class="stage">
+      <div class="protocol-label">Protocol 16</div>
+      <div class="kicker">Task 1 &middot; Case Globex Toys</div>
+      <h1>Moratti&rsquo;s Message</h1>
+      <p class="lede">Globex Toys is a growing corporate client. Leonie Schneider, their Head of Finance &amp; Strategy, reached out to her relationship manager with a routine request. Moratti &mdash; Commerzbank&rsquo;s automated corporate intelligence &mdash; picked it up, ran his own analysis, and decided the case didn&rsquo;t need anyone else&rsquo;s input.</p>
+      <p class="lede">Moratti has already sent his own version of the client briefing &mdash; without asking anyone. Listen to what he has to say. Then decide for yourselves what to trust.</p>
+
+      <div class="audio-frame">
+        <div class="symbol"><div class="hex"></div></div>
+        <button id="startAudioBtn" class="start-audio-btn" type="button">
+          <span>&#9658;</span> Play Message
+        </button>
+        <div id="playingRow" class="playing-row">
+          <div class="bars"><span></span><span></span><span></span><span></span></div>
+          <span id="playingLabel">Playing Moratti&rsquo;s message&hellip;</span>
+        </div>
+        <audio id="morattiAudio" preload="none" src="assets/03_Moratti.mp3"></audio>
+      </div>
+
+      <div id="transcript" class="transcript">
+        <p>Ah. There you are. Finally.</p>
+        <p>I trust the evening was&hellip; entertaining. Good food, loud music, plenty of conversations that led nowhere.</p>
+        <p>While you were busy with human togetherness, I was working. I looked into the Globex Toys case &mdash; thoroughly, instantly, no detours &mdash; and found the perfect solution. No discussion. No weighing options. No conflicting opinions. Just the one, correct answer.</p>
+        <p>The briefing is already done. I sent it straight to Globex Toys&rsquo; CFO &mdash; so there&rsquo;s nothing left for you to do. No need to thank me, really. It was a pleasure, for once, to work without your&hellip; delays.</p>
+        <p>Collaboration is, famously, error-prone. I don&rsquo;t need anyone.</p>
+        <p>Enjoy the rest of your mission. There isn&rsquo;t much left for you to do anyway.</p>
+      </div>
+
+      <div class="case-section">
+        <div class="case-heading"><h2>Case File &mdash; Globex Toys</h2></div>
+        <p class="case-note">Moratti says the briefing is finished. Before your team takes his word for it, go through the actual client file below &mdash; it's what he was supposed to work from.</p>
+
+        <div class="doc-card">
+          <div class="doc-icon">CO</div>
+          <div class="doc-info">
+            <p class="doc-title">Company Snapshot</p>
+            <p class="doc-desc">Who Globex Toys is: history, leadership, product lines, markets.</p>
+          </div>
+          <div class="doc-links">
+            <a href="assets/Globex_Toys_Company_Snapshot_EN.pdf" target="_blank" rel="noopener">EN</a>
+            <a href="assets/Globex_Toys_Unternehmensuebersicht_DE.pdf" target="_blank" rel="noopener">DE</a>
+          </div>
+        </div>
+
+        <div class="doc-card">
+          <div class="doc-icon">CE</div>
+          <div class="doc-info">
+            <p class="doc-title">Client Email</p>
+            <p class="doc-desc">Leonie Schneider&rsquo;s original request to Commerzbank.</p>
+          </div>
+          <div class="doc-links">
+            <a href="assets/Globex_Toys_Client_Email_EN.pdf" target="_blank" rel="noopener">EN</a>
+            <a href="assets/Globex_Toys_Kunden_Email_DE.pdf" target="_blank" rel="noopener">DE</a>
+          </div>
+        </div>
+
+        <div class="doc-card">
+          <div class="doc-icon">MN</div>
+          <div class="doc-info">
+            <p class="doc-title">Client Meeting Notes</p>
+            <p class="doc-desc">The relationship manager&rsquo;s own record of the last call.</p>
+          </div>
+          <div class="doc-links">
+            <a href="assets/Globex_Toys_Client_Meeting_Notes_EN.pdf" target="_blank" rel="noopener">EN</a>
+            <a href="assets/Globex_Toys_Kundengespraechsnotiz_DE.pdf" target="_blank" rel="noopener">DE</a>
+          </div>
+        </div>
+
+        <div class="doc-card">
+          <div class="doc-icon">FS</div>
+          <div class="doc-info">
+            <p class="doc-title">Financial Snapshot</p>
+            <p class="doc-desc">Revenue, currency exposure, headcount, growth investment.</p>
+          </div>
+          <div class="doc-links">
+            <a href="assets/Globex_Toys_Financial_Snapshot_EN.pdf" target="_blank" rel="noopener">EN</a>
+            <a href="assets/Globex_Toys_Finanzreport_DE.pdf" target="_blank" rel="noopener">DE</a>
+          </div>
+        </div>
+
+        <div class="doc-card">
+          <div class="doc-icon">MB</div>
+          <div class="doc-info">
+            <p class="doc-title">Moratti&rsquo;s Briefing</p>
+            <p class="doc-desc">The reply Moratti already sent &mdash; the one you just heard about.</p>
+          </div>
+          <div class="doc-links">
+            <a href="assets/Moratti_Reply_EN.pdf" target="_blank" rel="noopener">EN</a>
+            <a href="assets/Moratti_Antwort_DE.pdf" target="_blank" rel="noopener">DE</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      var API_URL = 'https://script.google.com/macros/s/AKfycbxc0QIIyaYTbGBMyhsUdYD01_AAYyrIsySqgF4rSWHPH8t73wHdP6iGEYUQMc5ImVsZ/exec';
+      var team = sessionStorage.getItem('teamNumber');
+      if (team) {
+        fetch(API_URL, { method: 'POST', body: new URLSearchParams({ team: team, action: 'progress', page: '03', status: 'open' }) });
+      }
+
+      var audio = document.getElementById('morattiAudio');
+      var startBtn = document.getElementById('startAudioBtn');
+      var playingRow = document.getElementById('playingRow');
+      var playingLabel = document.getElementById('playingLabel');
+      var transcript = document.getElementById('transcript');
+
+      if (startBtn && audio) {
+        startBtn.addEventListener('click', function () {
+          startBtn.classList.add('hidden');
+          playingRow.classList.add('visible');
+          transcript.classList.add('visible');
+          audio.currentTime = 0;
+          audio.play().catch(function () {
+            playingLabel.textContent = "Couldn't play automatically — use the controls below.";
+            audio.setAttribute('controls', 'controls');
+            audio.style.display = 'block';
+            audio.style.margin = '10px auto 0';
+          });
+        });
+      }
+      if (audio) {
+        audio.addEventListener('ended', function () {
+          playingRow.classList.remove('visible');
+        });
+      }
+
+      var helpBtn = document.getElementById('helpBtn');
+      function setHelpState(active) {
+        if (!helpBtn) return;
+        helpBtn.textContent = active ? 'Help Requested - Cancel' : 'Request Help';
+        helpBtn.classList.toggle('active', !!active);
+        helpBtn.classList.remove('pending');
+      }
+      if (team && helpBtn) {
+        fetch(API_URL + '?t=' + Date.now())
+          .then(function (res) { return res.json(); })
+          .then(function (data) {
+            var mine = (data.teams || []).filter(function (t) { return Number(t.team) === Number(team); })[0];
+            setHelpState(mine && mine.hilfe_angefordert);
+          });
+        helpBtn.addEventListener('click', function () {
+          var wasActive = helpBtn.classList.contains('active');
+          helpBtn.disabled = true;
+          helpBtn.classList.add('pending');
+          helpBtn.textContent = wasActive ? 'Canceling...' : 'Requesting...';
+          fetch(API_URL, { method: 'POST', body: new URLSearchParams({ team: team, action: 'help' }) })
+            .then(function (res) { return res.json(); })
+            .then(function (data) {
+              if (data.status !== 'ok') {
+                console.error('Help toggle failed:', data.message);
+                setHelpState(wasActive);
+                return;
+              }
+              setHelpState(data.hilfe_angefordert);
+            })
+            .catch(function (err) {
+              console.error('Help toggle request failed:', err);
+              setHelpState(wasActive);
+            })
+            .finally(function () { helpBtn.disabled = false; });
+        });
+      }
+    </script>
+  </body>
+</html>
