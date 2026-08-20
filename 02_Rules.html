@@ -1,23 +1,23 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Protocol 16 – Briefing</title>
-<style>
-:root {
---bg: #002E3C;
+  <html lang="en">
+  <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Protocol 16 - Rules</title>
+  <style>
+  :root {
+  --bg: #002E3C;
 --bg-deep: #001B24;
 --accent: #FFD700;
---text: #F1EFED;
---text-muted: #A0AEAC;
---border: #537173;
+  --text: #F1EFED;
+  --text-muted: #A0AEAC;
+  --border: #537173;
 --danger: #C5000E;
-}
+  }
 * { box-sizing: border-box; }
 html, body { height: 100%; }
 body {
-margin: 0;
+  margin: 0;
 min-height: 100vh;
 background: radial-gradient(circle at 50% 20%, #0a4457 0%, var(--bg) 45%, var(--bg-deep) 100%);
 color: var(--text);
@@ -27,17 +27,18 @@ align-items: center;
 justify-content: center;
 padding: 24px;
 }
-.stage { width: 100%; max-width: 640px; text-align: center; }
+.stage { width: 100%; max-width: 1000px; text-align: center; }
 .protocol-label {
-font-size: 13px;
-letter-spacing: 4px;
+  font-size: 13px;
+font-weight: 700;
+letter-spacing: 6px;
 text-transform: uppercase;
 color: var(--accent);
 margin-bottom: 10px;
 }
 h1 { font-size: 22px; font-weight: 500; margin: 0 0 24px; }
 .video-frame {
-position: relative;
+  position: relative;
 width: 100%;
 padding-top: 56.25%;
 background: #000;
@@ -46,12 +47,13 @@ overflow: hidden;
 margin-bottom: 28px;
 border: 1px solid var(--border);
 }
-.video-frame iframe {
-position: absolute;
+.video-frame iframe,
+  .video-frame #ytPlayer {
+  position: absolute;
 top: 0;
 left: 0;
 width: 100%;
-height: 100%;
+  height: 100%;
 border: 0;
 }
 a.enter {
@@ -64,11 +66,14 @@ font-weight: 600;
 letter-spacing: 1px;
 text-decoration: none;
 border-radius: 999px;
-transition: transform 0.15s ease;
+transition: opacity 0.4s ease, transform 0.15s ease;
+opacity: 0;
+pointer-events: none;
 }
-a.enter:hover { transform: scale(1.04); }
+a.enter.visible { opacity: 1; pointer-events: auto; }
+  a.enter:hover { transform: scale(1.04); }
 .help-btn {
-position: fixed;
+  position: fixed;
 bottom: 20px;
 right: 20px;
 background: transparent;
@@ -90,70 +95,94 @@ background: var(--danger);
 color: #fff;
 border-color: var(--danger);
 animation: helpPulseBtn 1.4s ease-in-out infinite;
-}
+  }
 .help-btn.pending { opacity: 0.55; }
 @keyframes helpPulseBtn {
 0%, 100% { box-shadow: 0 0 0 0 rgba(197,0,14,0.55); }
-50% { box-shadow: 0 0 0 9px rgba(197,0,14,0); }
+  50% { box-shadow: 0 0 0 9px rgba(197,0,14,0); }
 }
 </style>
 </head>
 <body>
-<button id="helpBtn" class="help-btn" type="button">Request Help</button>
+  <button id="helpBtn" class="help-btn" type="button">Request Help</button>
 <div class="stage">
 <div class="protocol-label">Protocol 16</div>
 <h1>Watch the briefing, then continue.</h1>
-<div class="video-frame">
-<!-- Testvideo, tauschen sobald finales Video feststeht -->
-<iframe src="https://www.youtube-nocookie.com/embed/c0Yw09viCKg" title="Protocol 16 Briefing (Test)" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+  <div class="video-frame">
+<div id="ytPlayer"></div>
 </div>
 <p style="margin: 0 0 24px;">
-<a href="https://youtu.be/c0Yw09viCKg" target="_blank" rel="noopener" style="color: var(--text-muted); font-size: 13px;">Video lässt sich nicht laden? Auf YouTube ansehen ↗</a>
-</p>
-<a class="enter" id="enterLink" href="Modul 1 - The Contradictory Brief.html">Enter the Mission</a>
+<a href="https://youtu.be/MKDmx3z_GtI" target="_blank" rel="noopener" style="color: var(--text-muted); font-size: 13px;">Can't load the video? Watch on YouTube -&gt;</a>
+  </p>
+<a class="enter" id="enterLink" href="03_MorattisMessage1.html">Enter the Mission</a>
 </div>
+  <script src="https://www.youtube.com/iframe_api"></script>
 <script>
 var API_URL = 'https://script.google.com/macros/s/AKfycbxc0QIIyaYTbGBMyhsUdYD01_AAYyrIsySqgF4rSWHPH8t73wHdP6iGEYUQMc5ImVsZ/exec';
 var team = sessionStorage.getItem('teamNumber');
 var enterLink = document.getElementById('enterLink');
 if (team) {
 fetch(API_URL, { method: 'POST', body: new URLSearchParams({ team: team, action: 'progress', page: '02', status: 'open' }) });
-}
-if (enterLink) {
-enterLink.addEventListener('click', function () {
+    }
+  if (enterLink) {
+  enterLink.addEventListener('click', function () {
 if (team) {
 fetch(API_URL, { method: 'POST', body: new URLSearchParams({ team: team, action: 'progress', page: '02', status: 'done' }) });
 }
+  });
+}
+
+var ytPlayer;
+function onYouTubeIframeAPIReady() {
+ytPlayer = new YT.Player('ytPlayer', {
+videoId: 'MKDmx3z_GtI',
+host: 'https://www.youtube-nocookie.com',
+playerVars: {
+  autoplay: 1,
+mute: 1,
+cc_load_policy: 0,
+rel: 0,
+  modestbranding: 1,
+playsinline: 1
+  },
+  events: {
+onStateChange: onPlayerStateChange
+}
 });
+  }
+  function onPlayerStateChange(event) {
+    if (event.data === YT.PlayerState.ENDED && enterLink) {
+    enterLink.classList.add('visible');
+}
 }
 
 var helpBtn = document.getElementById('helpBtn');
 function setHelpState(active) {
-if (!helpBtn) return;
-helpBtn.textContent = active ? 'Help Requested – Cancel' : 'Request Help';
+  if (!helpBtn) return;
+helpBtn.textContent = active ? 'Help Requested - Cancel' : 'Request Help';
 helpBtn.classList.toggle('active', !!active);
 helpBtn.classList.remove('pending');
 }
 if (team && helpBtn) {
 fetch(API_URL + '?t=' + Date.now())
-.then(function (res) { return res.json(); })
+  .then(function (res) { return res.json(); })
 .then(function (data) {
-var mine = (data.teams || []).filter(function (t) { return Number(t.team) === Number(team); })[0];
+  var mine = (data.teams || []).filter(function (t) { return Number(t.team) === Number(team); })[0];
 setHelpState(mine && mine.hilfe_angefordert);
 });
 helpBtn.addEventListener('click', function () {
-var wasActive = helpBtn.classList.contains('active');
+  var wasActive = helpBtn.classList.contains('active');
 helpBtn.disabled = true;
 helpBtn.classList.add('pending');
-helpBtn.textContent = wasActive ? 'Canceling…' : 'Requesting…';
+helpBtn.textContent = wasActive ? 'Canceling...' : 'Requesting...';
 fetch(API_URL, { method: 'POST', body: new URLSearchParams({ team: team, action: 'help' }) })
-.then(function (res) { return res.json(); })
+  .then(function (res) { return res.json(); })
 .then(function (data) {
-if (data.status !== 'ok') {
+  if (data.status !== 'ok') {
 console.error('Help toggle failed:', data.message);
 setHelpState(wasActive);
 return;
-}
+  }
 setHelpState(data.hilfe_angefordert);
 })
 .catch(function (err) {
@@ -164,5 +193,6 @@ setHelpState(wasActive);
 });
 }
 </script>
-</body>
-</html>
+  </body>
+  </html>
+  
