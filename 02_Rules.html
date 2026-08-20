@@ -1,236 +1,261 @@
 <!DOCTYPE html>
-  <html lang="en">
+<html lang="en">
   <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Protocol 16 - Rules</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Protocol 16 - Rules</title>
   <style>
-  :root {
-  --bg: #002E3C;
---bg-deep: #001B24;
---accent: #FFD700;
-  --text: #F1EFED;
-  --text-muted: #A0AEAC;
-  --border: #537173;
---danger: #C5000E;
-  }
-* { box-sizing: border-box; }
-html, body { height: 100%; }
-body {
-  margin: 0;
-min-height: 100vh;
-background: radial-gradient(circle at 50% 20%, #0a4457 0%, var(--bg) 45%, var(--bg-deep) 100%);
-color: var(--text);
-font-family: -apple-system, "Segoe UI", Arial, sans-serif;
-display: flex;
-align-items: center;
-justify-content: center;
-padding: 24px;
-}
-.stage { width: 100%; max-width: 1000px; text-align: center; }
-.protocol-label {
-  font-size: 13px;
-font-weight: 700;
-letter-spacing: 6px;
-text-transform: uppercase;
-color: var(--accent);
-margin-bottom: 10px;
-}
-h1 { font-size: 22px; font-weight: 500; margin: 0 0 24px; }
-.video-frame {
-  position: relative;
-width: 100%;
-padding-top: 56.25%;
-background: #000;
-border-radius: 12px;
-overflow: hidden;
-margin-bottom: 28px;
-border: 1px solid var(--border);
-}
-.video-frame iframe,
-  .video-frame #ytPlayer {
-  position: absolute;
-top: 0;
-left: 0;
-width: 100%;
-  height: 100%;
-border: 0;
-}
-a.enter {
-display: inline-block;
-padding: 14px 36px;
-background: var(--accent);
-color: #1A1500;
-font-size: 15px;
-font-weight: 600;
-letter-spacing: 1px;
-text-decoration: none;
-border-radius: 999px;
-transition: opacity 0.4s ease, transform 0.15s ease;
-opacity: 0;
-pointer-events: none;
-}
-a.enter.visible { opacity: 1; pointer-events: auto; }
-  a.enter:hover { transform: scale(1.04); }
-.help-btn {
-  position: fixed;
-bottom: 20px;
-right: 20px;
-background: transparent;
-color: #FF8A80;
-border: 1px solid var(--danger);
-border-radius: 999px;
-padding: 10px 20px;
-font-size: 13px;
-font-weight: 600;
-cursor: pointer;
-font-family: inherit;
-transition: background 0.15s ease;
-z-index: 10;
-}
-.help-btn:hover { background: rgba(197,0,14,0.12); }
-.help-btn:disabled { opacity: 0.6; cursor: default; }
-.help-btn.active {
-background: var(--danger);
-color: #fff;
-border-color: var(--danger);
-animation: helpPulseBtn 1.4s ease-in-out infinite;
-  }
-.help-btn.pending { opacity: 0.55; }
-@keyframes helpPulseBtn {
-0%, 100% { box-shadow: 0 0 0 0 rgba(197,0,14,0.55); }
-  50% { box-shadow: 0 0 0 9px rgba(197,0,14,0); }
-}
-    .sound-hint {
-      position: absolute;
-      bottom: 14px;
-      left: 14px;
-      background: rgba(0,0,0,0.6);
+    :root {
+      --bg: #002E3C;
+      --bg-deep: #001B24;
+      --accent: #FFD700;
+      --text: #F1EFED;
+      --text-muted: #A0AEAC;
+      --border: #537173;
+      --danger: #C5000E;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: radial-gradient(circle at 50% 20%, #0a4457 0%, var(--bg) 45%, var(--bg-deep) 100%);
       color: var(--text);
+      font-family: -apple-system, "Segoe UI", Arial, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .stage { width: 100%; max-width: 1000px; text-align: center; }
+    .protocol-label {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 6px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 10px;
+    }
+    h1 { font-size: 22px; font-weight: 500; margin: 0 0 24px; }
+    .video-frame {
+      position: relative;
+      width: 100%;
+      padding-top: 56.25%;
+      background: #000;
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 28px;
       border: 1px solid var(--border);
-      border-radius: 999px;
-      padding: 8px 16px;
-      font-size: 12px;
+    }
+    .video-frame iframe,
+    .video-frame #ytPlayer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: 0;
+    }
+    a.enter {
+      display: inline-block;
+      padding: 14px 36px;
+      background: var(--accent);
+      color: #1A1500;
+      font-size: 15px;
       font-weight: 600;
-      letter-spacing: 0.3px;
-      z-index: 5;
-      transition: opacity 0.3s ease;
-      animation: soundHintPulse 1.8s ease-in-out infinite;
+      letter-spacing: 1px;
+      text-decoration: none;
+      border-radius: 999px;
+      transition: opacity 0.4s ease, transform 0.15s ease;
+      opacity: 0;
+      pointer-events: none;
     }
-    .sound-hint.hidden { opacity: 0; pointer-events: none; }
-    @keyframes soundHintPulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.6; }
+    a.enter.visible { opacity: 1; pointer-events: auto; }
+    a.enter:hover { transform: scale(1.04); }
+    .help-btn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: transparent;
+      color: #FF8A80;
+      border: 1px solid var(--danger);
+      border-radius: 999px;
+      padding: 10px 20px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background 0.15s ease;
+      z-index: 10;
     }
-</style>
-</head>
-<body>
-  <button id="helpBtn" class="help-btn" type="button">Request Help</button>
-<div class="stage">
-<div class="protocol-label">Protocol 16</div>
-<h1>Watch the briefing, then continue.</h1>
-  <div class="video-frame">
-<div id="ytPlayer"></div>
-    <div id="soundHint" class="sound-hint">Tap anywhere to enable sound</div>
-</div>
-<p style="margin: 0 0 24px;">
-<a href="https://youtu.be/MKDmx3z_GtI" target="_blank" rel="noopener" style="color: var(--text-muted); font-size: 13px;">Can't load the video? Watch on YouTube -&gt;</a>
-  </p>
-<a class="enter" id="enterLink" href="03_MorattisMessage1.html">Enter the Mission</a>
-</div>
+    .help-btn:hover { background: rgba(197,0,14,0.12); }
+    .help-btn:disabled { opacity: 0.6; cursor: default; }
+    .help-btn.active {
+      background: var(--danger);
+      color: #fff;
+      border-color: var(--danger);
+      animation: helpPulseBtn 1.4s ease-in-out infinite;
+    }
+    .help-btn.pending { opacity: 0.55; }
+    @keyframes helpPulseBtn {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(197,0,14,0.55); }
+      50% { box-shadow: 0 0 0 9px rgba(197,0,14,0); }
+    }
+    .start-overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0,0,0,0.4);
+      cursor: pointer;
+      z-index: 6;
+      border: 0;
+      padding: 0;
+      transition: opacity 0.25s ease;
+    }
+    .start-overlay.hidden { opacity: 0; pointer-events: none; }
+    .play-circle {
+      width: 88px;
+      height: 88px;
+      border-radius: 50%;
+      background: var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 14px;
+      animation: playPulse 2s ease-in-out infinite;
+    }
+    .play-circle::after {
+      content: "";
+      width: 0;
+      height: 0;
+      border-style: solid;
+      border-width: 16px 0 16px 26px;
+      border-color: transparent transparent transparent #1A1500;
+      margin-left: 6px;
+    }
+    .start-label {
+      color: var(--text);
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+    @keyframes playPulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(255,215,0,0.45); }
+      50% { box-shadow: 0 0 0 16px rgba(255,215,0,0); }
+    }
+    </style>
+  </head>
+  <body>
+    <button id="helpBtn" class="help-btn" type="button">Request Help</button>button>
+    <div class="stage">
+      <div class="protocol-label">Protocol 16</div>div>
+      <h1>Watch the briefing, then continue.</h1>
+    <div class="video-frame">
+    <div id="ytPlayer"></div>div>
+    <button id="startOverlay" class="start-overlay" type="button">
+    <span class="play-circle"></span>span>
+    <span class="start-label">Start Video</span>span>
+    </button>button>
+    </div>div>
+    <p style="margin: 0 0 24px;">
+    <a href="https://youtu.be/MKDmx3z_GtI" target="_blank" rel="noopener" style="color: var(--text-muted); font-size: 13px;">Can't load the video? Watch on YouTube -&gt;</a>a>
+    </p>p>
+    <a class="enter" id="enterLink" href="03_MorattisMessage1.html">Enter the Mission</a>a>
+    </div>div>
   <script src="https://www.youtube.com/iframe_api"></script>
-<script>
-var API_URL = 'https://script.google.com/macros/s/AKfycbxc0QIIyaYTbGBMyhsUdYD01_AAYyrIsySqgF4rSWHPH8t73wHdP6iGEYUQMc5ImVsZ/exec';
-var team = sessionStorage.getItem('teamNumber');
-var enterLink = document.getElementById('enterLink');
-if (team) {
-fetch(API_URL, { method: 'POST', body: new URLSearchParams({ team: team, action: 'progress', page: '02', status: 'open' }) });
+  <script>
+    var API_URL = 'https://script.google.com/macros/s/AKfycbxc0QIIyaYTbGBMyhsUdYD01_AAYyrIsySqgF4rSWHPH8t73wHdP6iGEYUQMc5ImVsZ/exec';
+    var team = sessionStorage.getItem('teamNumber');
+    var enterLink = document.getElementById('enterLink');
+    if (team) {
+      fetch(API_URL, { method: 'POST', body: new URLSearchParams({ team: team, action: 'progress', page: '02', status: 'open' }) });
     }
-  if (enterLink) {
-  enterLink.addEventListener('click', function () {
-if (team) {
-fetch(API_URL, { method: 'POST', body: new URLSearchParams({ team: team, action: 'progress', page: '02', status: 'done' }) });
-}
-  });
-}
+    if (enterLink) {
+      enterLink.addEventListener('click', function () {
+        if (team) {
+          fetch(API_URL, { method: 'POST', body: new URLSearchParams({ team: team, action: 'progress', page: '02', status: 'done' }) });
+        }
+      });
+    }
 
-var ytPlayer;
-function onYouTubeIframeAPIReady() {
-ytPlayer = new YT.Player('ytPlayer', {
-videoId: 'MKDmx3z_GtI',
-host: 'https://www.youtube-nocookie.com',
-playerVars: {
-  autoplay: 1,
-mute: 1,
-cc_load_policy: 0,
-rel: 0,
-  modestbranding: 1,
-playsinline: 1
-  },
-  events: {
-onStateChange: onPlayerStateChange
-}
-});
-  }
-  function onPlayerStateChange(event) {
-    if (event.data === YT.PlayerState.ENDED && enterLink) {
-    enterLink.classList.add('visible');
-}
-}
+    var ytPlayer;
+    var playerReady = false;
+    function onYouTubeIframeAPIReady() {
+      ytPlayer = new YT.Player('ytPlayer', {
+        videoId: 'MKDmx3z_GtI',
+        host: 'https://www.youtube-nocookie.com',
+        playerVars: {
+          autoplay: 0,
+          cc_load_policy: 0,
+          rel: 0,
+          modestbranding: 1,
+          playsinline: 1
+        },
+        events: {
+          onReady: function () { playerReady = true; },
+          onStateChange: onPlayerStateChange
+        }
+      });
+    }
+    function onPlayerStateChange(event) {
+      if (event.data === YT.PlayerState.ENDED && enterLink) {
+        enterLink.classList.add('visible');
+      }
+    }
 
-  var soundEnabled = false;
-  var soundHint = document.getElementById('soundHint');
-  function enableSound() {
-    if (soundEnabled || !ytPlayer || typeof ytPlayer.unMute !== 'function') return;
-    soundEnabled = true;
-    ytPlayer.unMute();
-    ytPlayer.setVolume(100);
-    if (soundHint) soundHint.classList.add('hidden');
-    document.removeEventListener('click', enableSound);
-    document.removeEventListener('touchstart', enableSound);
-    document.removeEventListener('keydown', enableSound);
-  }
-  document.addEventListener('click', enableSound);
-  document.addEventListener('touchstart', enableSound);
-  document.addEventListener('keydown', enableSound);
+    var startOverlay = document.getElementById('startOverlay');
+    if (startOverlay) {
+      startOverlay.addEventListener('click', function () {
+        if (!playerReady || !ytPlayer || typeof ytPlayer.playVideo !== 'function') return;
+        startOverlay.classList.add('hidden');
+        ytPlayer.playVideo();
+      });
+    }
 
-var helpBtn = document.getElementById('helpBtn');
-function setHelpState(active) {
-  if (!helpBtn) return;
-helpBtn.textContent = active ? 'Help Requested - Cancel' : 'Request Help';
-helpBtn.classList.toggle('active', !!active);
-helpBtn.classList.remove('pending');
-}
-if (team && helpBtn) {
-fetch(API_URL + '?t=' + Date.now())
-  .then(function (res) { return res.json(); })
-.then(function (data) {
-  var mine = (data.teams || []).filter(function (t) { return Number(t.team) === Number(team); })[0];
-setHelpState(mine && mine.hilfe_angefordert);
-});
-helpBtn.addEventListener('click', function () {
-  var wasActive = helpBtn.classList.contains('active');
-helpBtn.disabled = true;
-helpBtn.classList.add('pending');
-helpBtn.textContent = wasActive ? 'Canceling...' : 'Requesting...';
-fetch(API_URL, { method: 'POST', body: new URLSearchParams({ team: team, action: 'help' }) })
-  .then(function (res) { return res.json(); })
-.then(function (data) {
-  if (data.status !== 'ok') {
-console.error('Help toggle failed:', data.message);
-setHelpState(wasActive);
-return;
-  }
-setHelpState(data.hilfe_angefordert);
-})
-.catch(function (err) {
-console.error('Help toggle request failed:', err);
-setHelpState(wasActive);
-})
-.finally(function () { helpBtn.disabled = false; });
-});
-}
-</script>
+    var helpBtn = document.getElementById('helpBtn');
+    function setHelpState(active) {
+      if (!helpBtn) return;
+      helpBtn.textContent = active ? 'Help Requested - Cancel' : 'Request Help';
+      helpBtn.classList.toggle('active', !!active);
+      helpBtn.classList.remove('pending');
+    }
+    if (team && helpBtn) {
+      fetch(API_URL + '?t=' + Date.now())
+      .then(function (res) { return res.json(); })
+      .then(function (data) {
+        var mine = (data.teams || []).filter(function (t) { return Number(t.team) === Number(team); })[0];
+        setHelpState(mine && mine.hilfe_angefordert);
+      });
+      helpBtn.addEventListener('click', function () {
+        var wasActive = helpBtn.classList.contains('active');
+        helpBtn.disabled = true;
+        helpBtn.classList.add('pending');
+        helpBtn.textContent = wasActive ? 'Canceling...' : 'Requesting...';
+        fetch(API_URL, { method: 'POST', body: new URLSearchParams({ team: team, action: 'help' }) })
+    .then(function (res) { return res.json(); })
+        .then(function (data) {
+          if (data.status !== 'ok') {
+            console.error('Help toggle failed:', data.message);
+            setHelpState(wasActive);
+            return;
+          }
+          setHelpState(data.hilfe_angefordert);
+        })
+        .catch(function (err) {
+          console.error('Help toggle request failed:', err);
+          setHelpState(wasActive);
+        })
+        .finally(function () { helpBtn.disabled = false; });
+      });
+    }
+      </script>
   </body>
-  </html>
-  
+</html>
+
+  </script></h1>
+  </body>
+  </style></title>
+  </head>
