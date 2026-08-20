@@ -13,7 +13,7 @@
     --text-muted: #A0AEAC;
   }
   * { box-sizing: border-box; }
-  html, body { height: 100%; }
+  html { min-height: 100%; }
   body {
     margin: 0;
     min-height: 100vh;
@@ -121,7 +121,7 @@
             .then(function (data) {
                       if (data.status === 'ok') {
                                   sessionStorage.setItem('teamNumber', team);
-                                        fetch(API_URL, { method: 'POST', body: new URLSearchParams({ team: team, action: 'progress', page: '01' }) });
+                                        fetch(API_URL, { method: 'POST', keepalive: true, body: new URLSearchParams({ team: team, action: 'progress', page: '01' }) });
                                   window.location.href = '02_Rules.html';
                       } else if (data.code === 'DUPLICATE') {
                                   errorEl.textContent = 'This team number is already logged in.';

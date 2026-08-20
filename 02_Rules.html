@@ -15,7 +15,7 @@
       --danger: #C5000E;
     }
     * { box-sizing: border-box; }
-    html, body { height: 100%; }
+    html { min-height: 100%; }
     body {
       margin: 0;
       min-height: 100vh;
@@ -176,7 +176,7 @@
     if (enterLink) {
       enterLink.addEventListener('click', function () {
         if (team) {
-          fetch(API_URL, { method: 'POST', body: new URLSearchParams({ team: team, action: 'progress', page: '02', status: 'done' }) });
+          fetch(API_URL, { method: 'POST', keepalive: true, body: new URLSearchParams({ team: team, action: 'progress', page: '02', status: 'done' }) });
         }
       });
     }
