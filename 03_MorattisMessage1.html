@@ -24,7 +24,7 @@
       background: radial-gradient(circle at 50% 12%, #0a4457 0%, var(--bg) 45%, var(--bg-deep) 100%);
       color: var(--text);
       font-family: -apple-system, "Segoe UI", Arial, sans-serif;
-      padding: 24px;
+      padding: 24px 24px 90px;
     }
     .stage { width: 100%; max-width: 760px; margin: 0 auto; text-align: center; }
     .protocol-label {
@@ -203,6 +203,12 @@
     }
     .doc-links a:hover { background: var(--accent); color: #1A1500; border-color: var(--accent); }
 
+    .section-end {
+      margin-top: 34px;
+      padding-top: 24px;
+      border-top: 1px solid var(--panel-border);
+    }
+
     .help-btn {
       position: fixed;
       bottom: 20px;
@@ -334,6 +340,8 @@
           </div>
         </div>
       </div>
+
+      <div class="section-end"></div>
     </div>
 
     <script>
