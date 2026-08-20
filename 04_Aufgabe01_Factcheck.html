@@ -126,22 +126,6 @@
     .feedback.error { background: rgba(197,0,14,0.12); border: 1px solid var(--danger); color: #FF8A80; }
     .feedback.success { background: rgba(0,137,50,0.12); border: 1px solid var(--success); color: #6FE39B; }
 
-    .continue-row { text-align: center; margin-top: 22px; display: none; }
-    .continue-row.show { display: block; }
-    .continue-btn {
-      display: inline-block;
-      padding: 14px 40px;
-      background: var(--accent);
-      color: #1A1500;
-      font-size: 15px;
-      font-weight: 600;
-      letter-spacing: 1px;
-      text-decoration: none;
-      border-radius: 999px;
-      transition: transform 0.15s ease;
-    }
-    .continue-btn:hover { transform: scale(1.03); }
-
     .help-btn {
       position: fixed;
       bottom: 20px;
@@ -189,9 +173,6 @@
       <div class="submit-row">
         <button id="submitBtn" class="submit-btn" type="button" disabled>Submit Assessment</button>
         <div id="feedback" class="feedback"></div>
-        <div class="continue-row" id="continueRow">
-          <a class="continue-btn" id="continueLink" href="05_Aufgabe01_Digit1.html">Continue</a>
-        </div>
       </div>
     </div>
 
@@ -298,12 +279,11 @@
         var allCorrect = CLAIMS.every(function (claim) { return answers[claim.id] === claim.answer; });
         if (allCorrect) {
           solved = true;
-          showFeedback('success', 'All six confirmed. Your assessment matches the case file — Moratti’s briefing does not.');
           submitBtn.disabled = true;
-          document.getElementById('continueRow').classList.add('show');
           if (team) {
-            fetch(API_URL, { method: 'POST', body: new URLSearchParams({ team: team, action: 'progress', page: '04', status: 'done' }) });
+            fetch(API_URL, { method: 'POST', keepalive: true, body: new URLSearchParams({ team: team, action: 'progress', page: '04', status: 'done' }) });
           }
+          window.location.href = '05_Aufgabe01_Digit1.html';
         } else {
           showFeedback('error', 'Not quite. Check the case file again — not every claim holds up.');
         }
