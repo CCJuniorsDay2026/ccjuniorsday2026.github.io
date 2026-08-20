@@ -50,6 +50,14 @@ thead th { text-align: left; font-size: 12px; text-transform: uppercase; letter-
 tbody td { padding: 10px 16px; border-bottom: 1px solid rgba(83,113,115,0.4); font-size: 14px; }
 tbody tr:last-child td { border-bottom: none; }
 tbody tr:hover { background: rgba(255,255,255,0.03); }
+tbody tr.mc-baker { background: rgba(58,126,138,0.18); }
+tbody tr.mc-baker:hover { background: rgba(58,126,138,0.26); }
+tbody tr.mc-scotland { background: rgba(147,193,180,0.18); }
+tbody tr.mc-scotland:hover { background: rgba(147,193,180,0.26); }
+tbody tr.mc-whitehall { background: rgba(214,193,139,0.16); }
+tbody tr.mc-whitehall:hover { background: rgba(214,193,139,0.24); }
+tbody tr.mc-charing { background: rgba(155,92,47,0.18); }
+tbody tr.mc-charing:hover { background: rgba(155,92,47,0.26); }
 tbody tr.help-active { background: rgba(197,0,14,0.28); box-shadow: inset 4px 0 0 var(--danger); }
 tbody tr.help-active:hover { background: rgba(197,0,14,0.34); }
 .team-num { font-weight: 700; color: var(--accent); font-size: 15px; }
@@ -124,6 +132,13 @@ var API_URL = 'https://script.google.com/macros/s/AKfycbxc0QIIyaYTbGBMyhsUdYD01_
 var REFRESH_MS = 10000;
 var PAGE_COUNT = 18;
 
+var MC_STATIONS = [
+{ value: 'Baker Street', cls: 'mc-baker' },
+{ value: 'Scotland Yard', cls: 'mc-scotland' },
+{ value: 'Whitehall', cls: 'mc-whitehall' },
+{ value: 'Charing Cross', cls: 'mc-charing' }
+];
+
 var tableBody = document.getElementById('tableBody');
 var statusDot = document.getElementById('statusDot');
 var statusText = document.getElementById('statusText');
@@ -172,6 +187,11 @@ return '<option value="' + opt.value + '"' + sel + '>' + opt.label + '</option>'
 }).join('');
 }
 
+function mcClass(value) {
+var found = MC_STATIONS.filter(function (s) { return s.value === value; })[0];
+return found ? found.cls : '';
+}
+
 function render(teams) {
 teams.sort(function (a, b) { return Number(a.team) - Number(b.team); });
 var rows = teams.map(function (t) {
@@ -191,12 +211,17 @@ var sprachOptions = optionsHtml([
 ], t.sprache);
 var mcOptions = optionsHtml([
 { value: '', label: '–' },
-{ value: '1', label: '1' },
-{ value: '2', label: '2' },
-{ value: '3', label: '3' },
-{ value: '4', label: '4' }
+{ value: 'Baker Street', label: 'Baker Street' },
+{ value: 'Scotland Yard', label: 'Scotland Yard' },
+{ value: 'Whitehall', label: 'Whitehall' },
+{ value: 'Charing Cross', label: 'Charing Cross' }
 ], t.mission_control);
-return '<tr' + (helpActive ? ' class="help-active"' : '') + '>' +
+var rowClasses = [];
+if (helpActive) rowClasses.push('help-active');
+var mcCls = mcClass(t.mission_control);
+if (mcCls) rowClasses.push(mcCls);
+var trClassAttr = rowClasses.length ? ' class="' + rowClasses.join(' ') + '"' : '';
+return '<tr' + trClassAttr + '>' +
 '<td><span class="team-num">Team ' + escapeHtml(t.team) + '</span></td>' +
 '<td><input class="field-input editable-field" data-team="' + escapeHtml(t.team) + '" data-field="raum" value="' + escapeHtml(t.raum) + '" placeholder="Raum"></td>' +
 '<td><select class="field-select editable-field" data-team="' + escapeHtml(t.team) + '" data-field="sprache">' + sprachOptions + '</select></td>' +
@@ -234,6 +259,12 @@ body: new URLSearchParams({ action: 'update', team: team, field: field, value: v
 if (data.status !== 'ok') throw new Error(data.message || 'Speichern fehlgeschlagen');
 el.classList.add('field-saved');
 setTimeout(function () { el.classList.remove('field-saved'); }, 1200);
+if (field === 'mission_control') {
+var tr = el.closest('tr');
+MC_STATIONS.forEach(function (s) { tr.classList.remove(s.cls); });
+var cls = mcClass(value);
+if (cls) tr.classList.add(cls);
+}
 })
 .catch(function (err) {
 errorBanner.className = 'error-banner show';
