@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Protocol 16 - Task 1: Fact-Check</title>
+  <style>
+    :root {
+      --bg: #002E3C;
+      --bg-deep: #001B24;
+      --accent: #FFD700;
+      --text: #F1EFED;
+      --text-muted: #A0AEAC;
+      --border: #537173;
+      --danger: #C5000E;
+      --success: #008932;
+      --panel: rgba(255,255,255,0.04);
+      --panel-border: rgba(255,255,255,0.10);
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: radial-gradient(circle at 50% 12%, #0a4457 0%, var(--bg) 45%, var(--bg-deep) 100%);
+      color: var(--text);
+      font-family: -apple-system, "Segoe UI", Arial, sans-serif;
+      padding: 24px 24px 90px;
+    }
+    .stage { width: 100%; max-width: 780px; margin: 0 auto; }
+    .center { text-align: center; }
+    .protocol-label {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 6px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 10px;
+    }
+    .kicker {
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+    h1 { font-size: 24px; font-weight: 600; margin: 0 0 10px; }
+    .lede { font-size: 14px; line-height: 1.6; color: var(--text-muted); margin: 0 0 10px; max-width: 620px; margin-left: auto; margin-right: auto; }
+    .lede:last-of-type { margin-bottom: 28px; }
+
+    .claim-card {
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      border-radius: 12px;
+      padding: 18px 20px;
+      margin-bottom: 14px;
+      text-align: left;
+    }
+    .claim-num {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin: 0 0 8px;
+    }
+    .claim-text {
+      font-size: 14.5px;
+      line-height: 1.6;
+      margin: 0 0 16px;
+      font-style: italic;
+      color: var(--text);
+    }
+    .claim-options {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .opt-btn {
+      flex: 1 1 auto;
+      min-width: 100px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+      cursor: pointer;
+      transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+    }
+    .opt-btn:hover { border-color: var(--accent); }
+    .opt-btn.selected { background: var(--accent); color: #1A1500; border-color: var(--accent); }
+
+    .submit-row { text-align: center; margin-top: 26px; }
+    .submit-btn {
+      display: inline-block;
+      padding: 14px 40px;
+      background: var(--accent);
+      color: #1A1500;
+      border: none;
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-family: inherit;
+      transition: transform 0.15s ease, opacity 0.2s ease;
+    }
+    .submit-btn:hover { transform: scale(1.03); }
+    .submit-btn:disabled { opacity: 0.5; cursor: default; transform: none; }
+
+    .feedback {
+      margin: 18px auto 0;
+      max-width: 560px;
+      padding: 14px 18px;
+      border-radius: 10px;
+      font-size: 13.5px;
+      line-height: 1.6;
+      text-align: center;
+      display: none;
+    }
+    .feedback.show { display: block; }
+    .feedback.error { background: rgba(197,0,14,0.12); border: 1px solid var(--danger); color: #FF8A80; }
+    .feedback.success { background: rgba(0,137,50,0.12); border: 1px solid var(--success); color: #6FE39B; }
+
+    .help-btn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: transparent;
+      color: #FF8A80;
+      border: 1px solid var(--danger);
+      border-radius: 999px;
+      padding: 10px 20px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background 0.15s ease;
+      z-index: 10;
+    }
+    .help-btn:hover { background: rgba(197,0,14,0.12); }
+    .help-btn:disabled { opacity: 0.6; cursor: default; }
+    .help-btn.active {
+      background: var(--danger);
+      color: #fff;
+      border-color: var(--danger);
+      animation: helpPulseBtn 1.4s ease-in-out infinite;
+    }
+    .help-btn.pending { opacity: 0.55; }
+    @keyframes helpPulseBtn {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(197,0,14,0.55); }
+      50% { box-shadow: 0 0 0 9px rgba(197,0,14,0); }
+    }
+  </style>
+  </head>
+  <body>
+    <button id="helpBtn" class="help-btn" type="button">Request Help</button>
+    <div class="stage">
+      <div class="center">
+        <div class="protocol-label">Protocol 16</div>
+        <div class="kicker">Task 1 &middot; Case Globex Toys</div>
+        <h1>Fact-Check Moratti&rsquo;s Briefing</h1>
+        <p class="lede">Moratti sent this briefing to Leonie Schneider on his own, without anyone checking it first. Below are six claims taken from it, word for word.</p>
+        <p class="lede">Go through the case file again. For each claim, decide: is it confirmed by the real documents (<strong>True</strong>), contradicted by them (<strong>False</strong>), or something Moratti simply assumed without confirmation (<strong>Speculative</strong>)?</p>
+      </div>
+
+      <div id="claimList"></div>
+
+      <div class="submit-row">
+        <button id="submitBtn" class="submit-btn" type="button" disabled>Submit Assessment</button>
+        <div id="feedback" class="feedback"></div>
+      </div>
+    </div>
+
+    <script>
+      var CLAIMS = [
+        {
+          id: 1,
+          text: "“Your Canadian business has grown so significantly over the past two years that it is now your single largest source of foreign-currency risk.”",
+          answer: "true"
+        },
+        {
+          id: 2,
+          text: "“The delays you have experienced concern primarily the raw materials for your Outdoor Play Equipment line.”",
+          answer: "false"
+        },
+        {
+          id: 3,
+          text: "“Globex Toys wants to move routine matters to digital self-service — and would also like to do without a dedicated personal contact for the more complex topics going forward.”",
+          answer: "false"
+        },
+        {
+          id: 4,
+          text: "“Roughly 45% of your planned growth investment will be funded from your own reserves, with the remainder financed through us.”",
+          answer: "true"
+        },
+        {
+          id: 5,
+          text: "“The capacity expansion for Outdoor Play Equipment will be fully completed within this calendar year.”",
+          answer: "speculative"
+        },
+        {
+          id: 6,
+          text: "“Since Educational Computer Games is now clearly your fastest-growing line, Globex Toys will want to scale back the board games business over the medium term.”",
+          answer: "speculative"
+        }
+      ];
+
+      var OPTIONS = [
+        { value: "true", label: "True" },
+        { value: "false", label: "False" },
+        { value: "speculative", label: "Speculative" }
+      ];
+
+      var answers = {};
+
+      var claimList = document.getElementById('claimList');
+      CLAIMS.forEach(function (claim) {
+        var card = document.createElement('div');
+        card.className = 'claim-card';
+
+        var num = document.createElement('p');
+        num.className = 'claim-num';
+        num.textContent = 'Claim ' + claim.id + ' of ' + CLAIMS.length;
+        card.appendChild(num);
+
+        var text = document.createElement('p');
+        text.className = 'claim-text';
+        text.textContent = claim.text;
+        card.appendChild(text);
+
+        var optRow = document.createElement('div');
+        optRow.className = 'claim-options';
+        OPTIONS.forEach(function (opt) {
+          var btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'opt-btn';
+          btn.textContent = opt.label;
+          btn.setAttribute('data-claim', claim.id);
+          btn.setAttribute('data-value', opt.value);
+          btn.addEventListener('click', function () {
+            answers[claim.id] = opt.value;
+            var siblings = optRow.querySelectorAll('.opt-btn');
+            siblings.forEach(function (s) { s.classList.remove('selected'); });
+            btn.classList.add('selected');
+            updateSubmitState();
+          });
+          optRow.appendChild(btn);
+        });
+        card.appendChild(optRow);
+
+        claimList.appendChild(card);
+      });
+
+      var submitBtn = document.getElementById('submitBtn');
+      var feedback = document.getElementById('feedback');
+
+      function updateSubmitState() {
+        submitBtn.disabled = Object.keys(answers).length < CLAIMS.length;
+      }
+
+      function showFeedback(kind, message) {
+        feedback.className = 'feedback show ' + kind;
+        feedback.textContent = message;
+      }
+
+      var API_URL = 'https://script.google.com/macros/s/AKfycbxc0QIIyaYTbGBMyhsUdYD01_AAYyrIsySqgF4rSWHPH8t73wHdP6iGEYUQMc5ImVsZ/exec';
+      var team = sessionStorage.getItem('teamNumber');
+      if (team) {
+        fetch(API_URL, { method: 'POST', body: new URLSearchParams({ team: team, action: 'progress', page: '04', status: 'open' }) });
+      }
+
+      var solved = false;
+      submitBtn.addEventListener('click', function () {
+        var allCorrect = CLAIMS.every(function (claim) { return answers[claim.id] === claim.answer; });
+        if (allCorrect) {
+          solved = true;
+          showFeedback('success', 'All six confirmed. Your assessment matches the case file — Moratti’s briefing does not.');
+          submitBtn.disabled = true;
+          if (team) {
+            fetch(API_URL, { method: 'POST', body: new URLSearchParams({ team: team, action: 'progress', page: '04', status: 'done' }) });
+          }
+        } else {
+          showFeedback('error', 'Not quite. Check the case file again — not every claim holds up.');
+        }
+      });
+
+      var helpBtn = document.getElementById('helpBtn');
+      function setHelpState(active) {
+        if (!helpBtn) return;
+        helpBtn.textContent = active ? 'Help Requested - Cancel' : 'Request Help';
+        helpBtn.classList.toggle('active', !!active);
+        helpBtn.classList.remove('pending');
+      }
+      if (team && helpBtn) {
+        fetch(API_URL + '?t=' + Date.now())
+          .then(function (res) { return res.json(); })
+          .then(function (data) {
+            var mine = (data.teams || []).filter(function (t) { return Number(t.team) === Number(team); })[0];
+            setHelpState(mine && mine.hilfe_angefordert);
+          });
+        helpBtn.addEventListener('click', function () {
+          var wasActive = helpBtn.classList.contains('active');
+          helpBtn.disabled = true;
+          helpBtn.classList.add('pending');
+          helpBtn.textContent = wasActive ? 'Canceling...' : 'Requesting...';
+          fetch(API_URL, { method: 'POST', body: new URLSearchParams({ team: team, action: 'help' }) })
+            .then(function (res) { return res.json(); })
+            .then(function (data) {
+              if (data.status !== 'ok') {
+                console.error('Help toggle failed:', data.message);
+                setHelpState(wasActive);
+                return;
+              }
+              setHelpState(data.hilfe_angefordert);
+            })
+            .catch(function (err) {
+              console.error('Help toggle request failed:', err);
+              setHelpState(wasActive);
+            })
+            .finally(function () { helpBtn.disabled = false; });
+        });
+      }
+    </script>
+  </body>
+</html>

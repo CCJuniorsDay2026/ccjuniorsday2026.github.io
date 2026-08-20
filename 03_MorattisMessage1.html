@@ -207,7 +207,21 @@
       margin-top: 34px;
       padding-top: 24px;
       border-top: 1px solid var(--panel-border);
+      text-align: center;
     }
+    .continue-btn {
+      display: inline-block;
+      padding: 14px 36px;
+      background: var(--accent);
+      color: #1A1500;
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-decoration: none;
+      border-radius: 999px;
+      transition: transform 0.15s ease;
+    }
+    .continue-btn:hover { transform: scale(1.04); }
 
     .help-btn {
       position: fixed;
@@ -341,7 +355,9 @@
         </div>
       </div>
 
-      <div class="section-end"></div>
+      <div class="section-end">
+        <a class="continue-btn" id="continueLink" href="04_Aufgabe01_Factcheck.html">Fact-Check Moratti&rsquo;s Briefing</a>
+      </div>
     </div>
 
     <script>
@@ -349,6 +365,15 @@
       var team = sessionStorage.getItem('teamNumber');
       if (team) {
         fetch(API_URL, { method: 'POST', body: new URLSearchParams({ team: team, action: 'progress', page: '03', status: 'open' }) });
+      }
+
+      var continueLink = document.getElementById('continueLink');
+      if (continueLink) {
+        continueLink.addEventListener('click', function () {
+          if (team) {
+            fetch(API_URL, { method: 'POST', body: new URLSearchParams({ team: team, action: 'progress', page: '03', status: 'done' }) });
+          }
+        });
       }
 
       var audio = document.getElementById('morattiAudio');
