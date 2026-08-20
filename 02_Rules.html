@@ -101,6 +101,27 @@ animation: helpPulseBtn 1.4s ease-in-out infinite;
 0%, 100% { box-shadow: 0 0 0 0 rgba(197,0,14,0.55); }
   50% { box-shadow: 0 0 0 9px rgba(197,0,14,0); }
 }
+    .sound-hint {
+      position: absolute;
+      bottom: 14px;
+      left: 14px;
+      background: rgba(0,0,0,0.6);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 8px 16px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+      z-index: 5;
+      transition: opacity 0.3s ease;
+      animation: soundHintPulse 1.8s ease-in-out infinite;
+    }
+    .sound-hint.hidden { opacity: 0; pointer-events: none; }
+    @keyframes soundHintPulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
 </style>
 </head>
 <body>
@@ -110,6 +131,7 @@ animation: helpPulseBtn 1.4s ease-in-out infinite;
 <h1>Watch the briefing, then continue.</h1>
   <div class="video-frame">
 <div id="ytPlayer"></div>
+    <div id="soundHint" class="sound-hint">Tap anywhere to enable sound</div>
 </div>
 <p style="margin: 0 0 24px;">
 <a href="https://youtu.be/MKDmx3z_GtI" target="_blank" rel="noopener" style="color: var(--text-muted); font-size: 13px;">Can't load the video? Watch on YouTube -&gt;</a>
@@ -155,6 +177,22 @@ onStateChange: onPlayerStateChange
     enterLink.classList.add('visible');
 }
 }
+
+  var soundEnabled = false;
+  var soundHint = document.getElementById('soundHint');
+  function enableSound() {
+    if (soundEnabled || !ytPlayer || typeof ytPlayer.unMute !== 'function') return;
+    soundEnabled = true;
+    ytPlayer.unMute();
+    ytPlayer.setVolume(100);
+    if (soundHint) soundHint.classList.add('hidden');
+    document.removeEventListener('click', enableSound);
+    document.removeEventListener('touchstart', enableSound);
+    document.removeEventListener('keydown', enableSound);
+  }
+  document.addEventListener('click', enableSound);
+  document.addEventListener('touchstart', enableSound);
+  document.addEventListener('keydown', enableSound);
 
 var helpBtn = document.getElementById('helpBtn');
 function setHelpState(active) {
