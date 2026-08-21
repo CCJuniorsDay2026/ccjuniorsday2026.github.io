@@ -26,7 +26,8 @@
       font-family: -apple-system, "Segoe UI", Arial, sans-serif;
       padding: 24px 24px 210px;
     }
-    .stage { width: 100%; max-width: 640px; margin: 0 auto; text-align: center; }
+    .stage { width: 100%; max-width: 640px; margin: 0 auto; }
+    .center { text-align: center; }
     .protocol-label {
       font-size: 13px;
       font-weight: 700;
@@ -36,20 +37,29 @@
       margin-bottom: 10px;
     }
     .kicker { font-size: 13px; font-weight: 600; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 6px; }
-    h1 { font-size: 26px; font-weight: 600; margin: 0 0 26px; }
+    h1 { font-size: 26px; font-weight: 600; margin: 0 0 14px; }
+    .lede { font-size: 14.5px; line-height: 1.65; color: var(--text-muted); margin: 0 0 30px; max-width: 520px; margin-left: auto; margin-right: auto; }
 
-    .instr-panel {
+    .role-panel {
       background: var(--panel);
-      border: 1px solid var(--panel-border);
-      border-radius: 12px;
-      padding: 26px 28px;
+      border-left: 3px solid var(--accent);
+      border-radius: 0 10px 10px 0;
+      padding: 20px 24px;
+      margin-bottom: 16px;
       text-align: left;
-      margin-bottom: 30px;
     }
-    .instr-line { font-size: 15px; line-height: 1.75; color: var(--text); margin: 0 0 14px; }
-    .instr-line:last-child { margin-bottom: 0; }
-    .instr-line.emph { color: var(--accent); font-weight: 600; }
+    .role-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin: 0 0 8px;
+    }
+    .role-text { font-size: 14.5px; line-height: 1.7; color: var(--text); margin: 0; }
+    .role-text strong { color: var(--accent); }
 
+    .proceed-row { text-align: center; margin-top: 32px; }
     .proceed-btn {
       display: inline-block;
       padding: 14px 40px;
@@ -76,6 +86,7 @@
       border: 1px solid rgba(255,255,255,0.12);
       font-size: 13.5px;
       color: var(--text-muted);
+      text-align: center;
     }
     .pending-panel.show { display: block; }
 
@@ -108,20 +119,27 @@
   <body>
     <button id="helpBtn" class="help-btn" type="button">Request Help</button>
     <div class="stage" id="stage">
-      <div class="protocol-label">Protocol 16</div>
-      <div class="kicker">Task 3 &middot; Reconnect</div>
-      <h1>Split the Team.</h1>
-
-      <div class="instr-panel">
-        <p class="instr-line emph">Choose two people to go on the outside mission. They will become the Field Agents.</p>
-        <p class="instr-line">Open the envelope now.</p>
-        <p class="instr-line">The number inside is the floor where the garden is &mdash; the one the Field Agents need to find. Go now.</p>
-        <p class="instr-line">The rest of you keep solving here. Click Continue to proceed.</p>
+      <div class="center">
+        <div class="protocol-label">Protocol 16</div>
+        <div class="kicker">Task 3 &middot; Reconnect</div>
+        <h1>Split the Team.</h1>
+        <p class="lede">Reconnect held. Whatever Moratti tried to keep buried just came loose &mdash; but not all of it made it through. Part of Sherlock is still out there, and it isn&rsquo;t coming to you on its own.</p>
       </div>
 
-      <button class="proceed-btn" id="proceedBtn" type="button">Continue</button>
+      <div class="role-panel">
+        <p class="role-label">Field Agents &middot; Outside Mission</p>
+        <p class="role-text"><strong>Pick two people to go.</strong> From here on, they&rsquo;re the Field Agents. Open the envelope now &mdash; the number inside is the floor where the garden is. Don&rsquo;t discuss it for long. Go.</p>
+      </div>
 
-      <div class="pending-panel" id="pendingPanel">Task 3 is logged. Task 4 isn&rsquo;t open on this screen yet &mdash; wait for the signal from Mission Control.</div>
+      <div class="role-panel">
+        <p class="role-label">Mission Control &middot; Staying Here</p>
+        <p class="role-text">Everyone else holds the room. Sherlock isn&rsquo;t finished, and there&rsquo;s still ground to cover while the Field Agents are out there. Click Continue when you&rsquo;re ready to keep going.</p>
+      </div>
+
+      <div class="proceed-row">
+        <button class="proceed-btn" id="proceedBtn" type="button">Continue</button>
+        <div class="pending-panel" id="pendingPanel">Task 3 is logged. Task 4 isn&rsquo;t open on this screen yet &mdash; wait for the signal from Mission Control.</div>
+      </div>
     </div>
 
     <script>

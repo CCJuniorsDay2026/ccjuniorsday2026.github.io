@@ -6,82 +6,77 @@
     <title>Protocol 16 - Task 3: Reconnect</title>
   <style>
     :root {
-      --cy: #4DE8FF;
-      --bg: #000000;
-      --panel: rgba(77,232,255,0.05);
-      --panel-border: rgba(77,232,255,0.25);
-      --text-muted: #7FB8C4;
+      --bg: #002E3C;
+      --bg-deep: #001B24;
+      --accent: #FFD700;
+      --text: #F1EFED;
+      --text-muted: #A0AEAC;
+      --border: #537173;
       --danger: #C5000E;
+      --panel: rgba(255,255,255,0.04);
+      --panel-border: rgba(255,255,255,0.10);
     }
     * { box-sizing: border-box; }
-    html, body { min-height: 100%; }
+    html { min-height: 100%; }
     body {
       margin: 0;
       min-height: 100vh;
-      background: var(--bg);
-      color: var(--cy);
-      font-family: "SF Mono", "Consolas", "Courier New", monospace;
-      padding: 40px 24px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      background: radial-gradient(circle at 50% 12%, #0a4457 0%, var(--bg) 45%, var(--bg-deep) 100%);
+      color: var(--text);
+      font-family: -apple-system, "Segoe UI", Arial, sans-serif;
+      padding: 24px 24px 210px;
     }
-    .stage { width: 100%; max-width: 640px; text-align: center; }
+    .stage { width: 100%; max-width: 620px; margin: 0 auto; text-align: center; }
     .protocol-label {
-      font-size: 12px;
+      font-size: 13px;
       font-weight: 700;
-      letter-spacing: 5px;
-      color: var(--cy);
-      text-shadow: 0 0 12px rgba(77,232,255,0.6);
+      letter-spacing: 6px;
+      text-transform: uppercase;
+      color: var(--accent);
       margin-bottom: 10px;
     }
-    .kicker { font-size: 11px; letter-spacing: 2px; color: var(--text-muted); margin-bottom: 30px; }
+    .kicker { font-size: 13px; font-weight: 600; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 22px; }
 
     .riddle-panel {
       background: var(--panel);
       border: 1px solid var(--panel-border);
-      border-radius: 8px;
-      padding: 28px 30px;
+      border-radius: 12px;
+      padding: 26px 28px;
       margin-bottom: 30px;
     }
-    .riddle-line { font-size: 16px; line-height: 2; color: #E8FBFF; margin: 0; }
-    .riddle-line.q { color: var(--cy); margin-top: 10px; }
+    .riddle-line { font-size: 15.5px; line-height: 1.85; color: var(--text); margin: 0; }
+    .riddle-line.q { color: var(--accent); font-weight: 600; margin-top: 8px; }
 
-    .letter-row { display: flex; justify-content: center; gap: 8px; margin: 34px 0; }
-    .letter-box {
-      width: 34px;
-      height: 44px;
-      border-bottom: 2px solid var(--panel-border);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 22px;
-      font-weight: 700;
-      color: #fff;
-      text-shadow: 0 0 10px rgba(77,232,255,0.8);
-      opacity: 0;
-      transition: opacity 0.6s ease;
-    }
-    .letter-box.revealed { opacity: 1; }
-
-    .answer-row { display: flex; justify-content: center; }
-    .answer-input {
-      background: rgba(77,232,255,0.04);
-      border: none;
-      border-bottom: 1px solid rgba(77,232,255,0.35);
-      color: var(--cy);
-      font-family: inherit;
-      font-size: 14px;
-      letter-spacing: 2px;
-      padding: 8px 4px;
-      width: 260px;
+    .letter-inputs-row { display: flex; justify-content: center; gap: 7px; margin: 30px 0 16px; flex-wrap: wrap; }
+    .letter-inputs-row input {
+      width: 38px;
+      height: 50px;
       text-align: center;
+      font-size: 21px;
+      font-weight: 700;
+      font-family: inherit;
+      text-transform: uppercase;
+      color: var(--text);
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-radius: 8px;
       outline: none;
-      text-transform: lowercase;
     }
-    .answer-input:focus { border-bottom-color: #fff; }
-    .answer-feedback { text-align: center; font-size: 10.5px; color: var(--text-muted); height: 16px; margin-top: 8px; opacity: 0; transition: opacity 0.3s ease; }
-    .answer-feedback.show { opacity: 1; }
+    .letter-inputs-row input:focus { border-color: var(--accent); }
+    .letter-inputs-row input.revealed {
+      border-color: var(--accent);
+      background: rgba(255,215,0,0.08);
+      color: var(--accent);
+    }
+    .letter-inputs-row.error input:not(.revealed) { border-color: var(--danger); animation: shake 0.4s ease; }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-6px); }
+      75% { transform: translateX(6px); }
+    }
+
+    .answer-feedback { text-align: center; font-size: 13px; font-weight: 600; color: var(--text-muted); min-height: 20px; opacity: 0; transition: opacity 0.3s ease; }
+    .answer-feedback.show { opacity: 1; color: #FF8A80; }
 
     .help-btn {
       position: fixed;
@@ -92,10 +87,10 @@
       border: 1px solid var(--danger);
       border-radius: 999px;
       padding: 10px 20px;
-      font-size: 12px;
+      font-size: 13px;
       font-weight: 600;
       cursor: pointer;
-      font-family: -apple-system, "Segoe UI", Arial, sans-serif;
+      font-family: inherit;
       transition: background 0.15s ease;
       z-index: 10;
     }
@@ -122,10 +117,16 @@
         <p class="riddle-line q">Name the missing word.</p>
       </div>
 
-      <div class="letter-row" id="letterRow"></div>
-
-      <div class="answer-row">
-        <input type="text" class="answer-input" id="answerInput" autocomplete="off" placeholder="type the word">
+      <div class="letter-inputs-row" id="lettersRow">
+        <input type="text" maxlength="1" autocomplete="off">
+        <input type="text" maxlength="1" autocomplete="off">
+        <input type="text" maxlength="1" autocomplete="off">
+        <input type="text" maxlength="1" autocomplete="off">
+        <input type="text" maxlength="1" autocomplete="off">
+        <input type="text" maxlength="1" autocomplete="off">
+        <input type="text" maxlength="1" autocomplete="off">
+        <input type="text" maxlength="1" autocomplete="off">
+        <input type="text" maxlength="1" autocomplete="off">
       </div>
       <p class="answer-feedback" id="answerFeedback">not quite</p>
     </div>
@@ -137,20 +138,14 @@
         fetch(API_URL, { method: 'POST', body: new URLSearchParams({ team: team, action: 'progress', page: '13', status: 'open' }) });
       }
 
-      // --- Letter grid: RECONNECT, 9 letters, positions 0,3,7 pre-set (R,O,C) ---
       var ANSWER = 'reconnect';
-      var letterRow = document.getElementById('letterRow');
-      var boxes = [];
-      for (var i = 0; i < ANSWER.length; i++) {
-        var box = document.createElement('div');
-        box.className = 'letter-box';
-        box.textContent = '';
-        letterRow.appendChild(box);
-        boxes.push(box);
-      }
+      var lettersRow = document.getElementById('lettersRow');
+      var boxes = Array.prototype.slice.call(lettersRow.querySelectorAll('input'));
+      var answerFeedback = document.getElementById('answerFeedback');
+      var solved = false;
 
-      // Timed reveal: R at 5 min, O at 10 min, C at 15 min.
-      // Timestamp persisted in sessionStorage so a page reload doesn't restart the clock.
+      // Timed reveal: R (idx 0) at 5 min, O (idx 3) at 10 min, C (idx 7) at 15 min.
+      // Timestamp persisted in sessionStorage so a reload doesn't restart the clock.
       var TIME_KEY = 'a3_riddle_start';
       var startStr = sessionStorage.getItem(TIME_KEY);
       var start;
@@ -160,35 +155,63 @@
         start = Date.now();
         sessionStorage.setItem(TIME_KEY, String(start));
       }
-
       var REVEALS = [
-        { sec: 300, idx: 0 },  // R
-        { sec: 600, idx: 3 },  // O
-        { sec: 900, idx: 7 }   // C
+        { sec: 300, idx: 0 },
+        { sec: 600, idx: 3 },
+        { sec: 900, idx: 7 }
       ];
 
+      function revealBox(idx) {
+        var box = boxes[idx];
+        if (box.classList.contains('revealed')) return;
+        box.value = ANSWER[idx].toUpperCase();
+        box.readOnly = true;
+        box.classList.add('revealed');
+        checkComplete();
+      }
       function applyReveals() {
         var elapsed = (Date.now() - start) / 1000;
         REVEALS.forEach(function (r) {
-          if (elapsed >= r.sec && !boxes[r.idx].classList.contains('revealed')) {
-            boxes[r.idx].textContent = ANSWER[r.idx].toUpperCase();
-            boxes[r.idx].classList.add('revealed');
-          }
+          if (elapsed >= r.sec) revealBox(r.idx);
         });
       }
       applyReveals();
       setInterval(applyReveals, 3000);
 
-      // --- Answer check ---
-      var answerInput = document.getElementById('answerInput');
-      var answerFeedback = document.getElementById('answerFeedback');
-      var solved = false;
+      function nextEditable(from) {
+        for (var i = from; i < boxes.length; i++) { if (!boxes[i].readOnly) return i; }
+        return -1;
+      }
+      function prevEditable(from) {
+        for (var i = from; i >= 0; i--) { if (!boxes[i].readOnly) return i; }
+        return -1;
+      }
 
-      function checkAnswer() {
+      boxes.forEach(function (box, idx) {
+        box.addEventListener('input', function () {
+          box.value = box.value.replace(/[^a-zA-Z]/g, '').slice(0, 1).toUpperCase();
+          lettersRow.classList.remove('error');
+          answerFeedback.classList.remove('show');
+          if (box.value) {
+            var ni = nextEditable(idx + 1);
+            if (ni !== -1) boxes[ni].focus();
+          }
+          checkComplete();
+        });
+        box.addEventListener('keydown', function (ev) {
+          if (ev.key === 'Backspace' && !box.value) {
+            var pi = prevEditable(idx - 1);
+            if (pi !== -1) boxes[pi].focus();
+          }
+        });
+      });
+
+      function checkComplete() {
         if (solved) return;
-        var val = answerInput.value.trim().toLowerCase();
-        if (!val) return;
-        if (val === ANSWER) {
+        var allFilled = boxes.every(function (b) { return b.value.length === 1; });
+        if (!allFilled) return;
+        var word = boxes.map(function (b) { return b.value.toLowerCase(); }).join('');
+        if (word === ANSWER) {
           solved = true;
           if (team) {
             fetch(API_URL, { method: 'POST', keepalive: true, body: new URLSearchParams({ team: team, action: 'progress', page: '13', status: 'done' }) });
@@ -197,15 +220,19 @@
             window.location.href = '14_Aufgabe03_FieldAgents.html';
           }, 500);
         } else {
+          lettersRow.classList.add('error');
           answerFeedback.classList.add('show');
-          answerInput.value = '';
-          setTimeout(function () { answerFeedback.classList.remove('show'); }, 2200);
+          boxes.forEach(function (b) { if (!b.readOnly) b.value = ''; });
+          setTimeout(function () {
+            lettersRow.classList.remove('error');
+            var fi = nextEditable(0);
+            if (fi !== -1) boxes[fi].focus();
+          }, 700);
         }
       }
-      answerInput.addEventListener('blur', checkAnswer);
-      answerInput.addEventListener('keydown', function (ev) {
-        if (ev.key === 'Enter') checkAnswer();
-      });
+
+      var firstEditable = nextEditable(0);
+      if (firstEditable !== -1) boxes[firstEditable].focus();
 
       var helpBtn = document.getElementById('helpBtn');
       function setHelpState(active) {
