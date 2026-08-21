@@ -106,8 +106,8 @@
       color: var(--text-muted);
       margin: 0 0 16px;
     }
-    .digit-inputs { display: flex; justify-content: center; gap: 10px; margin-bottom: 14px; }
-    .digit-inputs input {
+    .digit-inputs-row { display: flex; justify-content: center; gap: 10px; margin-bottom: 14px; }
+    .digit-inputs-row input {
       width: 52px;
       height: 62px;
       text-align: center;
@@ -120,9 +120,9 @@
       border-radius: 8px;
       outline: none;
     }
-    .digit-inputs input:focus { border-color: var(--accent); }
-    .digit-inputs.error input { border-color: var(--danger); animation: shake 0.4s ease; }
-    .digit-inputs.success input { border-color: var(--success); }
+    .digit-inputs-row input:focus { border-color: var(--accent); }
+    .digit-inputs-row.error input { border-color: var(--danger); animation: shake 0.4s ease; }
+    .digit-inputs-row.success input { border-color: var(--success); }
     @keyframes shake {
       0%, 100% { transform: translateX(0); }
       25% { transform: translateX(-6px); }
@@ -211,7 +211,7 @@
 
       <div class="unlock-panel">
         <p class="unlock-label">Code Field</p>
-        <div class="digit-inputs" id="digitInputs">
+        <div class="digit-inputs-row" id="digitInputsRow">
           <input type="text" inputmode="numeric" maxlength="1" autocomplete="off">
           <input type="text" inputmode="numeric" maxlength="1" autocomplete="off">
           <input type="text" inputmode="numeric" maxlength="1" autocomplete="off">
@@ -281,27 +281,27 @@
       });
 
       // --- 4-digit code gate ---
-      var CODE = '4386';
-      var digitInputs = document.getElementById('digitInputs');
-      var inputs = Array.prototype.slice.call(digitInputs.querySelectorAll('input'));
+      var GATE_CODE = '4386';
+      var digitInputsRowEl = document.getElementById('digitInputsRow');
+      var digitInputEls = Array.prototype.slice.call(digitInputsRowEl.querySelectorAll('input'));
       var unlockStatusEl = document.getElementById('unlockStatus');
       var verifyBtn = document.getElementById('verifyBtn');
       var continueRow = document.getElementById('continueRow');
-      var unlocked = false;
+      var gateUnlocked = false;
 
-      inputs.forEach(function (inp, idx) {
+      digitInputEls.forEach(function (inp, idx) {
         inp.addEventListener('input', function () {
           inp.value = inp.value.replace(/[^0-9]/g, '').slice(0, 1);
-          digitInputs.classList.remove('error');
+          digitInputsRowEl.classList.remove('error');
           unlockStatusEl.className = 'unlock-status';
           unlockStatusEl.textContent = '';
-          if (inp.value && idx < inputs.length - 1) {
-            inputs[idx + 1].focus();
+          if (inp.value && idx < digitInputEls.length - 1) {
+            digitInputEls[idx + 1].focus();
           }
         });
         inp.addEventListener('keydown', function (ev) {
           if (ev.key === 'Backspace' && !inp.value && idx > 0) {
-            inputs[idx - 1].focus();
+            digitInputEls[idx - 1].focus();
           }
           if (ev.key === 'Enter') {
             verifyBtn.click();
@@ -310,30 +310,30 @@
       });
 
       verifyBtn.addEventListener('click', function () {
-        if (unlocked) return;
-        var entered = inputs.map(function (i) { return i.value; }).join('');
+        if (gateUnlocked) return;
+        var entered = digitInputEls.map(function (i) { return i.value; }).join('');
         if (entered.length < 4) {
-          digitInputs.classList.add('error');
+          digitInputsRowEl.classList.add('error');
           unlockStatusEl.className = 'unlock-status error';
           unlockStatusEl.textContent = 'Enter all four digits.';
           return;
         }
-        if (entered === CODE) {
-          unlocked = true;
-          digitInputs.classList.remove('error');
-          digitInputs.classList.add('success');
+        if (entered === GATE_CODE) {
+          gateUnlocked = true;
+          digitInputsRowEl.classList.remove('error');
+          digitInputsRowEl.classList.add('success');
           unlockStatusEl.className = 'unlock-status success';
           unlockStatusEl.textContent = 'Verified.';
           verifyBtn.style.display = 'none';
           continueRow.classList.add('show');
         } else {
-          digitInputs.classList.add('error');
+          digitInputsRowEl.classList.add('error');
           unlockStatusEl.className = 'unlock-status error';
           unlockStatusEl.textContent = 'Not correct. Check the message again.';
           setTimeout(function () {
-            inputs.forEach(function (i) { i.value = ''; });
-            digitInputs.classList.remove('error');
-            inputs[0].focus();
+            digitInputEls.forEach(function (i) { i.value = ''; });
+            digitInputsRowEl.classList.remove('error');
+            digitInputEls[0].focus();
           }, 700);
         }
       });
