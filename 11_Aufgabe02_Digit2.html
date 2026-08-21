@@ -221,7 +221,7 @@
       var API_URL = 'https://script.google.com/macros/s/AKfycbxc0QIIyaYTbGBMyhsUdYD01_AAYyrIsySqgF4rSWHPH8t73wHdP6iGEYUQMc5ImVsZ/exec';
       var team = sessionStorage.getItem('teamNumber');
       if (team) {
-        fetch(API_URL, { method: 'POST', body: new URLSearchParams({ team: team, action: 'progress', page: '12', status: 'open' }) });
+        fetch(API_URL, { method: 'POST', body: new URLSearchParams({ team: team, action: 'progress', page: '11', status: 'open' }) });
       }
 
       document.getElementById('digitBox').textContent = DIGIT;
@@ -270,7 +270,7 @@
         if (advanced) return;
         advanced = true;
         if (team) {
-          fetch(API_URL, { method: 'POST', keepalive: true, body: new URLSearchParams({ team: team, action: 'progress', page: '12', status: 'done' }) });
+          fetch(API_URL, { method: 'POST', keepalive: true, body: new URLSearchParams({ team: team, action: 'progress', page: '11', status: 'done' }) });
         }
         playNoiseBurst();
         document.body.classList.add('blackout');
