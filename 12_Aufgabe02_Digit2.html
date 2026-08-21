@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Protocol 16 - Task 1: Code Fragment</title>
+    <title>Protocol 16 - Task 2: Code Fragment</title>
   <style>
     :root {
       --bg: #002E3C;
@@ -13,7 +13,6 @@
       --text-muted: #A0AEAC;
       --border: #537173;
       --danger: #C5000E;
-      --success: #008932;
       --panel: rgba(255,255,255,0.04);
       --panel-border: rgba(255,255,255,0.10);
     }
@@ -26,8 +25,12 @@
       color: var(--text);
       font-family: -apple-system, "Segoe UI", Arial, sans-serif;
       padding: 24px 24px 210px;
+      transition: background 1.6s ease;
     }
-    .stage { width: 100%; max-width: 620px; margin: 0 auto; text-align: center; }
+    body.blackout {
+      background: #000000;
+    }
+    .stage { width: 100%; max-width: 620px; margin: 0 auto; text-align: center; transition: opacity 1s ease; }
     .protocol-label {
       font-size: 13px;
       font-weight: 700;
@@ -47,13 +50,6 @@
     .lede { font-size: 14.5px; line-height: 1.65; color: var(--text-muted); margin: 0 0 10px; max-width: 520px; margin-left: auto; margin-right: auto; }
     .lede:last-of-type { margin-bottom: 40px; }
 
-    /* --- Digit reveal --- */
-    .digit-wrap {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      margin-top: 98px;
-    }
     .start-prompt {
       display: inline-block;
       padding: 13px 30px;
@@ -68,11 +64,17 @@
       cursor: pointer;
       font-family: inherit;
       animation: startPromptPulse 1.8s ease-in-out infinite;
-      transition: opacity 0.3s ease;
     }
     @keyframes startPromptPulse {
       0%, 100% { box-shadow: 0 0 0 0 rgba(255,215,0,0.35); }
       50% { box-shadow: 0 0 0 10px rgba(255,215,0,0); }
+    }
+
+    .digit-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 98px;
     }
     .digit-reveal {
       display: flex;
@@ -103,7 +105,6 @@
       font-size: 54px;
       font-weight: 700;
       color: var(--accent);
-      box-shadow: 0 0 0 0 rgba(255,215,0,0.5);
       animation: digitGlow 2.1s ease-in-out infinite;
     }
     @keyframes digitGlow {
@@ -117,58 +118,37 @@
       max-width: 320px;
     }
 
-    /* --- Envelope / continue --- */
-    .envelope-wrap {
+    .proceed-wrap {
       margin-top: 96px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
       opacity: 0;
       pointer-events: none;
       transition: opacity 0.7s ease;
     }
-    .envelope-wrap.show { opacity: 1; pointer-events: auto; }
-    .envelope-btn {
-      width: 84px;
-      height: 84px;
-      border-radius: 50%;
+    .proceed-wrap.show { opacity: 1; pointer-events: auto; }
+    .proceed-btn {
+      display: inline-block;
+      padding: 14px 40px;
       background: var(--accent);
+      color: #1A1500;
       border: none;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      font-size: 72px;
-      animation: envelopePulse 1.8s ease-in-out infinite;
-      transition: transform 0.15s ease;
-    }
-    .envelope-btn:hover { transform: scale(1.05); }
-    .envelope-btn:active { transform: scale(0.96); }
-    @keyframes envelopePulse {
-      0%, 100% { box-shadow: 0 0 0 0 rgba(255,215,0,0.45); }
-      50% { box-shadow: 0 0 0 14px rgba(255,215,0,0); }
-    }
-    .envelope-caption {
-      margin-top: 14px;
-      font-size: 13px;
+      font-size: 15px;
       font-weight: 600;
-      letter-spacing: 0.5px;
-      color: var(--text);
+      letter-spacing: 1px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-family: inherit;
+      transition: transform 0.15s ease, opacity 0.4s ease;
     }
-    .envelope-sub {
-      margin-top: 4px;
-      font-size: 12px;
-      color: var(--text-muted);
-    }
+    .proceed-btn:hover { transform: scale(1.03); }
+    .proceed-btn.hidden { display: none; }
 
-    /* --- Pending panel (shown once next task page isn't wired yet) --- */
     .pending-panel {
       display: none;
-      margin-top: 40px;
+      margin-top: 28px;
       padding: 18px 22px;
       border-radius: 10px;
-      background: var(--panel);
-      border: 1px solid var(--panel-border);
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.12);
       font-size: 13.5px;
       color: var(--text-muted);
       max-width: 460px;
@@ -210,92 +190,100 @@
   </head>
   <body>
     <button id="helpBtn" class="help-btn" type="button">Request Help</button>
-    <div class="stage">
+    <div class="stage" id="stage">
       <div class="protocol-label">Protocol 16</div>
-      <div class="kicker">Task 1 &middot; Result</div>
-      <h1>Moratti's Cover Is Blown.</h1>
-      <p class="lede">Your fact-check held up. Every claim you checked against the real case file matched or didn't &mdash; and the ones that didn't were exactly the ones Moratti was counting on nobody double-checking.</p>
-      <p class="lede">Somewhere inside the system he slipped into, something just came loose. A fragment breaks free &mdash; the first digit of a code buried in what he was trying to hide.</p>
+      <div class="kicker">Task 2 &middot; Result</div>
+      <h1>The Match Holds.</h1>
+      <p class="lede">Four real needs, four real solutions &mdash; nothing Moratti glued together by guessing. Another piece of what he tried to bury comes loose.</p>
 
       <div class="digit-wrap" id="digitWrap">
         <button class="start-prompt" id="startPrompt" type="button">Tap to continue</button>
         <div class="digit-reveal" id="digitReveal">
-          <div class="digit-label">Digit 1</div>
+          <div class="digit-label">Digit 2</div>
           <div class="digit-box" id="digitBox">?</div>
-          <p class="digit-caption">Keep this. You'll need every digit before the end.</p>
+          <p class="digit-caption">Two down. Keep going.</p>
         </div>
       </div>
 
-      <div class="envelope-wrap" id="envelopeWrap">
-        <button class="envelope-btn" id="envelopeBtn" type="button" aria-label="Continue">&#9993;</button>
-        <div class="envelope-caption">You've got mail.</div>
-        <div class="envelope-sub">Tap to continue</div>
+      <div class="proceed-wrap" id="proceedWrap">
+        <button class="proceed-btn" id="proceedBtn" type="button">Continue</button>
       </div>
 
-      <div class="pending-panel" id="pendingPanel">Digit 1 is logged. Task 2 isn't open on this screen yet &mdash; wait for the signal from Mission Control.</div>
+      <div class="pending-panel" id="pendingPanel">Digit 2 is logged. Task 3 isn&rsquo;t open on this screen yet &mdash; wait for the signal from Mission Control.</div>
     </div>
 
     <script>
-      // --- Content that still needs a decision from Martin ---
-      // DIGIT: the actual value revealed on this page. Same for all teams for now;
-      // flip to a per-room lookup later if the 16 rooms end up needing different codes.
-      var DIGIT = '3';
-      // NEXT_PAGE: Aufgabe 2's first page is live now.
-      var NEXT_PAGE = '06_Aufgabe02_Binaercode.html';
+      // DIGIT: placeholder value, same-for-all-teams-for-now convention as page 05.
+      var DIGIT = '7';
+      // NEXT_PAGE: Aufgabe 3's first page. Leave null until it exists.
+      var NEXT_PAGE = null;
 
       var API_URL = 'https://script.google.com/macros/s/AKfycbxc0QIIyaYTbGBMyhsUdYD01_AAYyrIsySqgF4rSWHPH8t73wHdP6iGEYUQMc5ImVsZ/exec';
       var team = sessionStorage.getItem('teamNumber');
       if (team) {
-        fetch(API_URL, { method: 'POST', body: new URLSearchParams({ team: team, action: 'progress', page: '05', status: 'open' }) });
+        fetch(API_URL, { method: 'POST', body: new URLSearchParams({ team: team, action: 'progress', page: '12', status: 'open' }) });
       }
 
       document.getElementById('digitBox').textContent = DIGIT;
 
-      // --- Sound ---
-      // Real assets, both in assets/. Browsers block audio playback until the
-      // page has had a genuine user gesture, so the whole reveal sequence is
-      // gated behind the "Tap to continue" button below (same rule we hit on
-      // 02_Rules.html). That one tap is the gesture that authorizes both
-      // sounds, including the second one 5s later.
       var digitAudio = new Audio('assets/00_Digitsound.mp3');
       digitAudio.preload = 'auto';
-      var mailAudio = new Audio('assets/05_Youvegotmail.mp3');
-      mailAudio.preload = 'auto';
 
       var startPrompt = document.getElementById('startPrompt');
       var digitReveal = document.getElementById('digitReveal');
-      var envelopeWrap = document.getElementById('envelopeWrap');
+      var proceedWrap = document.getElementById('proceedWrap');
 
       startPrompt.addEventListener('click', function () {
         startPrompt.style.display = 'none';
         digitReveal.classList.add('show');
         digitAudio.currentTime = 0;
         digitAudio.play().catch(function (err) { console.error('Digit sound failed:', err); });
-
         setTimeout(function () {
-          envelopeWrap.classList.add('show');
-          mailAudio.currentTime = 0;
-          mailAudio.play().catch(function (err) { console.error('Mail sound failed:', err); });
-        }, 10000);
+          proceedWrap.classList.add('show');
+        }, 1400);
       });
 
-      // --- Continue ---
-      var envelopeBtn = document.getElementById('envelopeBtn');
+      // Synthesized static/noise burst for the petrol-to-black transition
+      // (no dedicated sound asset for this yet).
+      function playNoiseBurst() {
+        try {
+          var ctx = new (window.AudioContext || window.webkitAudioContext)();
+          var bufferSize = ctx.sampleRate * 0.5;
+          var buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+          var data = buffer.getChannelData(0);
+          for (var i = 0; i < bufferSize; i++) { data[i] = (Math.random() * 2 - 1) * (1 - i / bufferSize); }
+          var noise = ctx.createBufferSource();
+          noise.buffer = buffer;
+          var gain = ctx.createGain();
+          gain.gain.setValueAtTime(0.18, ctx.currentTime);
+          noise.connect(gain);
+          gain.connect(ctx.destination);
+          noise.start();
+        } catch (e) { console.error('Noise burst failed:', e); }
+      }
+
+      var proceedBtn = document.getElementById('proceedBtn');
       var pendingPanel = document.getElementById('pendingPanel');
+      var stage = document.getElementById('stage');
       var advanced = false;
-      envelopeBtn.addEventListener('click', function () {
+      proceedBtn.addEventListener('click', function () {
         if (advanced) return;
         advanced = true;
         if (team) {
-          fetch(API_URL, { method: 'POST', keepalive: true, body: new URLSearchParams({ team: team, action: 'progress', page: '05', status: 'done' }) });
+          fetch(API_URL, { method: 'POST', keepalive: true, body: new URLSearchParams({ team: team, action: 'progress', page: '12', status: 'done' }) });
         }
-        if (NEXT_PAGE) {
-          window.location.href = NEXT_PAGE;
-        } else {
-          envelopeWrap.style.opacity = '0.4';
-          envelopeWrap.style.pointerEvents = 'none';
-          pendingPanel.classList.add('show');
-        }
+        playNoiseBurst();
+        document.body.classList.add('blackout');
+        stage.style.opacity = '0';
+        setTimeout(function () {
+          if (NEXT_PAGE) {
+            window.location.href = NEXT_PAGE;
+          } else {
+            stage.style.opacity = '1';
+            proceedBtn.classList.add('hidden');
+            pendingPanel.classList.add('show');
+          }
+        }, 1200);
       });
 
       var helpBtn = document.getElementById('helpBtn');

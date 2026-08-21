@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Protocol 16 - Task 2: Match 1 of 4</title>
+  <style>
+    :root {
+      --bg: #002E3C;
+      --bg-deep: #001B24;
+      --accent: #FFD700;
+      --text: #F1EFED;
+      --text-muted: #A0AEAC;
+      --border: #537173;
+      --danger: #C5000E;
+      --success: #008932;
+      --panel: rgba(255,255,255,0.04);
+      --panel-border: rgba(255,255,255,0.10);
+    }
+    * { box-sizing: border-box; }
+    html { min-height: 100%; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: radial-gradient(circle at 50% 12%, #0a4457 0%, var(--bg) 45%, var(--bg-deep) 100%);
+      color: var(--text);
+      font-family: -apple-system, "Segoe UI", Arial, sans-serif;
+      padding: 24px 24px 210px;
+    }
+    .stage { width: 100%; max-width: 760px; margin: 0 auto; }
+    .center { text-align: center; }
+    .protocol-label {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 6px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 10px;
+    }
+    .kicker {
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+    h1 { font-size: 23px; font-weight: 600; margin: 0 0 18px; }
+
+    .mail-panel {
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      border-radius: 12px;
+      padding: 18px 20px;
+      margin-bottom: 22px;
+      text-align: left;
+    }
+    .mail-tag {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin: 0 0 10px;
+    }
+    .mail-p { font-size: 13.5px; line-height: 1.65; color: var(--text); margin: 0 0 10px; }
+    .mail-p:last-child { margin-bottom: 0; }
+
+    .doc-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 18px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      color: var(--text);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 24px;
+      transition: border-color 0.15s ease;
+    }
+    .doc-link:hover { border-color: var(--accent); }
+
+    .q-label { font-size: 13px; color: var(--text-muted); margin-bottom: 14px; }
+    .opt-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 26px; }
+    .opt-btn {
+      text-align: left;
+      padding: 14px 18px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+    }
+    .opt-btn:hover { border-color: var(--accent); }
+    .opt-btn.selected { background: var(--accent); color: #1A1500; border-color: var(--accent); }
+
+    .nav-row { text-align: center; }
+    .next-btn {
+      display: inline-block;
+      padding: 14px 40px;
+      background: var(--accent);
+      color: #1A1500;
+      border: none;
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-family: inherit;
+      transition: transform 0.15s ease, opacity 0.2s ease;
+    }
+    .next-btn:hover { transform: scale(1.03); }
+    .next-btn:disabled { opacity: 0.5; cursor: default; transform: none; }
+
+    .help-btn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: transparent;
+      color: #FF8A80;
+      border: 1px solid var(--danger);
+      border-radius: 999px;
+      padding: 10px 20px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background 0.15s ease;
+      z-index: 10;
+    }
+    .help-btn:hover { background: rgba(197,0,14,0.12); }
+    .help-btn:disabled { opacity: 0.6; cursor: default; }
+    .help-btn.active {
+      background: var(--danger);
+      color: #fff;
+      border-color: var(--danger);
+      animation: helpPulseBtn 1.4s ease-in-out infinite;
+    }
+    .help-btn.pending { opacity: 0.55; }
+    @keyframes helpPulseBtn {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(197,0,14,0.55); }
+      50% { box-shadow: 0 0 0 9px rgba(197,0,14,0); }
+    }
+  </style>
+  </head>
+  <body>
+    <button id="helpBtn" class="help-btn" type="button">Request Help</button>
+    <div class="stage">
+      <div class="center">
+        <div class="protocol-label">Protocol 16</div>
+        <div class="kicker">Task 2 &middot; Match 1 of 4</div>
+        <h1>What does Globex Toys actually need here?</h1>
+      </div>
+
+      <div class="mail-panel">
+        <p class="mail-tag">Translated by Sherlock</p>
+        <p class="mail-p">Subject: Progress report before choosing a bank</p><p class="mail-p">Hello,</p><p class="mail-p">To be honest, we are a little concerned about Mr Moratti&#x27;s proposal from yesterday. He seems to believe that one system will solve all problems. However, international business is not so simple.</p><p class="mail-p">We&#x27;re expanding in several directions at once. Canada and the UK keep growing as export markets - Canada especially, faster than anything else we do. We&#x27;ve also just started sourcing electronics components for our Educational Computer Games line from a new supplier in Vietnam, and we&#x27;re in early talks with a logistics partner in Poland, though that&#x27;s still early days.</p><p class="mail-p">As a customer, we want to have one clear point of contact for our day-to-day questions. But when something really matters, we still want to speak to someone who actually knows our business - not a form, not a queue, not a system that decides on our behalf. If that&#x27;s what Mr Moratti&#x27;s &quot;one system&quot; means, it&#x27;s the wrong direction for us.</p><p class="mail-p">The Canadian dollar has become our largest currency exposure by some distance, and it&#x27;s still growing. We don&#x27;t want to call someone every time the rate moves - we&#x27;d rather manage our FX positions ourselves, flexibly, whenever it suits us, online.</p><p class="mail-p">Our new supplier in Vietnam has already caused two shipment delays this quarter. Nothing dramatic yet, but with the volumes we&#x27;re planning for next year, we need real support on the documentary side of international trade - the kind of protection that comes with proper letters of credit and collections, not just a phone number for when something goes wrong.</p><p class="mail-p">And then there&#x27;s the elephant in the room: the Board approved our capacity expansion for Outdoor Play Equipment back in the spring, but we still haven&#x27;t signed off on how to finance it. Before we commit, we want to actually see the credit lines, the collateral requirements, the whole process - not sign something we only understand once it&#x27;s too late to change our minds.</p><p class="mail-p">We are currently reviewing our banking relationships, and this is exactly the moment where a mistake would cost us. We&#x27;d rather take our time and get it right than let someone else - man or machine - decide for us.</p><p class="mail-p">Best regards,<br>Leonie Schneider<br>Head of Finance &amp; Strategy, Globex Toys</p>
+      </div>
+
+      <div class="center">
+        <a class="doc-link" href="assets/Commerzbank_Solutions_Overview_EN.pdf" target="_blank" rel="noopener">&#8681; Commerzbank Solutions Overview (PDF)</a>
+      </div>
+
+      <p class="q-label">Pick the one Commerzbank solution that actually fits &mdash; not every option on this list is a real match.</p>
+      <div class="opt-list" id="optList"></div>
+
+      <div class="nav-row">
+        <button id="nextBtn" class="next-btn" type="button" disabled>Continue</button>
+      </div>
+    </div>
+
+    <script>
+      var OPTIONS = [
+        { value: 'mittelstandsbank_direkt', label: 'Mittelstandsbank Direkt' },
+        { value: 'firmenkundenportal', label: 'Firmenkundenportal (Corporate Clients Digital Channels)' },
+        { value: 'fx_live_trader', label: 'FX Live Trader Web' },
+        { value: 'fms_live', label: 'FMS Live' },
+        { value: 'trade_finance_direkt', label: 'Trade Finance Direkt' },
+        { value: 'loanpilot', label: 'LoanPilot' }
+      ];
+      var QKEY = 'q1';
+      var STORAGE_KEY = 'a2_answers';
+
+      function getAnswers() {
+        try { return JSON.parse(sessionStorage.getItem(STORAGE_KEY)) || {}; }
+        catch (e) { return {}; }
+      }
+      function setAnswer(key, value) {
+        var answers = getAnswers();
+        answers[key] = value;
+        sessionStorage.setItem(STORAGE_KEY, JSON.stringify(answers));
+      }
+
+      var optList = document.getElementById('optList');
+      var nextBtn = document.getElementById('nextBtn');
+      var current = getAnswers()[QKEY] || null;
+
+      OPTIONS.forEach(function (opt) {
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'opt-btn';
+        btn.textContent = opt.label;
+        if (opt.value === current) {
+          btn.classList.add('selected');
+          nextBtn.disabled = false;
+        }
+        btn.addEventListener('click', function () {
+          var siblings = optList.querySelectorAll('.opt-btn');
+          siblings.forEach(function (s) { s.classList.remove('selected'); });
+          btn.classList.add('selected');
+          current = opt.value;
+          nextBtn.disabled = false;
+        });
+        optList.appendChild(btn);
+      });
+
+      var API_URL = 'https://script.google.com/macros/s/AKfycbxc0QIIyaYTbGBMyhsUdYD01_AAYyrIsySqgF4rSWHPH8t73wHdP6iGEYUQMc5ImVsZ/exec';
+      var team = sessionStorage.getItem('teamNumber');
+      if (team) {
+        fetch(API_URL, { method: 'POST', body: new URLSearchParams({ team: team, action: 'progress', page: '07', status: 'open' }) });
+      }
+
+      nextBtn.addEventListener('click', function () {
+        if (!current) return;
+        setAnswer(QKEY, current);
+        if (team) {
+          fetch(API_URL, { method: 'POST', keepalive: true, body: new URLSearchParams({ team: team, action: 'progress', page: '07', status: 'done' }) });
+        }
+        window.location.href = '08_Aufgabe02_Frage2.html';
+      });
+
+      var helpBtn = document.getElementById('helpBtn');
+      function setHelpState(active) {
+        if (!helpBtn) return;
+        helpBtn.textContent = active ? 'Help Requested - Cancel' : 'Request Help';
+        helpBtn.classList.toggle('active', !!active);
+        helpBtn.classList.remove('pending');
+      }
+      if (team && helpBtn) {
+        fetch(API_URL + '?t=' + Date.now())
+          .then(function (res) { return res.json(); })
+          .then(function (data) {
+            var mine = (data.teams || []).filter(function (t) { return Number(t.team) === Number(team); })[0];
+            setHelpState(mine && mine.hilfe_angefordert);
+          });
+        helpBtn.addEventListener('click', function () {
+          var wasActive = helpBtn.classList.contains('active');
+          helpBtn.disabled = true;
+          helpBtn.classList.add('pending');
+          helpBtn.textContent = wasActive ? 'Canceling...' : 'Requesting...';
+          fetch(API_URL, { method: 'POST', body: new URLSearchParams({ team: team, action: 'help' }) })
+            .then(function (res) { return res.json(); })
+            .then(function (data) {
+              if (data.status !== 'ok') {
+                console.error('Help toggle failed:', data.message);
+                setHelpState(wasActive);
+                return;
+              }
+              setHelpState(data.hilfe_angefordert);
+            })
+            .catch(function (err) {
+              console.error('Help toggle request failed:', err);
+              setHelpState(wasActive);
+            })
+            .finally(function () { helpBtn.disabled = false; });
+        });
+      }
+    </script>
+  </body>
+</html>
