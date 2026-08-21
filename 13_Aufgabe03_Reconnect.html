@@ -140,7 +140,9 @@
 
       var ANSWER = 'reconnect';
       var lettersRow = document.getElementById('lettersRow');
-      var boxes = Array.from(lettersRow.querySelectorAll('input'));
+      var lettersNodeList = lettersRow.querySelectorAll('input');
+      var boxes = [];
+      for (var bi = 0; bi < lettersNodeList.length; bi++) { boxes.push(lettersNodeList[bi]); }
       var answerFeedback = document.getElementById('answerFeedback');
       var solved = false;
 
