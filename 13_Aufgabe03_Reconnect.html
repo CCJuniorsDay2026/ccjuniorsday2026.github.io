@@ -140,7 +140,7 @@
 
       var ANSWER = 'reconnect';
       var lettersRow = document.getElementById('lettersRow');
-      var boxes = Array.prototype.slice.call(lettersRow.querySelectorAll('input'));
+      var boxes = Array.from(lettersRow.querySelectorAll('input'));
       var answerFeedback = document.getElementById('answerFeedback');
       var solved = false;
 

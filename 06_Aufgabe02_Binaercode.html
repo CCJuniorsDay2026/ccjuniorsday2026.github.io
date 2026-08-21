@@ -283,7 +283,7 @@
       // --- 4-digit code gate ---
       var GATE_CODE = '4386';
       var digitInputsRowEl = document.getElementById('digitInputsRow');
-      var digitInputEls = Array.prototype.slice.call(digitInputsRowEl.querySelectorAll('input'));
+      var digitInputEls = Array.from(digitInputsRowEl.querySelectorAll('input'));
       var unlockStatusEl = document.getElementById('unlockStatus');
       var verifyBtn = document.getElementById('verifyBtn');
       var continueRow = document.getElementById('continueRow');
