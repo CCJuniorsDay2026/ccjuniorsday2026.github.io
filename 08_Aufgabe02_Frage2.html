@@ -83,7 +83,8 @@
     .doc-link:hover { border-color: var(--accent); }
 
     .q-label { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 14px; }
-    .q-sub { font-size: 12.5px; color: var(--text-muted); margin: -10px 0 16px; }
+    .q-sub { font-size: 12.5px; color: var(--text-muted); margin: -10px 0 6px; }
+    .q-hint { font-size: 12.5px; color: var(--text-muted); margin: 0 0 16px; }
     .opt-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 26px; }
     .opt-btn {
       text-align: left;
@@ -172,6 +173,7 @@
 
       <p class="q-label">Which solution actually fits this?</p>
       <p class="q-sub">Not every option below is a real match &mdash; some sound close but work differently.</p>
+      <p class="q-hint">Not all of these are tools the client uses directly &mdash; some work behind the scenes through her relationship team. Count both.</p>
       <div class="opt-list" id="optList"></div>
 
       <div class="nav-row">
