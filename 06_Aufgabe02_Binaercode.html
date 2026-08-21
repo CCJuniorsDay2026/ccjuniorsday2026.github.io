@@ -284,7 +284,7 @@
       var CODE = '4386';
       var digitInputs = document.getElementById('digitInputs');
       var inputs = Array.prototype.slice.call(digitInputs.querySelectorAll('input'));
-      var status = document.getElementById('unlockStatus');
+      var unlockStatusEl = document.getElementById('unlockStatus');
       var verifyBtn = document.getElementById('verifyBtn');
       var continueRow = document.getElementById('continueRow');
       var unlocked = false;
@@ -293,8 +293,8 @@
         inp.addEventListener('input', function () {
           inp.value = inp.value.replace(/[^0-9]/g, '').slice(0, 1);
           digitInputs.classList.remove('error');
-          status.className = 'unlock-status';
-          status.textContent = '';
+          unlockStatusEl.className = 'unlock-status';
+          unlockStatusEl.textContent = '';
           if (inp.value && idx < inputs.length - 1) {
             inputs[idx + 1].focus();
           }
@@ -314,22 +314,22 @@
         var entered = inputs.map(function (i) { return i.value; }).join('');
         if (entered.length < 4) {
           digitInputs.classList.add('error');
-          status.className = 'unlock-status error';
-          status.textContent = 'Enter all four digits.';
+          unlockStatusEl.className = 'unlock-status error';
+          unlockStatusEl.textContent = 'Enter all four digits.';
           return;
         }
         if (entered === CODE) {
           unlocked = true;
           digitInputs.classList.remove('error');
           digitInputs.classList.add('success');
-          status.className = 'unlock-status success';
-          status.textContent = 'Verified.';
+          unlockStatusEl.className = 'unlock-status success';
+          unlockStatusEl.textContent = 'Verified.';
           verifyBtn.style.display = 'none';
           continueRow.classList.add('show');
         } else {
           digitInputs.classList.add('error');
-          status.className = 'unlock-status error';
-          status.textContent = 'Not correct. Check the message again.';
+          unlockStatusEl.className = 'unlock-status error';
+          unlockStatusEl.textContent = 'Not correct. Check the message again.';
           setTimeout(function () {
             inputs.forEach(function (i) { i.value = ''; });
             digitInputs.classList.remove('error');
