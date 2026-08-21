@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Protocol 16 - Task 2: Match 4 of 4</title>
+    <title>Protocol 16 - Task 2: Concern 4 of 4</title>
   <style>
     :root {
       --bg: #002E3C;
@@ -27,7 +27,7 @@
       font-family: -apple-system, "Segoe UI", Arial, sans-serif;
       padding: 24px 24px 210px;
     }
-    .stage { width: 100%; max-width: 760px; margin: 0 auto; }
+    .stage { width: 100%; max-width: 700px; margin: 0 auto; }
     .center { text-align: center; }
     .protocol-label {
       font-size: 13px;
@@ -44,26 +44,27 @@
       color: var(--text-muted);
       margin-bottom: 6px;
     }
-    h1 { font-size: 23px; font-weight: 600; margin: 0 0 18px; }
+    h1 { font-size: 22px; font-weight: 600; margin: 0 0 6px; }
+    .subhead { font-size: 13.5px; color: var(--text-muted); margin: 0 0 22px; }
 
-    .mail-panel {
+    .quote-panel {
       background: var(--panel);
-      border: 1px solid var(--panel-border);
-      border-radius: 12px;
-      padding: 18px 20px;
-      margin-bottom: 22px;
+      border-left: 3px solid var(--accent);
+      border-radius: 0 10px 10px 0;
+      padding: 18px 22px;
+      margin-bottom: 8px;
       text-align: left;
     }
-    .mail-tag {
+    .quote-tag {
       font-size: 11px;
       font-weight: 700;
       letter-spacing: 1.5px;
       text-transform: uppercase;
       color: var(--accent);
-      margin: 0 0 10px;
+      margin: 0 0 8px;
     }
-    .mail-p { font-size: 13.5px; line-height: 1.65; color: var(--text); margin: 0 0 10px; }
-    .mail-p:last-child { margin-bottom: 0; }
+    .quote-text { font-size: 15px; line-height: 1.65; color: var(--text); margin: 0; font-style: italic; }
+    .source-tag { font-size: 11.5px; color: var(--text-muted); margin: 6px 0 26px; text-align: right; }
 
     .doc-link {
       display: inline-flex;
@@ -81,7 +82,8 @@
     }
     .doc-link:hover { border-color: var(--accent); }
 
-    .q-label { font-size: 13px; color: var(--text-muted); margin-bottom: 14px; }
+    .q-label { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 14px; }
+    .q-sub { font-size: 12.5px; color: var(--text-muted); margin: -10px 0 16px; }
     .opt-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 26px; }
     .opt-btn {
       text-align: left;
@@ -153,20 +155,23 @@
     <div class="stage">
       <div class="center">
         <div class="protocol-label">Protocol 16</div>
-        <div class="kicker">Task 2 &middot; Match 4 of 4</div>
-        <h1>What does Globex Toys actually need here?</h1>
+        <div class="kicker">Task 2 &middot; Concern 4 of 4</div>
+        <h1>Sherlock flagged this line.</h1>
+        <p class="subhead">Read it, then pick the one Commerzbank solution that actually answers it.</p>
       </div>
 
-      <div class="mail-panel">
-        <p class="mail-tag">Translated by Sherlock</p>
-        <p class="mail-p">Subject: Progress report before choosing a bank</p><p class="mail-p">Hello,</p><p class="mail-p">To be honest, we are a little concerned about Mr Moratti&#x27;s proposal from yesterday. He seems to believe that one system will solve all problems. However, international business is not so simple.</p><p class="mail-p">We&#x27;re expanding in several directions at once. Canada and the UK keep growing as export markets - Canada especially, faster than anything else we do. We&#x27;ve also just started sourcing electronics components for our Educational Computer Games line from a new supplier in Vietnam, and we&#x27;re in early talks with a logistics partner in Poland, though that&#x27;s still early days.</p><p class="mail-p">As a customer, we want to have one clear point of contact for our day-to-day questions. But when something really matters, we still want to speak to someone who actually knows our business - not a form, not a queue, not a system that decides on our behalf. If that&#x27;s what Mr Moratti&#x27;s &quot;one system&quot; means, it&#x27;s the wrong direction for us.</p><p class="mail-p">The Canadian dollar has become our largest currency exposure by some distance, and it&#x27;s still growing. We don&#x27;t want to call someone every time the rate moves - we&#x27;d rather manage our FX positions ourselves, flexibly, whenever it suits us, online.</p><p class="mail-p">Our new supplier in Vietnam has already caused two shipment delays this quarter. Nothing dramatic yet, but with the volumes we&#x27;re planning for next year, we need real support on the documentary side of international trade - the kind of protection that comes with proper letters of credit and collections, not just a phone number for when something goes wrong.</p><p class="mail-p">And then there&#x27;s the elephant in the room: the Board approved our capacity expansion for Outdoor Play Equipment back in the spring, but we still haven&#x27;t signed off on how to finance it. Before we commit, we want to actually see the credit lines, the collateral requirements, the whole process - not sign something we only understand once it&#x27;s too late to change our minds.</p><p class="mail-p">We are currently reviewing our banking relationships, and this is exactly the moment where a mistake would cost us. We&#x27;d rather take our time and get it right than let someone else - man or machine - decide for us.</p><p class="mail-p">Best regards,<br>Leonie Schneider<br>Head of Finance &amp; Strategy, Globex Toys</p>
+      <div class="quote-panel">
+        <p class="quote-tag">From Leonie Schneider&rsquo;s message</p>
+        <p class="quote-text">“The Board approved our capacity expansion for Outdoor Play Equipment back in the spring, but we still haven’t signed off on how to finance it. Before we commit, we want to actually see the credit lines, the collateral requirements, the whole process — not sign something we only understand once it’s too late to change our minds.”</p>
       </div>
+      <p class="source-tag">&mdash; decoded by Sherlock, Task 2</p>
 
       <div class="center">
         <a class="doc-link" href="assets/Commerzbank_Solutions_Overview_EN.pdf" target="_blank" rel="noopener">&#8681; Commerzbank Solutions Overview (PDF)</a>
       </div>
 
-      <p class="q-label">Pick the one Commerzbank solution that actually fits &mdash; not every option on this list is a real match.</p>
+      <p class="q-label">Which solution actually fits this?</p>
+      <p class="q-sub">Not every option below is a real match &mdash; some sound close but work differently.</p>
       <div class="opt-list" id="optList"></div>
 
       <div class="nav-row">
