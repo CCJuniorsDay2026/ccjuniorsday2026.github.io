@@ -66,13 +66,15 @@
     .matrix-svg { width: 100%; height: auto; display: block; }
     .matrix-svg .grid-line { stroke: rgba(57,255,20,0.14); stroke-width: 1; }
     .matrix-svg .axis-label { fill: var(--text-muted); font-size: 9px; font-family: inherit; }
-    .matrix-svg .node { fill: var(--gr); opacity: 0.85; }
-    .matrix-svg .node.target { fill: #fff; }
-    .matrix-svg .node-ring { fill: none; stroke: var(--gr); stroke-width: 1.3; opacity: 0.85; animation: ringPulse 1.7s ease-out infinite; transform-origin: center; }
-    .matrix-svg .node-ring.target-ring { stroke: #fff; }
-    @keyframes ringPulse {
-      0% { r: 9; opacity: 0.9; }
-      100% { r: 20; opacity: 0; }
+    .matrix-svg .node { fill: var(--gr); }
+    .matrix-svg .node.pulse {
+      transform-box: fill-box;
+      transform-origin: center;
+      animation: nodePulse 2.4s ease-in-out infinite;
+    }
+    @keyframes nodePulse {
+      0%, 100% { filter: drop-shadow(0 0 3px rgba(57,255,20,0.55)); transform: scale(1); }
+      50% { filter: drop-shadow(0 0 9px rgba(57,255,20,0.95)); transform: scale(1.35); }
     }
 
     .side-stack { display: flex; flex-direction: column; gap: 16px; }
@@ -92,18 +94,31 @@
     .bars-row { display: flex; align-items: flex-end; gap: 3px; height: 40px; margin-top: 8px; }
     .bar { flex: 1; background: linear-gradient(180deg, var(--gr), var(--gr-faint)); opacity: 0.8; transition: height 0.5s ease; }
 
+    .signal-pct { font-size: 20px; font-weight: 700; color: var(--gr); text-shadow: 0 0 8px rgba(57,255,20,0.7); }
+    .signal-graph { width: 100%; height: 50px; display: block; margin-top: 4px; }
+
     .hexdump { font-size: 10px; line-height: 1.7; color: var(--gr-dim); letter-spacing: 1px; word-spacing: 6px; }
 
-    .acquisition-row { display: flex; justify-content: space-between; font-size: 11px; padding: 3px 0; color: var(--text-muted); }
-    .acquisition-row span:last-child { color: var(--gr-dim); }
+    .binary-grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 3px; font-size: 11px; text-align: center; color: var(--gr-faint); }
+    .binary-grid span { transition: color 0.4s ease, text-shadow 0.4s ease; }
+    .binary-grid span.lit { color: var(--gr); text-shadow: 0 0 6px rgba(57,255,20,0.8); }
+
+    .target-lock-row {
+      display: flex;
+      justify-content: space-between;
+      background: var(--gr);
+      color: #001a06;
+      font-weight: 700;
+      padding: 4px 8px;
+      margin: 3px 0;
+      font-size: 11px;
+      letter-spacing: 0.5px;
+    }
 
     .bottom-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 22px; margin-bottom: 6px; }
     @media (max-width: 900px) { .bottom-row { grid-template-columns: 1fr; } }
     .log-list { list-style: none; margin: 0; padding: 0; font-size: 10px; line-height: 1.85; color: var(--text-muted); max-height: 130px; overflow: hidden; }
     .log-list li span { color: var(--gr); }
-
-    .signal-pct { font-size: 22px; font-weight: 700; color: var(--gr); text-shadow: 0 0 8px rgba(57,255,20,0.7); }
-    .signal-graph { width: 100%; height: 56px; display: block; margin-top: 4px; }
 
     .crossref-row { display: flex; justify-content: space-between; font-size: 10.5px; padding: 3px 0; border-bottom: 1px dashed var(--gr-faint); color: var(--text-muted); }
     .crossref-row span:last-child { color: var(--gr-dim); }
@@ -190,6 +205,11 @@
             <div class="toggle-row"><span>FRAGMENT SYNC</span><span class="toggle-pill on">ON</span></div>
             <div class="bars-row" id="barsRow"></div>
           </div>
+          <div>
+            <p class="section-title">SIGNAL STRENGTH</p>
+            <div class="signal-pct" id="signalPct">93%</div>
+            <svg class="signal-graph" viewBox="0 0 300 50" preserveAspectRatio="none"><polyline id="signalLine" fill="none" stroke="#39FF14" stroke-width="1.5" points=""></polyline></svg>
+          </div>
         </div>
       </div>
 
@@ -211,8 +231,8 @@
         <p class="section-title">CROSS REFS</p>
         <div class="crossref-row"><span>REF-2291-A &middot; fragment lattice</span><span id="cr1">88%</span></div>
         <div class="crossref-row"><span>REF-0047-C &middot; node weighting</span><span id="cr2">41%</span></div>
+        <div class="target-lock-row"><span>TARGET LOCK</span><span>X:2 &nbsp; Y:1</span></div>
         <div class="crossref-row"><span>REF-6635-B &middot; spatial trace</span><span id="cr3">67%</span></div>
-        <div class="acquisition-row"><span>ACQUISITION LOCK</span><span>X:2 &nbsp; Y:2</span></div>
         <div class="crossref-row"><span>REF-1120-D &middot; checksum table</span><span id="cr4">73%</span></div>
       </div>
 
@@ -222,9 +242,8 @@
           <ul class="log-list" id="logList"></ul>
         </div>
         <div>
-          <p class="section-title">SIGNAL STRENGTH</p>
-          <div class="signal-pct" id="signalPct">93%</div>
-          <svg class="signal-graph" viewBox="0 0 300 60" preserveAspectRatio="none"><polyline id="signalLine" fill="none" stroke="#39FF14" stroke-width="1.5" points=""></polyline></svg>
+          <p class="section-title">BINARY STREAM</p>
+          <div class="binary-grid" id="binaryGrid"></div>
         </div>
         <div>
           <p class="section-title">FRAGMENT INTEGRITY</p>
@@ -266,54 +285,54 @@
       }
       document.getElementById('tickerInner').textContent = tickerBits.join('   ::   ');
 
-      // --- Node map (8 points on two rows y=2 and y=5, representing chairs around the table) ---
+      // --- Node map: 10 points, two even rows (y=1, y=3), x=1..5, no gaps.
+      // Target = (2,1). Represents the room's chairs (two rows facing each other).
       var svgNS = 'http://www.w3.org/2000/svg';
       var matrixSvg = document.getElementById('matrixSvg');
-      var nodes = [
-        { x: 1, y: 2 }, { x: 2, y: 2, target: true }, { x: 4, y: 2 }, { x: 5, y: 2 },
-        { x: 1, y: 5 }, { x: 2, y: 5 }, { x: 4, y: 5 }, { x: 5, y: 5 }
-      ];
-      var pad = 40, cell = 55;
-      function gx(x) { return pad + x * cell; }
-      function gy(y) { return 260 - y * cell; }
+      var nodes = [];
+      [1, 3].forEach(function (y) {
+        for (var x = 1; x <= 5; x++) {
+          nodes.push({ x: x, y: y, target: (x === 2 && y === 1) });
+        }
+      });
+
+      var padX = 40, cellX = 55;
+      var baseY = 250, cellY = 45;
+      function gx(x) { return padX + x * cellX; }
+      function gy(y) { return baseY - y * cellY; }
 
       for (var gi = 0; gi <= 6; gi++) {
         var vLine = document.createElementNS(svgNS, 'line');
         vLine.setAttribute('class', 'grid-line');
         vLine.setAttribute('x1', gx(gi)); vLine.setAttribute('y1', gy(0));
-        vLine.setAttribute('x2', gx(gi)); vLine.setAttribute('y2', gy(6));
+        vLine.setAttribute('x2', gx(gi)); vLine.setAttribute('y2', gy(4));
         matrixSvg.appendChild(vLine);
+      }
+      for (var hi = 0; hi <= 4; hi++) {
         var hLine = document.createElementNS(svgNS, 'line');
         hLine.setAttribute('class', 'grid-line');
-        hLine.setAttribute('x1', gx(0)); hLine.setAttribute('y1', gy(gi));
-        hLine.setAttribute('x2', gx(6)); hLine.setAttribute('y2', gy(gi));
+        hLine.setAttribute('x1', gx(0)); hLine.setAttribute('y1', gy(hi));
+        hLine.setAttribute('x2', gx(6)); hLine.setAttribute('y2', gy(hi));
         matrixSvg.appendChild(hLine);
       }
       for (var li = 0; li <= 6; li++) {
         var lbl = document.createElementNS(svgNS, 'text');
         lbl.setAttribute('class', 'axis-label');
         lbl.setAttribute('x', gx(li) - 3);
-        lbl.setAttribute('y', gy(0) + 14);
+        lbl.setAttribute('y', gy(0) + 16);
         lbl.textContent = li;
         matrixSvg.appendChild(lbl);
       }
 
-      var nodeRings = [];
+      var nodeEls = [];
       nodes.forEach(function (n) {
         var c = document.createElementNS(svgNS, 'circle');
-        c.setAttribute('class', 'node' + (n.target ? ' target' : ''));
+        c.setAttribute('class', 'node pulse');
         c.setAttribute('cx', gx(n.x));
         c.setAttribute('cy', gy(n.y));
-        c.setAttribute('r', n.target ? 6 : 4);
+        c.setAttribute('r', 5);
         matrixSvg.appendChild(c);
-
-        var ring = document.createElementNS(svgNS, 'circle');
-        ring.setAttribute('class', 'node-ring' + (n.target ? ' target-ring' : ''));
-        ring.setAttribute('cx', gx(n.x));
-        ring.setAttribute('cy', gy(n.y));
-        ring.setAttribute('r', 9);
-        matrixSvg.appendChild(ring);
-        nodeRings.push({ el: ring, target: !!n.target });
+        nodeEls.push({ el: c, target: !!n.target });
       });
 
       // After 10 minutes, only the target node keeps pulsing.
@@ -330,8 +349,8 @@
       function narrowPulse() {
         var elapsed = (Date.now() - pStart) / 1000;
         if (elapsed >= 600) {
-          nodeRings.forEach(function (nr) {
-            if (!nr.target) nr.el.style.display = 'none';
+          nodeEls.forEach(function (n) {
+            if (!n.target) n.el.classList.remove('pulse');
           });
         }
       }
@@ -388,6 +407,21 @@
         barEls.forEach(function (bar) { bar.style.height = (6 + Math.random() * 34) + 'px'; });
       }, 550);
 
+      // --- Signal strength graph ---
+      var signalPct = document.getElementById('signalPct');
+      var signalLine = document.getElementById('signalLine');
+      var signalPoints = [];
+      for (var sp = 0; sp < 30; sp++) { signalPoints.push(15 + Math.random() * 16); }
+      function drawSignal() {
+        signalPoints.shift();
+        signalPoints.push(8 + Math.random() * 32);
+        var str = signalPoints.map(function (v, i) { return (i * 10) + ',' + (50 - v); }).join(' ');
+        signalLine.setAttribute('points', str);
+        signalPct.textContent = (86 + Math.floor(Math.random() * 13)) + '%';
+      }
+      drawSignal();
+      setInterval(drawSignal, 700);
+
       // --- Hex dump block ---
       var hexdumpEl = document.getElementById('hexdump');
       var hexRows = [];
@@ -407,6 +441,25 @@
       refreshHex();
       setInterval(refreshHex, 2200);
 
+      // --- Binary stream flicker grid ---
+      var binaryGrid = document.getElementById('binaryGrid');
+      var binaryCells = [];
+      for (var bc = 0; bc < 40; bc++) {
+        var span = document.createElement('span');
+        span.textContent = Math.random() < 0.5 ? '0' : '1';
+        binaryGrid.appendChild(span);
+        binaryCells.push(span);
+      }
+      function flickerBinary() {
+        for (var f = 0; f < 6; f++) {
+          var cell = binaryCells[Math.floor(Math.random() * binaryCells.length)];
+          cell.textContent = cell.textContent === '0' ? '1' : '0';
+          cell.classList.add('lit');
+          (function (c) { setTimeout(function () { c.classList.remove('lit'); }, 500); })(cell);
+        }
+      }
+      setInterval(flickerBinary, 300);
+
       var LOG_FRAGMENTS = [
         'sync buffer flush', 'node weight recalibrated', 'trace path resolved',
         'fragment checksum ok', 'listening on port 447', 'cache rebuilt',
@@ -425,20 +478,6 @@
       }
       addLog();
       setInterval(addLog, 1600);
-
-      var signalPct = document.getElementById('signalPct');
-      var signalLine = document.getElementById('signalLine');
-      var signalPoints = [];
-      for (var sp = 0; sp < 30; sp++) { signalPoints.push(20 + Math.random() * 20); }
-      function drawSignal() {
-        signalPoints.shift();
-        signalPoints.push(10 + Math.random() * 40);
-        var str = signalPoints.map(function (v, i) { return (i * 10) + ',' + (60 - v); }).join(' ');
-        signalLine.setAttribute('points', str);
-        signalPct.textContent = (86 + Math.floor(Math.random() * 13)) + '%';
-      }
-      drawSignal();
-      setInterval(drawSignal, 700);
 
       // --- Codeword gate ---
       var CODE = 'mission control';
