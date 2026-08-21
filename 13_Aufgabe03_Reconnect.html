@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Protocol 16 - Task 3: Reconnect</title>
+  <style>
+    :root {
+      --cy: #4DE8FF;
+      --bg: #000000;
+      --panel: rgba(77,232,255,0.05);
+      --panel-border: rgba(77,232,255,0.25);
+      --text-muted: #7FB8C4;
+      --danger: #C5000E;
+    }
+    * { box-sizing: border-box; }
+    html, body { min-height: 100%; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--cy);
+      font-family: "SF Mono", "Consolas", "Courier New", monospace;
+      padding: 40px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .stage { width: 100%; max-width: 640px; text-align: center; }
+    .protocol-label {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 5px;
+      color: var(--cy);
+      text-shadow: 0 0 12px rgba(77,232,255,0.6);
+      margin-bottom: 10px;
+    }
+    .kicker { font-size: 11px; letter-spacing: 2px; color: var(--text-muted); margin-bottom: 30px; }
+
+    .riddle-panel {
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      border-radius: 8px;
+      padding: 28px 30px;
+      margin-bottom: 30px;
+    }
+    .riddle-line { font-size: 16px; line-height: 2; color: #E8FBFF; margin: 0; }
+    .riddle-line.q { color: var(--cy); margin-top: 10px; }
+
+    .letter-row { display: flex; justify-content: center; gap: 8px; margin: 34px 0; }
+    .letter-box {
+      width: 34px;
+      height: 44px;
+      border-bottom: 2px solid var(--panel-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      font-weight: 700;
+      color: #fff;
+      text-shadow: 0 0 10px rgba(77,232,255,0.8);
+      opacity: 0;
+      transition: opacity 0.6s ease;
+    }
+    .letter-box.revealed { opacity: 1; }
+
+    .answer-row { display: flex; justify-content: center; }
+    .answer-input {
+      background: rgba(77,232,255,0.04);
+      border: none;
+      border-bottom: 1px solid rgba(77,232,255,0.35);
+      color: var(--cy);
+      font-family: inherit;
+      font-size: 14px;
+      letter-spacing: 2px;
+      padding: 8px 4px;
+      width: 260px;
+      text-align: center;
+      outline: none;
+      text-transform: lowercase;
+    }
+    .answer-input:focus { border-bottom-color: #fff; }
+    .answer-feedback { text-align: center; font-size: 10.5px; color: var(--text-muted); height: 16px; margin-top: 8px; opacity: 0; transition: opacity 0.3s ease; }
+    .answer-feedback.show { opacity: 1; }
+
+    .help-btn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: transparent;
+      color: #FF8A80;
+      border: 1px solid var(--danger);
+      border-radius: 999px;
+      padding: 10px 20px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: -apple-system, "Segoe UI", Arial, sans-serif;
+      transition: background 0.15s ease;
+      z-index: 10;
+    }
+    .help-btn:hover { background: rgba(197,0,14,0.12); }
+    .help-btn:disabled { opacity: 0.6; cursor: default; }
+    .help-btn.active { background: var(--danger); color: #fff; border-color: var(--danger); animation: helpPulseBtn 1.4s ease-in-out infinite; }
+    .help-btn.pending { opacity: 0.55; }
+    @keyframes helpPulseBtn {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(197,0,14,0.55); }
+      50% { box-shadow: 0 0 0 9px rgba(197,0,14,0); }
+    }
+  </style>
+  </head>
+  <body>
+    <button id="helpBtn" class="help-btn" type="button">Request Help</button>
+    <div class="stage">
+      <div class="protocol-label">Protocol 16</div>
+      <div class="kicker">Task 3 &middot; Sherlock Matrix</div>
+
+      <div class="riddle-panel">
+        <p class="riddle-line">One creates a link.</p>
+        <p class="riddle-line">One breaks a link.</p>
+        <p class="riddle-line">The third restores what was lost.</p>
+        <p class="riddle-line q">Name the missing word.</p>
+      </div>
+
+      <div class="letter-row" id="letterRow"></div>
+
+      <div class="answer-row">
+        <input type="text" class="answer-input" id="answerInput" autocomplete="off" placeholder="type the word">
+      </div>
+      <p class="answer-feedback" id="answerFeedback">not quite</p>
+    </div>
+
+    <script>
+      var API_URL = 'https://script.google.com/macros/s/AKfycbxc0QIIyaYTbGBMyhsUdYD01_AAYyrIsySqgF4rSWHPH8t73wHdP6iGEYUQMc5ImVsZ/exec';
+      var team = sessionStorage.getItem('teamNumber');
+      if (team) {
+        fetch(API_URL, { method: 'POST', body: new URLSearchParams({ team: team, action: 'progress', page: '13', status: 'open' }) });
+      }
+
+      // --- Letter grid: RECONNECT, 9 letters, positions 0,3,7 pre-set (R,O,C) ---
+      var ANSWER = 'reconnect';
+      var letterRow = document.getElementById('letterRow');
+      var boxes = [];
+      for (var i = 0; i < ANSWER.length; i++) {
+        var box = document.createElement('div');
+        box.className = 'letter-box';
+        box.textContent = '';
+        letterRow.appendChild(box);
+        boxes.push(box);
+      }
+
+      // Timed reveal: R at 5 min, O at 10 min, C at 15 min.
+      // Timestamp persisted in sessionStorage so a page reload doesn't restart the clock.
+      var TIME_KEY = 'a3_riddle_start';
+      var startStr = sessionStorage.getItem(TIME_KEY);
+      var start;
+      if (startStr) {
+        start = parseInt(startStr, 10);
+      } else {
+        start = Date.now();
+        sessionStorage.setItem(TIME_KEY, String(start));
+      }
+
+      var REVEALS = [
+        { sec: 300, idx: 0 },  // R
+        { sec: 600, idx: 3 },  // O
+        { sec: 900, idx: 7 }   // C
+      ];
+
+      function applyReveals() {
+        var elapsed = (Date.now() - start) / 1000;
+        REVEALS.forEach(function (r) {
+          if (elapsed >= r.sec && !boxes[r.idx].classList.contains('revealed')) {
+            boxes[r.idx].textContent = ANSWER[r.idx].toUpperCase();
+            boxes[r.idx].classList.add('revealed');
+          }
+        });
+      }
+      applyReveals();
+      setInterval(applyReveals, 3000);
+
+      // --- Answer check ---
+      var answerInput = document.getElementById('answerInput');
+      var answerFeedback = document.getElementById('answerFeedback');
+      var solved = false;
+
+      function checkAnswer() {
+        if (solved) return;
+        var val = answerInput.value.trim().toLowerCase();
+        if (!val) return;
+        if (val === ANSWER) {
+          solved = true;
+          if (team) {
+            fetch(API_URL, { method: 'POST', keepalive: true, body: new URLSearchParams({ team: team, action: 'progress', page: '13', status: 'done' }) });
+          }
+          setTimeout(function () {
+            window.location.href = '14_Aufgabe03_FieldAgents.html';
+          }, 500);
+        } else {
+          answerFeedback.classList.add('show');
+          answerInput.value = '';
+          setTimeout(function () { answerFeedback.classList.remove('show'); }, 2200);
+        }
+      }
+      answerInput.addEventListener('blur', checkAnswer);
+      answerInput.addEventListener('keydown', function (ev) {
+        if (ev.key === 'Enter') checkAnswer();
+      });
+
+      var helpBtn = document.getElementById('helpBtn');
+      function setHelpState(active) {
+        if (!helpBtn) return;
+        helpBtn.textContent = active ? 'Help Requested - Cancel' : 'Request Help';
+        helpBtn.classList.toggle('active', !!active);
+        helpBtn.classList.remove('pending');
+      }
+      if (team && helpBtn) {
+        fetch(API_URL + '?t=' + Date.now())
+          .then(function (res) { return res.json(); })
+          .then(function (data) {
+            var mine = (data.teams || []).filter(function (t) { return Number(t.team) === Number(team); })[0];
+            setHelpState(mine && mine.hilfe_angefordert);
+          });
+        helpBtn.addEventListener('click', function () {
+          var wasActive = helpBtn.classList.contains('active');
+          helpBtn.disabled = true;
+          helpBtn.classList.add('pending');
+          helpBtn.textContent = wasActive ? 'Canceling...' : 'Requesting...';
+          fetch(API_URL, { method: 'POST', body: new URLSearchParams({ team: team, action: 'help' }) })
+            .then(function (res) { return res.json(); })
+            .then(function (data) {
+              if (data.status !== 'ok') {
+                console.error('Help toggle failed:', data.message);
+                setHelpState(wasActive);
+                return;
+              }
+              setHelpState(data.hilfe_angefordert);
+            })
+            .catch(function (err) {
+              console.error('Help toggle request failed:', err);
+              setHelpState(wasActive);
+            })
+            .finally(function () { helpBtn.disabled = false; });
+        });
+      }
+    </script>
+  </body>
+</html>

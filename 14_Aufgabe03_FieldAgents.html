@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Protocol 16 - Task 3: Field Agents</title>
+  <style>
+    :root {
+      --bg: #002E3C;
+      --bg-deep: #001B24;
+      --accent: #FFD700;
+      --text: #F1EFED;
+      --text-muted: #A0AEAC;
+      --border: #537173;
+      --danger: #C5000E;
+      --panel: rgba(255,255,255,0.04);
+      --panel-border: rgba(255,255,255,0.10);
+    }
+    * { box-sizing: border-box; }
+    html { min-height: 100%; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: radial-gradient(circle at 50% 15%, #0a4457 0%, var(--bg) 45%, var(--bg-deep) 100%);
+      color: var(--text);
+      font-family: -apple-system, "Segoe UI", Arial, sans-serif;
+      padding: 24px 24px 210px;
+    }
+    .stage { width: 100%; max-width: 640px; margin: 0 auto; text-align: center; }
+    .protocol-label {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 6px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 10px;
+    }
+    .kicker { font-size: 13px; font-weight: 600; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 6px; }
+    h1 { font-size: 26px; font-weight: 600; margin: 0 0 26px; }
+
+    .instr-panel {
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      border-radius: 12px;
+      padding: 26px 28px;
+      text-align: left;
+      margin-bottom: 30px;
+    }
+    .instr-line { font-size: 15px; line-height: 1.75; color: var(--text); margin: 0 0 14px; }
+    .instr-line:last-child { margin-bottom: 0; }
+    .instr-line.emph { color: var(--accent); font-weight: 600; }
+
+    .proceed-btn {
+      display: inline-block;
+      padding: 14px 40px;
+      background: var(--accent);
+      color: #1A1500;
+      border: none;
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-family: inherit;
+      transition: transform 0.15s ease, opacity 0.2s ease;
+    }
+    .proceed-btn:hover { transform: scale(1.03); }
+    .proceed-btn.hidden { display: none; }
+
+    .pending-panel {
+      display: none;
+      margin-top: 28px;
+      padding: 18px 22px;
+      border-radius: 10px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.12);
+      font-size: 13.5px;
+      color: var(--text-muted);
+    }
+    .pending-panel.show { display: block; }
+
+    .help-btn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: transparent;
+      color: #FF8A80;
+      border: 1px solid var(--danger);
+      border-radius: 999px;
+      padding: 10px 20px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background 0.15s ease;
+      z-index: 10;
+    }
+    .help-btn:hover { background: rgba(197,0,14,0.12); }
+    .help-btn:disabled { opacity: 0.6; cursor: default; }
+    .help-btn.active { background: var(--danger); color: #fff; border-color: var(--danger); animation: helpPulseBtn 1.4s ease-in-out infinite; }
+    .help-btn.pending { opacity: 0.55; }
+    @keyframes helpPulseBtn {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(197,0,14,0.55); }
+      50% { box-shadow: 0 0 0 9px rgba(197,0,14,0); }
+    }
+  </style>
+  </head>
+  <body>
+    <button id="helpBtn" class="help-btn" type="button">Request Help</button>
+    <div class="stage" id="stage">
+      <div class="protocol-label">Protocol 16</div>
+      <div class="kicker">Task 3 &middot; Reconnect</div>
+      <h1>Split the Team.</h1>
+
+      <div class="instr-panel">
+        <p class="instr-line emph">Choose two people to go on the outside mission. They will become the Field Agents.</p>
+        <p class="instr-line">Open the envelope now.</p>
+        <p class="instr-line">The number inside is the floor where the garden is &mdash; the one the Field Agents need to find. Go now.</p>
+        <p class="instr-line">The rest of you keep solving here. Click Continue to proceed.</p>
+      </div>
+
+      <button class="proceed-btn" id="proceedBtn" type="button">Continue</button>
+
+      <div class="pending-panel" id="pendingPanel">Task 3 is logged. Task 4 isn&rsquo;t open on this screen yet &mdash; wait for the signal from Mission Control.</div>
+    </div>
+
+    <script>
+      // NEXT_PAGE: Aufgabe 4's first page. Leave null until it exists.
+      var NEXT_PAGE = null;
+
+      var API_URL = 'https://script.google.com/macros/s/AKfycbxc0QIIyaYTbGBMyhsUdYD01_AAYyrIsySqgF4rSWHPH8t73wHdP6iGEYUQMc5ImVsZ/exec';
+      var team = sessionStorage.getItem('teamNumber');
+      if (team) {
+        fetch(API_URL, { method: 'POST', body: new URLSearchParams({ team: team, action: 'progress', page: '14', status: 'open' }) });
+      }
+
+      var proceedBtn = document.getElementById('proceedBtn');
+      var pendingPanel = document.getElementById('pendingPanel');
+      var advanced = false;
+      proceedBtn.addEventListener('click', function () {
+        if (advanced) return;
+        advanced = true;
+        if (team) {
+          fetch(API_URL, { method: 'POST', keepalive: true, body: new URLSearchParams({ team: team, action: 'progress', page: '14', status: 'done' }) });
+        }
+        if (NEXT_PAGE) {
+          window.location.href = NEXT_PAGE;
+        } else {
+          proceedBtn.classList.add('hidden');
+          pendingPanel.classList.add('show');
+        }
+      });
+
+      var helpBtn = document.getElementById('helpBtn');
+      function setHelpState(active) {
+        if (!helpBtn) return;
+        helpBtn.textContent = active ? 'Help Requested - Cancel' : 'Request Help';
+        helpBtn.classList.toggle('active', !!active);
+        helpBtn.classList.remove('pending');
+      }
+      if (team && helpBtn) {
+        fetch(API_URL + '?t=' + Date.now())
+          .then(function (res) { return res.json(); })
+          .then(function (data) {
+            var mine = (data.teams || []).filter(function (t) { return Number(t.team) === Number(team); })[0];
+            setHelpState(mine && mine.hilfe_angefordert);
+          });
+        helpBtn.addEventListener('click', function () {
+          var wasActive = helpBtn.classList.contains('active');
+          helpBtn.disabled = true;
+          helpBtn.classList.add('pending');
+          helpBtn.textContent = wasActive ? 'Canceling...' : 'Requesting...';
+          fetch(API_URL, { method: 'POST', body: new URLSearchParams({ team: team, action: 'help' }) })
+            .then(function (res) { return res.json(); })
+            .then(function (data) {
+              if (data.status !== 'ok') {
+                console.error('Help toggle failed:', data.message);
+                setHelpState(wasActive);
+                return;
+              }
+              setHelpState(data.hilfe_angefordert);
+            })
+            .catch(function (err) {
+              console.error('Help toggle request failed:', err);
+              setHelpState(wasActive);
+            })
+            .finally(function () { helpBtn.disabled = false; });
+        });
+      }
+    </script>
+  </body>
+</html>
