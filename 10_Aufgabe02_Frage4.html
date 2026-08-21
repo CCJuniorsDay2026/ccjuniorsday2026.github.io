@@ -194,6 +194,7 @@
 
       <div class="nav-row">
         <button id="nextBtn" class="next-btn" type="button" disabled>Check &amp; Continue</button>
+        <a id="backBtn" class="next-btn" href="07_Aufgabe02_Frage1.html" style="display:none;">Back to Concern 1</a>
       </div>
     </div>
 
@@ -227,6 +228,7 @@
 
       var optList = document.getElementById('optList');
       var nextBtn = document.getElementById('nextBtn');
+      var backBtn = document.getElementById('backBtn');
       var resultMsg = document.getElementById('resultMsg');
       var current = getAnswers()[QKEY] || null;
 
@@ -245,6 +247,8 @@
           btn.classList.add('selected');
           current = opt.value;
           nextBtn.disabled = false;
+          nextBtn.style.display = '';
+          backBtn.style.display = 'none';
           resultMsg.classList.remove('show');
         });
         optList.appendChild(btn);
@@ -275,8 +279,8 @@
             window.location.href = '12_Aufgabe02_Digit2.html';
           } else {
             checking = false;
-            nextBtn.disabled = false;
-            nextBtn.textContent = 'Check &amp; Continue';
+            nextBtn.style.display = 'none';
+            backBtn.style.display = 'inline-block';
             resultMsg.textContent = 'Not quite \u2014 at least one of your four matches doesn\u2019t hold up against the case file. Go back and take another look. Your earlier picks are still there.';
             resultMsg.classList.add('show');
           }
