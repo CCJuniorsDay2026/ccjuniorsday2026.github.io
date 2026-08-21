@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Protocol 16 - Task 4: Secure Channel</title>
+  <style>
+    :root {
+      --bg: #002E3C;
+      --bg-deep: #001B24;
+      --accent: #FFD700;
+      --text: #F1EFED;
+      --text-muted: #A0AEAC;
+      --border: #537173;
+      --danger: #C5000E;
+      --success: #008932;
+      --panel: rgba(255,255,255,0.04);
+      --panel-border: rgba(255,255,255,0.10);
+    }
+    * { box-sizing: border-box; }
+    html { min-height: 100%; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: radial-gradient(circle at 50% 12%, #0a4457 0%, var(--bg) 45%, var(--bg-deep) 100%);
+      color: var(--text);
+      font-family: -apple-system, "Segoe UI", Arial, sans-serif;
+      padding: 24px 24px 210px;
+    }
+    .stage { width: 100%; max-width: 640px; margin: 0 auto; }
+    .center { text-align: center; }
+    .protocol-label { font-size: 13px; font-weight: 700; letter-spacing: 6px; text-transform: uppercase; color: var(--accent); margin-bottom: 10px; }
+    .kicker { font-size: 13px; font-weight: 600; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 6px; }
+    h1 { font-size: 24px; font-weight: 600; margin: 0 0 14px; }
+    .lede { font-size: 14.5px; line-height: 1.65; color: var(--text-muted); margin: 0 0 26px; max-width: 520px; margin-left: auto; margin-right: auto; }
+
+    .trust-panel { margin-bottom: 26px; }
+    .trust-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
+    .trust-label { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-muted); }
+    .trust-value { font-size: 13px; font-weight: 700; color: var(--accent); }
+    .trust-track {
+      position: relative;
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.08);
+      overflow: hidden;
+    }
+    .trust-fill {
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--danger), var(--accent));
+      transition: width 0.5s ease;
+    }
+    .trust-target-mark {
+      position: absolute;
+      top: -3px;
+      bottom: -3px;
+      left: 90%;
+      width: 2px;
+      background: rgba(255,255,255,0.55);
+    }
+    .trust-sub { font-size: 11.5px; color: var(--text-muted); margin-top: 6px; }
+
+    .timer-track { height: 4px; border-radius: 999px; background: rgba(255,255,255,0.08); overflow: hidden; margin-bottom: 20px; }
+    .timer-fill { height: 100%; background: var(--accent); transition: width 0.15s linear; }
+    .timer-fill.warn { background: var(--danger); }
+
+    .chat-panel {
+      background: var(--panel);
+      border-left: 3px solid var(--accent);
+      border-radius: 0 10px 10px 0;
+      padding: 20px 22px;
+      margin-bottom: 20px;
+      text-align: left;
+    }
+    .chat-tag { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--accent); margin: 0 0 8px; }
+    .chat-text { font-size: 15px; line-height: 1.65; color: var(--text); margin: 0; }
+
+    .opt-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 10px; }
+    .opt-btn {
+      text-align: left;
+      padding: 14px 18px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+    }
+    .opt-btn:hover:not(:disabled) { border-color: var(--accent); }
+    .opt-btn:disabled { cursor: default; opacity: 0.55; }
+    .opt-btn.correct { background: rgba(0,137,50,0.18); border-color: var(--success); color: #6FE39B; opacity: 1; }
+    .opt-btn.wrong { background: rgba(197,0,14,0.18); border-color: var(--danger); color: #FF8A80; opacity: 1; }
+
+    .round-feedback { min-height: 20px; font-size: 13px; font-weight: 600; color: var(--text-muted); text-align: center; margin: 6px 0 0; }
+
+    .success-panel { display: none; text-align: center; }
+    .success-panel.show { display: block; }
+    .success-panel h2 { font-size: 22px; color: var(--accent); margin: 0 0 10px; }
+    .success-panel p { font-size: 14.5px; line-height: 1.65; color: var(--text-muted); max-width: 460px; margin: 0 auto 26px; }
+    .continue-btn {
+      display: inline-block;
+      padding: 14px 40px;
+      background: var(--accent);
+      color: #1A1500;
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-decoration: none;
+      border-radius: 999px;
+      transition: transform 0.15s ease;
+    }
+    .continue-btn:hover { transform: scale(1.03); }
+
+    .help-btn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: transparent;
+      color: #FF8A80;
+      border: 1px solid var(--danger);
+      border-radius: 999px;
+      padding: 10px 20px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background 0.15s ease;
+      z-index: 10;
+    }
+    .help-btn:hover { background: rgba(197,0,14,0.12); }
+    .help-btn:disabled { opacity: 0.6; cursor: default; }
+    .help-btn.active { background: var(--danger); color: #fff; border-color: var(--danger); animation: helpPulseBtn 1.4s ease-in-out infinite; }
+    .help-btn.pending { opacity: 0.55; }
+    @keyframes helpPulseBtn {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(197,0,14,0.55); }
+      50% { box-shadow: 0 0 0 9px rgba(197,0,14,0); }
+    }
+  </style>
+  </head>
+  <body>
+    <button id="helpBtn" class="help-btn" type="button">Request Help</button>
+    <div class="stage">
+      <div class="center">
+        <div class="protocol-label">Protocol 16</div>
+        <div class="kicker">Task 4 &middot; Secure Channel</div>
+        <h1>Elina Is Online.</h1>
+        <p class="lede">The draft is ready, but nothing sends on its own. She's asking real questions now &mdash; answer well and fast, and her trust climbs back up. Get it wrong, or take too long, and it drops.</p>
+      </div>
+
+      <div class="trust-panel">
+        <div class="trust-head">
+          <span class="trust-label">Client Trust</span>
+          <span class="trust-value" id="trustValue">3 / 10</span>
+        </div>
+        <div class="trust-track">
+          <div class="trust-fill" id="trustFill" style="width:30%"></div>
+          <div class="trust-target-mark"></div>
+        </div>
+        <p class="trust-sub">Reach 9 to send the reply.</p>
+      </div>
+
+      <div id="roundArea">
+        <div class="timer-track"><div class="timer-fill" id="timerFill" style="width:100%"></div></div>
+        <div class="chat-panel">
+          <p class="chat-tag">Elina Koskinen</p>
+          <p class="chat-text" id="chatText"></p>
+        </div>
+        <div class="opt-list" id="optList"></div>
+        <p class="round-feedback" id="roundFeedback"></p>
+      </div>
+
+      <div class="success-panel" id="successPanel">
+        <h2>Client Connection Saved.</h2>
+        <p>Trust holds. The reply goes out under the team's name, not Moratti's &mdash; and somewhere in what's left of Sherlock, another fragment breaks loose.</p>
+        <a class="continue-btn" id="continueLink" href="18_Aufgabe04_Digit4.html">Continue</a>
+      </div>
+    </div>
+
+    <script>
+      var API_URL = 'https://script.google.com/macros/s/AKfycbxc0QIIyaYTbGBMyhsUdYD01_AAYyrIsySqgF4rSWHPH8t73wHdP6iGEYUQMc5ImVsZ/exec';
+      var team = sessionStorage.getItem('teamNumber');
+      if (team) {
+        fetch(API_URL, { method: 'POST', body: new URLSearchParams({ team: team, action: 'progress', page: '17', status: 'open' }) });
+      }
+
+      var ROUNDS = [
+        {
+          q: "Before we go further — can I trust that this reply actually reflects what my email asked for, and not another rushed pitch?",
+          opts: [
+            { text: "Of course — our platform is built to solve exactly these problems, you can trust the system.", correct: false },
+            { text: "Yes — everything below responds directly to what you wrote, point by point, from the team, not one person's assumption.", correct: true },
+            { text: "Absolutely, and we'd also like to discuss expanding into three more countries next quarter.", correct: false }
+          ]
+        },
+        {
+          q: "You mentioned Mittelstandsbank Direkt. Will I be talking to a different person every time?",
+          opts: [
+            { text: "You'll mainly interact through our automated FX trading platform.", correct: false },
+            { text: "You'll get whichever advisor happens to be free that day.", correct: false },
+            { text: "No — you get one direct contact who coordinates everything, with personal advice brought in whenever a decision really matters.", correct: true }
+          ]
+        },
+        {
+          q: "Our CAD exposure worries me most right now. What can I actually do myself, today?",
+          opts: [
+            { text: "With FX Live Trader Web you can monitor rates and place trades yourself, almost around the clock — no need to wait on us.", correct: true },
+            { text: "We recommend waiting for our trading desk to open, Monday to Friday, 9 to 5.", correct: false },
+            { text: "LoanPilot will handle that exposure for you automatically.", correct: false }
+          ]
+        },
+        {
+          q: "And the delays from Asia — who exactly handles that?",
+          opts: [
+            { text: "That's something our LoanPilot dashboard tracks for you.", correct: false },
+            { text: "Our Trade Finance Direkt team — letters of credit, collections, guarantees, import and export financing, end to end.", correct: true },
+            { text: "We'll look into it once the contract is signed.", correct: false }
+          ]
+        },
+        {
+          q: "Before I decide on financing, I want the full picture — not another rushed answer.",
+          opts: [
+            { text: "We're confident whatever we propose will work out.", correct: false },
+            { text: "You'll need to submit that information directly into our system yourself.", correct: false },
+            { text: "That's exactly what LoanPilot gives us internally — credit lines, collateral, terms, and the right process, before we ever come back to you.", correct: true }
+          ]
+        },
+        {
+          q: "One more thing. Yesterday felt like we were being sold to, not listened to. Why should this be different?",
+          opts: [
+            { text: "Because this time it's not a pitch — it's a team taking responsibility for getting it right, starting with an apology for yesterday.", correct: true },
+            { text: "Because our platform really is better than the other three banks you're considering.", correct: false },
+            { text: "Mr. Moratti already explained our approach yesterday.", correct: false }
+          ]
+        }
+      ];
+
+      var TARGET = 9;
+      var FLOOR = 1;
+      var CAP = 10;
+      var GAIN = 3;
+      var WRONG_PENALTY = 3;
+      var TIMEOUT_PENALTY = 2;
+      var ROUND_SECONDS = 35;
+
+      var trust = 3;
+      var roundIdx = 0;
+      var timerId = null;
+      var remaining = ROUND_SECONDS;
+      var resolved = false;
+
+      var trustValueEl = document.getElementById('trustValue');
+      var trustFillEl = document.getElementById('trustFill');
+      var timerFillEl = document.getElementById('timerFill');
+      var chatText = document.getElementById('chatText');
+      var optList = document.getElementById('optList');
+      var roundFeedback = document.getElementById('roundFeedback');
+      var roundArea = document.getElementById('roundArea');
+      var successPanel = document.getElementById('successPanel');
+
+      function updateTrustUI() {
+        trustValueEl.textContent = trust + ' / 10';
+        trustFillEl.style.width = (trust / CAP * 100) + '%';
+      }
+
+      function stopTimer() {
+        if (timerId) { clearInterval(timerId); timerId = null; }
+      }
+
+      function startRound() {
+        resolved = false;
+        roundFeedback.textContent = '';
+        var round = ROUNDS[roundIdx % ROUNDS.length];
+        chatText.textContent = round.q;
+        optList.innerHTML = '';
+        round.opts.forEach(function (opt) {
+          var btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'opt-btn';
+          btn.textContent = opt.text;
+          btn.addEventListener('click', function () { resolveRound(opt.correct, btn); });
+          optList.appendChild(btn);
+        });
+
+        remaining = ROUND_SECONDS;
+        timerFillEl.style.width = '100%';
+        timerFillEl.classList.remove('warn');
+        stopTimer();
+        timerId = setInterval(function () {
+          remaining -= 0.15;
+          var pct = Math.max(0, remaining / ROUND_SECONDS * 100);
+          timerFillEl.style.width = pct + '%';
+          if (remaining <= 10) timerFillEl.classList.add('warn');
+          if (remaining <= 0) {
+            resolveRound(null, null);
+          }
+        }, 150);
+      }
+
+      function disableOptions() {
+        optList.querySelectorAll('.opt-btn').forEach(function (b) { b.disabled = true; });
+      }
+
+      function resolveRound(correct, clickedBtn) {
+        if (resolved) return;
+        resolved = true;
+        stopTimer();
+        disableOptions();
+
+        if (correct === null) {
+          trust = Math.max(FLOOR, trust - TIMEOUT_PENALTY);
+          roundFeedback.textContent = 'Too slow — the pause itself cost you trust.';
+        } else if (correct) {
+          trust = Math.min(CAP, trust + GAIN);
+          clickedBtn.classList.add('correct');
+          roundFeedback.textContent = 'Good answer.';
+        } else {
+          trust = Math.max(FLOOR, trust - WRONG_PENALTY);
+          clickedBtn.classList.add('wrong');
+          roundFeedback.textContent = 'That wasn’t it.';
+        }
+        updateTrustUI();
+
+        setTimeout(function () {
+          if (trust >= TARGET) {
+            showSuccess();
+          } else {
+            roundIdx++;
+            startRound();
+          }
+        }, 1100);
+      }
+
+      function showSuccess() {
+        roundArea.style.display = 'none';
+        successPanel.classList.add('show');
+      }
+
+      var continueLink = document.getElementById('continueLink');
+      continueLink.addEventListener('click', function () {
+        if (team) {
+          fetch(API_URL, { method: 'POST', keepalive: true, body: new URLSearchParams({ team: team, action: 'progress', page: '17', status: 'done' }) });
+        }
+      });
+
+      updateTrustUI();
+      startRound();
+
+      var helpBtn = document.getElementById('helpBtn');
+      function setHelpState(active) {
+        if (!helpBtn) return;
+        helpBtn.textContent = active ? 'Help Requested - Cancel' : 'Request Help';
+        helpBtn.classList.toggle('active', !!active);
+        helpBtn.classList.remove('pending');
+      }
+      if (team && helpBtn) {
+        fetch(API_URL + '?t=' + Date.now())
+          .then(function (res) { return res.json(); })
+          .then(function (data) {
+            var mine = (data.teams || []).filter(function (t) { return Number(t.team) === Number(team); })[0];
+            setHelpState(mine && mine.hilfe_angefordert);
+          });
+        helpBtn.addEventListener('click', function () {
+          var wasActive = helpBtn.classList.contains('active');
+          helpBtn.disabled = true;
+          helpBtn.classList.add('pending');
+          helpBtn.textContent = wasActive ? 'Canceling...' : 'Requesting...';
+          fetch(API_URL, { method: 'POST', body: new URLSearchParams({ team: team, action: 'help' }) })
+            .then(function (res) { return res.json(); })
+            .then(function (data) {
+              if (data.status !== 'ok') {
+                console.error('Help toggle failed:', data.message);
+                setHelpState(wasActive);
+                return;
+              }
+              setHelpState(data.hilfe_angefordert);
+            })
+            .catch(function (err) {
+              console.error('Help toggle request failed:', err);
+              setHelpState(wasActive);
+            })
+            .finally(function () { helpBtn.disabled = false; });
+        });
+      }
+    </script>
+  </body>
+</html>

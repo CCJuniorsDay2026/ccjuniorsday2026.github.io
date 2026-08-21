@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Protocol 16 - Task 4: Signal</title>
+  <style>
+    :root {
+      --bg: #002E3C;
+      --bg-deep: #001B24;
+      --accent: #FFD700;
+      --text: #F1EFED;
+      --text-muted: #A0AEAC;
+      --border: #537173;
+      --danger: #C5000E;
+      --success: #008932;
+      --panel: rgba(255,255,255,0.04);
+      --panel-border: rgba(255,255,255,0.10);
+    }
+    * { box-sizing: border-box; }
+    html { min-height: 100%; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: radial-gradient(circle at 50% 12%, #0a4457 0%, var(--bg) 45%, var(--bg-deep) 100%);
+      color: var(--text);
+      font-family: -apple-system, "Segoe UI", Arial, sans-serif;
+      padding: 24px 24px 210px;
+    }
+    .stage { width: 100%; max-width: 700px; margin: 0 auto; text-align: center; }
+    .protocol-label {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 6px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 10px;
+    }
+    .kicker { font-size: 13px; font-weight: 600; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 6px; }
+    h1 { font-size: 26px; font-weight: 600; margin: 0 0 14px; }
+    .lede { font-size: 14.5px; line-height: 1.65; color: var(--text-muted); margin: 0 0 10px; max-width: 520px; margin-left: auto; margin-right: auto; }
+    .lede:last-of-type { margin-bottom: 30px; }
+
+    .signal-row { display: flex; justify-content: center; margin-bottom: 24px; }
+    .signal-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 13px 28px;
+      border-radius: 999px;
+      border: 1px solid var(--accent);
+      background: transparent;
+      color: var(--accent);
+      font-family: inherit;
+      font-size: 13.5px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+    .signal-btn:hover { background: rgba(255,215,0,0.08); }
+    .signal-btn.playing { animation: signalPulse 0.9s ease-in-out infinite; }
+    @keyframes signalPulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(255,215,0,0.4); }
+      50% { box-shadow: 0 0 0 10px rgba(255,215,0,0); }
+    }
+    .signal-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+
+    .code-panel {
+      text-align: left;
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      border-radius: 12px;
+      padding: 18px 20px;
+      margin-bottom: 32px;
+    }
+    .code-toolbar { display: flex; justify-content: flex-end; gap: 8px; margin-bottom: 12px; }
+    .code-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 12.5px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: border-color 0.15s ease, background 0.15s ease;
+    }
+    .code-btn:hover { border-color: var(--accent); }
+    .code-btn.copied { border-color: var(--success); color: #6FE39B; }
+    .code-block {
+      font-family: "SF Mono", "Courier New", monospace;
+      font-size: 22px;
+      letter-spacing: 3px;
+      line-height: 2.1;
+      color: var(--text);
+      word-break: break-all;
+      white-space: pre-wrap;
+      background: rgba(0,0,0,0.2);
+      border-radius: 8px;
+      padding: 20px 18px;
+      text-align: center;
+    }
+    .code-caption { font-size: 12px; color: var(--text-muted); margin: 12px 2px 0; text-align: center; }
+
+    .unlock-panel {
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      border-radius: 12px;
+      padding: 22px 20px;
+      margin-bottom: 24px;
+    }
+    .unlock-label {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin: 0 0 16px;
+    }
+    .letter-inputs-row { display: flex; justify-content: center; gap: 7px; margin-bottom: 14px; flex-wrap: wrap; }
+    .letter-inputs-row input {
+      width: 38px;
+      height: 50px;
+      text-align: center;
+      font-size: 21px;
+      font-weight: 700;
+      font-family: inherit;
+      text-transform: uppercase;
+      color: var(--text);
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      outline: none;
+    }
+    .letter-inputs-row input:focus { border-color: var(--accent); }
+    .letter-inputs-row.error input { border-color: var(--danger); animation: shake 0.4s ease; }
+    .letter-inputs-row.success input { border-color: var(--success); }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-6px); }
+      75% { transform: translateX(6px); }
+    }
+    .unlock-status { min-height: 20px; font-size: 13px; font-weight: 600; color: var(--text-muted); }
+    .unlock-status.error { color: #FF8A80; }
+    .unlock-status.success { color: #6FE39B; }
+    .verify-btn {
+      margin-top: 6px;
+      padding: 10px 26px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: border-color 0.15s ease;
+    }
+    .verify-btn:hover { border-color: var(--accent); }
+
+    .continue-row { text-align: center; margin-top: 6px; opacity: 0; pointer-events: none; transition: opacity 0.6s ease; }
+    .continue-row.show { opacity: 1; pointer-events: auto; }
+    .continue-btn {
+      display: inline-block;
+      padding: 14px 40px;
+      background: var(--accent);
+      color: #1A1500;
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-decoration: none;
+      border-radius: 999px;
+      transition: transform 0.15s ease;
+    }
+    .continue-btn:hover { transform: scale(1.03); }
+
+    .help-btn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: transparent;
+      color: #FF8A80;
+      border: 1px solid var(--danger);
+      border-radius: 999px;
+      padding: 10px 20px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background 0.15s ease;
+      z-index: 10;
+    }
+    .help-btn:hover { background: rgba(197,0,14,0.12); }
+    .help-btn:disabled { opacity: 0.6; cursor: default; }
+    .help-btn.active { background: var(--danger); color: #fff; border-color: var(--danger); animation: helpPulseBtn 1.4s ease-in-out infinite; }
+    .help-btn.pending { opacity: 0.55; }
+    @keyframes helpPulseBtn {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(197,0,14,0.55); }
+      50% { box-shadow: 0 0 0 9px rgba(197,0,14,0); }
+    }
+  </style>
+  </head>
+  <body>
+    <button id="helpBtn" class="help-btn" type="button">Request Help</button>
+    <div class="stage">
+      <div class="protocol-label">Protocol 16</div>
+      <div class="kicker">Task 4 &middot; Signal</div>
+      <h1>One Signal, Repeating.</h1>
+      <p class="lede">The Field Agents are gone. What's left of Sherlock is sending something through the old channel &mdash; the same short burst, over and over. No words. Just a rhythm.</p>
+      <p class="lede">Sherlock speaks every code there is. If you don't, ask him.</p>
+
+      <div class="signal-row">
+        <button class="signal-btn" id="signalBtn" type="button"><span class="signal-dot"></span>Play Signal</button>
+      </div>
+
+      <div class="code-panel">
+        <div class="code-toolbar">
+          <button class="code-btn" id="copyBtn" type="button">Copy</button>
+          <button class="code-btn" id="downloadBtn" type="button">Download</button>
+        </div>
+        <div class="code-block" id="codeBlock">-.-. --- -... .- -.. . ..-. ..-.</div>
+        <p class="code-caption">Transcribed exactly as received. Nothing added, nothing cleaned up.</p>
+      </div>
+
+      <div class="unlock-panel">
+        <p class="unlock-label">Decoded Signal</p>
+        <div class="letter-inputs-row" id="lettersRow">
+          <input type="text" maxlength="1" autocomplete="off">
+          <input type="text" maxlength="1" autocomplete="off">
+          <input type="text" maxlength="1" autocomplete="off">
+          <input type="text" maxlength="1" autocomplete="off">
+          <input type="text" maxlength="1" autocomplete="off">
+          <input type="text" maxlength="1" autocomplete="off">
+          <input type="text" maxlength="1" autocomplete="off">
+          <input type="text" maxlength="1" autocomplete="off">
+        </div>
+        <div class="unlock-status" id="unlockStatus"></div>
+        <button class="verify-btn" id="verifyBtn" type="button">Verify</button>
+      </div>
+
+      <div class="continue-row" id="continueRow">
+        <a class="continue-btn" id="continueLink" href="16_Aufgabe04_Triageboard.html">Open Secure Channel</a>
+      </div>
+    </div>
+
+    <script>
+      var API_URL = 'https://script.google.com/macros/s/AKfycbxc0QIIyaYTbGBMyhsUdYD01_AAYyrIsySqgF4rSWHPH8t73wHdP6iGEYUQMc5ImVsZ/exec';
+      var team = sessionStorage.getItem('teamNumber');
+      if (team) {
+        fetch(API_URL, { method: 'POST', body: new URLSearchParams({ team: team, action: 'progress', page: '15', status: 'open' }) });
+      }
+
+      var codeBlock = document.getElementById('codeBlock');
+      var copyBtn = document.getElementById('copyBtn');
+      var downloadBtn = document.getElementById('downloadBtn');
+
+      copyBtn.addEventListener('click', function () {
+        var text = codeBlock.textContent;
+        function done() {
+          copyBtn.textContent = 'Copied';
+          copyBtn.classList.add('copied');
+          setTimeout(function () {
+            copyBtn.textContent = 'Copy';
+            copyBtn.classList.remove('copied');
+          }, 1500);
+        }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(done).catch(function () { fallbackCopy(text, done); });
+        } else {
+          fallbackCopy(text, done);
+        }
+      });
+
+      function fallbackCopy(text, done) {
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand('copy'); } catch (e) {}
+        document.body.removeChild(ta);
+        done();
+      }
+
+      downloadBtn.addEventListener('click', function () {
+        var blob = new Blob([codeBlock.textContent], { type: 'text/plain' });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = 'signal_fragment.txt';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+      });
+
+      // --- Synthesized Morse audio (dit/dah tone sequence) ---
+      var signalBtn = document.getElementById('signalBtn');
+      var MORSE_TEXT = codeBlock.textContent.trim();
+      var playing = false;
+      function playMorse() {
+        if (playing) return;
+        playing = true;
+        signalBtn.classList.add('playing');
+        try {
+          var ctx = new (window.AudioContext || window.webkitAudioContext)();
+          var unit = 0.11;
+          var t = ctx.currentTime + 0.05;
+          var letters = MORSE_TEXT.split(' ');
+          letters.forEach(function (letter) {
+            if (!letter) return;
+            letter.split('').forEach(function (sym) {
+              var dur = sym === '-' ? unit * 3 : unit;
+              var osc = ctx.createOscillator();
+              var gain = ctx.createGain();
+              osc.frequency.value = 600;
+              osc.type = 'sine';
+              osc.connect(gain);
+              gain.connect(ctx.destination);
+              gain.gain.setValueAtTime(0.0001, t);
+              gain.gain.linearRampToValueAtTime(0.22, t + 0.008);
+              gain.gain.setValueAtTime(0.22, t + dur - 0.008);
+              gain.gain.linearRampToValueAtTime(0.0001, t + dur);
+              osc.start(t);
+              osc.stop(t + dur + 0.02);
+              t += dur + unit;
+            });
+            t += unit * 2;
+          });
+          setTimeout(function () {
+            playing = false;
+            signalBtn.classList.remove('playing');
+          }, (t - ctx.currentTime) * 1000);
+        } catch (e) {
+          console.error('Morse playback failed:', e);
+          playing = false;
+          signalBtn.classList.remove('playing');
+        }
+      }
+      signalBtn.addEventListener('click', playMorse);
+
+      // --- 8-letter decode gate ---
+      var ANSWER = 'COBADEFF';
+      var lettersRow = document.getElementById('lettersRow');
+      var lettersNodeList = lettersRow.querySelectorAll('input');
+      var letterEls = [];
+      for (var li = 0; li < lettersNodeList.length; li++) { letterEls.push(lettersNodeList[li]); }
+      var unlockStatusEl = document.getElementById('unlockStatus');
+      var verifyBtn = document.getElementById('verifyBtn');
+      var continueRow = document.getElementById('continueRow');
+      var gateUnlocked = false;
+
+      letterEls.forEach(function (inp, idx) {
+        inp.addEventListener('input', function () {
+          inp.value = inp.value.replace(/[^a-zA-Z]/g, '').slice(0, 1).toUpperCase();
+          lettersRow.classList.remove('error');
+          unlockStatusEl.className = 'unlock-status';
+          unlockStatusEl.textContent = '';
+          if (inp.value && idx < letterEls.length - 1) {
+            letterEls[idx + 1].focus();
+          }
+        });
+        inp.addEventListener('keydown', function (ev) {
+          if (ev.key === 'Backspace' && !inp.value && idx > 0) {
+            letterEls[idx - 1].focus();
+          }
+          if (ev.key === 'Enter') {
+            verifyBtn.click();
+          }
+        });
+      });
+
+      verifyBtn.addEventListener('click', function () {
+        if (gateUnlocked) return;
+        var entered = letterEls.map(function (i) { return i.value; }).join('');
+        if (entered.length < ANSWER.length) {
+          lettersRow.classList.add('error');
+          unlockStatusEl.className = 'unlock-status error';
+          unlockStatusEl.textContent = 'Fill in all eight letters.';
+          return;
+        }
+        if (entered === ANSWER) {
+          gateUnlocked = true;
+          lettersRow.classList.remove('error');
+          lettersRow.classList.add('success');
+          unlockStatusEl.className = 'unlock-status success';
+          unlockStatusEl.textContent = 'Verified. Channel identified.';
+          verifyBtn.style.display = 'none';
+          continueRow.classList.add('show');
+        } else {
+          lettersRow.classList.add('error');
+          unlockStatusEl.className = 'unlock-status error';
+          unlockStatusEl.textContent = 'Not correct. Listen again, or ask Sherlock.';
+          setTimeout(function () {
+            letterEls.forEach(function (i) { i.value = ''; });
+            lettersRow.classList.remove('error');
+            letterEls[0].focus();
+          }, 700);
+        }
+      });
+
+      var continueLink = document.getElementById('continueLink');
+      continueLink.addEventListener('click', function () {
+        if (team) {
+          fetch(API_URL, { method: 'POST', keepalive: true, body: new URLSearchParams({ team: team, action: 'progress', page: '15', status: 'done' }) });
+        }
+      });
+
+      var helpBtn = document.getElementById('helpBtn');
+      function setHelpState(active) {
+        if (!helpBtn) return;
+        helpBtn.textContent = active ? 'Help Requested - Cancel' : 'Request Help';
+        helpBtn.classList.toggle('active', !!active);
+        helpBtn.classList.remove('pending');
+      }
+      if (team && helpBtn) {
+        fetch(API_URL + '?t=' + Date.now())
+          .then(function (res) { return res.json(); })
+          .then(function (data) {
+            var mine = (data.teams || []).filter(function (t) { return Number(t.team) === Number(team); })[0];
+            setHelpState(mine && mine.hilfe_angefordert);
+          });
+        helpBtn.addEventListener('click', function () {
+          var wasActive = helpBtn.classList.contains('active');
+          helpBtn.disabled = true;
+          helpBtn.classList.add('pending');
+          helpBtn.textContent = wasActive ? 'Canceling...' : 'Requesting...';
+          fetch(API_URL, { method: 'POST', body: new URLSearchParams({ team: team, action: 'help' }) })
+            .then(function (res) { return res.json(); })
+            .then(function (data) {
+              if (data.status !== 'ok') {
+                console.error('Help toggle failed:', data.message);
+                setHelpState(wasActive);
+                return;
+              }
+              setHelpState(data.hilfe_angefordert);
+            })
+            .catch(function (err) {
+              console.error('Help toggle request failed:', err);
+              setHelpState(wasActive);
+            })
+            .finally(function () { helpBtn.disabled = false; });
+        });
+      }
+    </script>
+  </body>
+</html>
