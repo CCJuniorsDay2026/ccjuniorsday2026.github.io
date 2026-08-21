@@ -35,14 +35,25 @@
       color: var(--accent);
       margin-bottom: 10px;
     }
-    .kicker { font-size: 13px; font-weight: 600; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 22px; }
+    .kicker { font-size: 13px; font-weight: 600; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 6px; }
+    h1 { font-size: 24px; font-weight: 600; margin: 0 0 14px; }
+    .lede { font-size: 14.5px; line-height: 1.65; color: var(--text-muted); margin: 0 0 30px; max-width: 480px; margin-left: auto; margin-right: auto; }
 
     .riddle-panel {
       background: var(--panel);
-      border: 1px solid var(--panel-border);
-      border-radius: 12px;
-      padding: 26px 28px;
+      border-left: 3px solid var(--accent);
+      border-radius: 0 10px 10px 0;
+      padding: 22px 26px;
       margin-bottom: 30px;
+      text-align: left;
+    }
+    .riddle-tag {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin: 0 0 10px;
     }
     .riddle-line { font-size: 15.5px; line-height: 1.85; color: var(--text); margin: 0; }
     .riddle-line.q { color: var(--accent); font-weight: 600; margin-top: 8px; }
@@ -109,8 +120,11 @@
     <div class="stage">
       <div class="protocol-label">Protocol 16</div>
       <div class="kicker">Task 3 &middot; Sherlock Matrix</div>
+      <h1>One Word Left.</h1>
+      <p class="lede">The matrix let you through. What&rsquo;s waiting now isn&rsquo;t a code &mdash; it&rsquo;s a question Sherlock left behind on purpose. Answer it, and the next piece of him comes loose.</p>
 
       <div class="riddle-panel">
+        <p class="riddle-tag">Left behind in the matrix</p>
         <p class="riddle-line">One creates a link.</p>
         <p class="riddle-line">One breaks a link.</p>
         <p class="riddle-line">The third restores what was lost.</p>
@@ -163,12 +177,13 @@
         { sec: 900, idx: 7 }
       ];
 
+      // Reveal is a prefill/hint only, never a lock: all 9 fields stay writable
+      // at all times so a team that already knows the answer can type it in full.
       function revealBox(idx) {
         var box = boxes[idx];
         if (box.classList.contains('revealed')) return;
-        box.value = ANSWER[idx].toUpperCase();
-        box.readOnly = true;
         box.classList.add('revealed');
+        if (!box.value) box.value = ANSWER[idx].toUpperCase();
         checkComplete();
       }
       function applyReveals() {
@@ -180,30 +195,19 @@
       applyReveals();
       setInterval(applyReveals, 3000);
 
-      function nextEditable(from) {
-        for (var i = from; i < boxes.length; i++) { if (!boxes[i].readOnly) return i; }
-        return -1;
-      }
-      function prevEditable(from) {
-        for (var i = from; i >= 0; i--) { if (!boxes[i].readOnly) return i; }
-        return -1;
-      }
-
       boxes.forEach(function (box, idx) {
         box.addEventListener('input', function () {
           box.value = box.value.replace(/[^a-zA-Z]/g, '').slice(0, 1).toUpperCase();
           lettersRow.classList.remove('error');
           answerFeedback.classList.remove('show');
-          if (box.value) {
-            var ni = nextEditable(idx + 1);
-            if (ni !== -1) boxes[ni].focus();
+          if (box.value && idx < boxes.length - 1) {
+            boxes[idx + 1].focus();
           }
           checkComplete();
         });
         box.addEventListener('keydown', function (ev) {
-          if (ev.key === 'Backspace' && !box.value) {
-            var pi = prevEditable(idx - 1);
-            if (pi !== -1) boxes[pi].focus();
+          if (ev.key === 'Backspace' && !box.value && idx > 0) {
+            boxes[idx - 1].focus();
           }
         });
       });
@@ -224,17 +228,17 @@
         } else {
           lettersRow.classList.add('error');
           answerFeedback.classList.add('show');
-          boxes.forEach(function (b) { if (!b.readOnly) b.value = ''; });
+          boxes.forEach(function (b, idx) {
+            b.value = b.classList.contains('revealed') ? ANSWER[idx].toUpperCase() : '';
+          });
           setTimeout(function () {
             lettersRow.classList.remove('error');
-            var fi = nextEditable(0);
-            if (fi !== -1) boxes[fi].focus();
+            boxes[0].focus();
           }, 700);
         }
       }
 
-      var firstEditable = nextEditable(0);
-      if (firstEditable !== -1) boxes[firstEditable].focus();
+      boxes[0].focus();
 
       var helpBtn = document.getElementById('helpBtn');
       function setHelpState(active) {

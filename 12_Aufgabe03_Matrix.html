@@ -77,6 +77,14 @@
       50% { filter: drop-shadow(0 0 9px rgba(57,255,20,0.95)); transform: scale(1.35); }
     }
     .matrix-svg .node.revealed { fill: #ffffff; }
+    .matrix-svg .outer-ring {
+      fill: none;
+      stroke: #ffffff;
+      stroke-width: 1.5;
+      opacity: 0;
+      transition: opacity 0.8s ease;
+    }
+    .matrix-svg .outer-ring.show { opacity: 0.85; }
 
     .side-stack { display: flex; flex-direction: column; gap: 16px; }
     .kv-row { display: flex; justify-content: space-between; font-size: 11px; padding: 3px 0; border-bottom: 1px dashed var(--gr-faint); color: var(--text-muted); }
@@ -326,6 +334,7 @@
       }
 
       var nodeEls = [];
+      var targetRingEl = null;
       nodes.forEach(function (n) {
         var c = document.createElementNS(svgNS, 'circle');
         c.setAttribute('class', 'node pulse');
@@ -334,9 +343,20 @@
         c.setAttribute('r', 5);
         matrixSvg.appendChild(c);
         nodeEls.push({ el: c, target: !!n.target });
+        if (n.target) {
+          var ring = document.createElementNS(svgNS, 'circle');
+          ring.setAttribute('class', 'outer-ring');
+          ring.setAttribute('cx', gx(n.x));
+          ring.setAttribute('cy', gy(n.y));
+          ring.setAttribute('r', 12);
+          matrixSvg.appendChild(ring);
+          targetRingEl = ring;
+        }
       });
 
-      // After 10 minutes, only the target node keeps pulsing.
+      // Minute 0: all nodes green + pulsing.
+      // Minute 5: only the target node keeps pulsing, the rest stay green but static.
+      // Minute 10: the target additionally gets an outer ring and turns white, still pulsing.
       // Timestamp persisted in sessionStorage so a reload doesn't restart the clock.
       var PULSE_KEY = 'a3_matrix_start';
       var pStartStr = sessionStorage.getItem(PULSE_KEY);
@@ -349,14 +369,16 @@
       }
       function narrowPulse() {
         var elapsed = (Date.now() - pStart) / 1000;
+        if (elapsed >= 300) {
+          nodeEls.forEach(function (n) {
+            if (!n.target) n.el.classList.remove('pulse');
+          });
+        }
         if (elapsed >= 600) {
           nodeEls.forEach(function (n) {
-            if (!n.target) {
-              n.el.classList.remove('pulse');
-            } else {
-              n.el.classList.add('revealed');
-            }
+            if (n.target) n.el.classList.add('revealed');
           });
+          if (targetRingEl) targetRingEl.classList.add('show');
         }
       }
       narrowPulse();
