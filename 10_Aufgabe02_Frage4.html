@@ -120,6 +120,20 @@
     .next-btn:hover { transform: scale(1.03); }
     .next-btn:disabled { opacity: 0.5; cursor: default; transform: none; }
 
+    .result-msg {
+      display: none;
+      margin: -8px 0 22px;
+      padding: 14px 18px;
+      border-radius: 10px;
+      background: rgba(197,0,14,0.12);
+      border: 1px solid var(--danger);
+      color: #FF8A80;
+      font-size: 13.5px;
+      line-height: 1.6;
+      text-align: left;
+    }
+    .result-msg.show { display: block; }
+
     .help-btn {
       position: fixed;
       bottom: 20px;
@@ -149,7 +163,7 @@
       0%, 100% { box-shadow: 0 0 0 0 rgba(197,0,14,0.55); }
       50% { box-shadow: 0 0 0 9px rgba(197,0,14,0); }
     }
-  </style>
+</style>
   </head>
   <body>
     <button id="helpBtn" class="help-btn" type="button">Request Help</button>
@@ -176,8 +190,10 @@
       <p class="q-hint">Not all of these are tools the client uses directly &mdash; some work behind the scenes through her relationship team. Count both.</p>
       <div class="opt-list" id="optList"></div>
 
+      <p class="result-msg" id="resultMsg"></p>
+
       <div class="nav-row">
-        <button id="nextBtn" class="next-btn" type="button" disabled>Continue</button>
+        <button id="nextBtn" class="next-btn" type="button" disabled>Check &amp; Continue</button>
       </div>
     </div>
 
@@ -192,6 +208,12 @@
       ];
       var QKEY = 'q4';
       var STORAGE_KEY = 'a2_answers';
+      var CORRECT = {
+        q1: 'mittelstandsbank_direkt',
+        q2: 'fx_live_trader',
+        q3: 'trade_finance_direkt',
+        q4: 'loanpilot'
+      };
 
       function getAnswers() {
         try { return JSON.parse(sessionStorage.getItem(STORAGE_KEY)) || {}; }
@@ -205,6 +227,7 @@
 
       var optList = document.getElementById('optList');
       var nextBtn = document.getElementById('nextBtn');
+      var resultMsg = document.getElementById('resultMsg');
       var current = getAnswers()[QKEY] || null;
 
       OPTIONS.forEach(function (opt) {
@@ -222,6 +245,7 @@
           btn.classList.add('selected');
           current = opt.value;
           nextBtn.disabled = false;
+          resultMsg.classList.remove('show');
         });
         optList.appendChild(btn);
       });
@@ -232,13 +256,31 @@
         fetch(API_URL, { method: 'POST', body: new URLSearchParams({ team: team, action: 'progress', page: '10', status: 'open' }) });
       }
 
+      var checking = false;
       nextBtn.addEventListener('click', function () {
-        if (!current) return;
+        if (!current || checking) return;
+        checking = true;
         setAnswer(QKEY, current);
-        if (team) {
-          fetch(API_URL, { method: 'POST', keepalive: true, body: new URLSearchParams({ team: team, action: 'progress', page: '10', status: 'done' }) });
-        }
-        window.location.href = '11_Aufgabe02_Codepruefung.html';
+        nextBtn.disabled = true;
+        nextBtn.textContent = 'Cross-checking...';
+
+        setTimeout(function () {
+          var answers = getAnswers();
+          var allCorrect = Object.keys(CORRECT).every(function (k) { return answers[k] === CORRECT[k]; });
+
+          if (allCorrect) {
+            if (team) {
+              fetch(API_URL, { method: 'POST', keepalive: true, body: new URLSearchParams({ team: team, action: 'progress', page: '10', status: 'done' }) });
+            }
+            window.location.href = '12_Aufgabe02_Digit2.html';
+          } else {
+            checking = false;
+            nextBtn.disabled = false;
+            nextBtn.textContent = 'Check &amp; Continue';
+            resultMsg.textContent = 'Not quite \u2014 at least one of your four matches doesn\u2019t hold up against the case file. Go back and take another look. Your earlier picks are still there.';
+            resultMsg.classList.add('show');
+          }
+        }, 900);
       });
 
       var helpBtn = document.getElementById('helpBtn');

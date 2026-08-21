@@ -120,6 +120,20 @@
     .next-btn:hover { transform: scale(1.03); }
     .next-btn:disabled { opacity: 0.5; cursor: default; transform: none; }
 
+    .result-msg {
+      display: none;
+      margin: -8px 0 22px;
+      padding: 14px 18px;
+      border-radius: 10px;
+      background: rgba(197,0,14,0.12);
+      border: 1px solid var(--danger);
+      color: #FF8A80;
+      font-size: 13.5px;
+      line-height: 1.6;
+      text-align: left;
+    }
+    .result-msg.show { display: block; }
+
     .help-btn {
       position: fixed;
       bottom: 20px;
@@ -149,7 +163,7 @@
       0%, 100% { box-shadow: 0 0 0 0 rgba(197,0,14,0.55); }
       50% { box-shadow: 0 0 0 9px rgba(197,0,14,0); }
     }
-  </style>
+</style>
   </head>
   <body>
     <button id="helpBtn" class="help-btn" type="button">Request Help</button>
