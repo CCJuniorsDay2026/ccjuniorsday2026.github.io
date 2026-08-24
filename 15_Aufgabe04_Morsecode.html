@@ -41,6 +41,19 @@
     .lede { font-size: 14.5px; line-height: 1.65; color: var(--text-muted); margin: 0 0 10px; max-width: 520px; margin-left: auto; margin-right: auto; }
     .lede:last-of-type { margin-bottom: 30px; }
 
+    .uptime-clock {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 0 0 26px;
+      padding: 10px 22px;
+      border: 1px solid var(--panel-border);
+      border-radius: 10px;
+      background: var(--panel);
+    }
+    .uptime-label { font-size: 10.5px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px; }
+    .uptime-value { font-family: "SF Mono", "Courier New", monospace; font-size: 20px; font-weight: 700; color: var(--accent); letter-spacing: 1px; }
+
     .signal-row { display: flex; justify-content: center; margin-bottom: 24px; }
     .signal-btn {
       display: inline-flex;
@@ -224,6 +237,11 @@
       <p class="lede">The Field Agents are gone. What's left of Sherlock is sending something through the old channel &mdash; the same short burst, over and over. No words. Just a rhythm.</p>
       <p class="lede">Sherlock speaks every code there is. If you don't, ask him.</p>
 
+      <div class="uptime-clock" id="uptimeWrap">
+        <div class="uptime-label">Signal Uptime</div>
+        <div class="uptime-value" id="uptimeVal">00:00:00</div>
+      </div>
+
       <div class="signal-row">
         <button class="signal-btn" id="signalBtn" type="button"><span class="signal-dot"></span>Play Signal</button>
       </div>
@@ -266,6 +284,26 @@
       if (team) {
         fetch(API_URL, { method: 'POST', body: new URLSearchParams({ team: team, action: 'progress', page: '15', status: 'open' }) });
       }
+
+      // --- Signal timer (shared by the uptime clock and the phased reveal below) ---
+      // Timestamp persisted in sessionStorage so a reload doesn't restart the clock.
+      var SIGNAL_KEY = 'a4_signal_start';
+      var sigStartStr = sessionStorage.getItem(SIGNAL_KEY);
+      var sigStart;
+      if (sigStartStr) {
+        sigStart = parseInt(sigStartStr, 10);
+      } else {
+        sigStart = Date.now();
+        sessionStorage.setItem(SIGNAL_KEY, String(sigStart));
+      }
+      function pad2(n) { return n < 10 ? '0' + n : '' + n; }
+      function updateUptime() {
+        var s = Math.floor((Date.now() - sigStart) / 1000);
+        var hh = Math.floor(s / 3600), mm = Math.floor((s % 3600) / 60), ss = s % 60;
+        document.getElementById('uptimeVal').textContent = pad2(hh) + ':' + pad2(mm) + ':' + pad2(ss);
+      }
+      updateUptime();
+      setInterval(updateUptime, 1000);
 
       var codeBlock = document.getElementById('codeBlock');
       var copyBtn = document.getElementById('copyBtn');
@@ -361,16 +399,7 @@
       // Minute 0-10: signal is audio-only, no transcription shown.
       // Minute 10+: transcribed dots/dashes become visible.
       // Minute 16+: hint nudges the team to look for the Morse alphabet in the room.
-      // Timestamp persisted in sessionStorage so a reload doesn't restart the clock.
-      var SIGNAL_KEY = 'a4_signal_start';
-      var sigStartStr = sessionStorage.getItem(SIGNAL_KEY);
-      var sigStart;
-      if (sigStartStr) {
-        sigStart = parseInt(sigStartStr, 10);
-      } else {
-        sigStart = Date.now();
-        sessionStorage.setItem(SIGNAL_KEY, String(sigStart));
-      }
+      // Reuses the sigStart timestamp set up above with the uptime clock.
       var codePanelEl = document.getElementById('codePanel');
       var alphabetHintEl = document.getElementById('alphabetHint');
       function applySignalPhases() {
