@@ -107,6 +107,16 @@
     }
     .code-caption { font-size: 12px; color: var(--text-muted); margin: 12px 2px 0; text-align: center; }
 
+    .alphabet-hint {
+      display: none;
+      text-align: center;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      color: var(--accent);
+      margin: 0 0 22px;
+    }
+
     .unlock-panel {
       background: var(--panel);
       border: 1px solid var(--panel-border);
@@ -218,7 +228,9 @@
         <button class="signal-btn" id="signalBtn" type="button"><span class="signal-dot"></span>Play Signal</button>
       </div>
 
-      <div class="code-panel">
+      <p class="alphabet-hint" id="alphabetHint">Look for the Morse alphabet.</p>
+
+      <div class="code-panel" id="codePanel" style="display:none;">
         <div class="code-toolbar">
           <button class="code-btn" id="copyBtn" type="button">Copy</button>
           <button class="code-btn" id="downloadBtn" type="button">Download</button>
@@ -344,6 +356,34 @@
         }
       }
       signalBtn.addEventListener('click', playMorse);
+
+      // --- Phased reveal ---
+      // Minute 0-10: signal is audio-only, no transcription shown.
+      // Minute 10+: transcribed dots/dashes become visible.
+      // Minute 16+: hint nudges the team to look for the Morse alphabet in the room.
+      // Timestamp persisted in sessionStorage so a reload doesn't restart the clock.
+      var SIGNAL_KEY = 'a4_signal_start';
+      var sigStartStr = sessionStorage.getItem(SIGNAL_KEY);
+      var sigStart;
+      if (sigStartStr) {
+        sigStart = parseInt(sigStartStr, 10);
+      } else {
+        sigStart = Date.now();
+        sessionStorage.setItem(SIGNAL_KEY, String(sigStart));
+      }
+      var codePanelEl = document.getElementById('codePanel');
+      var alphabetHintEl = document.getElementById('alphabetHint');
+      function applySignalPhases() {
+        var elapsed = (Date.now() - sigStart) / 1000;
+        if (elapsed >= 600) {
+          codePanelEl.style.display = 'block';
+        }
+        if (elapsed >= 960) {
+          alphabetHintEl.style.display = 'block';
+        }
+      }
+      applySignalPhases();
+      setInterval(applySignalPhases, 3000);
 
       // --- 8-letter decode gate ---
       var ANSWER = 'COBADEFF';
