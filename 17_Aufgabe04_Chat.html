@@ -55,7 +55,7 @@
       position: absolute;
       top: -3px;
       bottom: -3px;
-      left: 90%;
+      left: 97%;
       width: 2px;
       background: rgba(255,255,255,0.55);
     }
@@ -160,7 +160,7 @@
           <div class="trust-fill" id="trustFill" style="width:30%"></div>
           <div class="trust-target-mark"></div>
         </div>
-        <p class="trust-sub">Reach 9 to send the reply.</p>
+        <p class="trust-sub">Reach 10 to send the reply.</p>
       </div>
 
       <div id="roundArea">
@@ -235,13 +235,45 @@
             { text: "Because our platform really is better than the other three banks you're considering.", correct: false },
             { text: "Mr. Moratti already explained our approach yesterday.", correct: false }
           ]
+        },
+        {
+          q: "Vietnam and Poland are new to us. Will someone actually understand what we're trying to build there, or is this just another line on a spreadsheet?",
+          opts: [
+            { text: "Our system already covers every market you could possibly need.", correct: false },
+            { text: "Your relationship contact brings in the right specialists as those markets develop — you're not left with a generic answer.", correct: true },
+            { text: "That's really a question for your local subsidiary, not for us.", correct: false }
+          ]
+        },
+        {
+          q: "You said this reply comes from the team. Does that include the two people you sent out of the room?",
+          opts: [
+            { text: "No, that was a separate errand, unrelated to this.", correct: false },
+            { text: "It doesn't matter who wrote it, the content speaks for itself.", correct: false },
+            { text: "Yes — they're back with exactly the piece that was missing, so this only exists because all of us worked on it together.", correct: true }
+          ]
+        },
+        {
+          q: "Let's talk about timing. If I need something urgently, how fast can I actually expect a real answer, not a form response?",
+          opts: [
+            { text: "As fast as it takes a person to pick up — your direct contact is reachable, and anything urgent gets escalated immediately, not queued.", correct: true },
+            { text: "Our system processes all requests within 24 hours automatically.", correct: false },
+            { text: "That depends on our internal workload that week.", correct: false }
+          ]
+        },
+        {
+          q: "One last thing — if this reply had come with the same rushed tone as yesterday's, would you have blamed the system, or the people?",
+          opts: [
+            { text: "Honestly, the system probably would have caught it eventually.", correct: false },
+            { text: "The people. Which is exactly why this one was checked and cross-referenced, not rushed out the door.", correct: true },
+            { text: "Mistakes happen under deadline pressure, that's normal for any bank.", correct: false }
+          ]
         }
       ];
 
-      var TARGET = 9;
+      var TARGET = 10;
       var FLOOR = 1;
       var CAP = 10;
-      var GAIN = 3;
+      var GAIN = 2;
       var WRONG_PENALTY = 3;
       var TIMEOUT_PENALTY = 2;
       var ROUND_SECONDS = 35;
