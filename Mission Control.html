@@ -65,6 +65,7 @@ tbody tr.help-active:hover { background: rgba(197,0,14,0.34); }
 .badge { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; padding: 4px 10px; border-radius: 999px; white-space: nowrap; }
 .badge.in { background: rgba(0,137,50,0.18); color: #6FE39B; }
 .badge.out { background: rgba(160,174,172,0.12); color: var(--text-muted); }
+.badge.done { background: rgba(255,215,0,0.18); color: var(--accent); font-weight: 700; }
 .badge.help { background: var(--danger); color: #fff; animation: helpPulse 1.2s ease-in-out infinite; }
 .badge .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
 @keyframes helpPulse {
@@ -197,7 +198,10 @@ function render(teams) {
 teams.sort(function (a, b) { return Number(a.team) - Number(b.team); });
 var rows = teams.map(function (t) {
 var loggedIn = !!t.locked_in_at;
-var badge = loggedIn
+var signedOff = !!t.page_19;
+var badge = signedOff
+? '<span class="badge done"><span class="dot"></span>Abgemeldet</span>'
+: loggedIn
 ? '<span class="badge in"><span class="dot"></span>Eingeloggt</span>'
 : '<span class="badge out"><span class="dot"></span>Wartet</span>';
 var helpActive = !!t.hilfe_angefordert;
