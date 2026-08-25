@@ -360,13 +360,14 @@
         signalBtn.classList.add('playing');
         try {
           var ctx = new (window.AudioContext || window.webkitAudioContext)();
-          var unit = 0.11;
+          var toneUnit = 0.22; // dit length, played 100% slower than the original 0.11s
+          var gapUnit = 0.275; // pause length, 150% longer than the original 0.11s
           var t = ctx.currentTime + 0.05;
           var letters = MORSE_TEXT.split(' ');
           letters.forEach(function (letter) {
             if (!letter) return;
             letter.split('').forEach(function (sym) {
-              var dur = sym === '-' ? unit * 3 : unit;
+              var dur = sym === '-' ? toneUnit * 3 : toneUnit;
               var osc = ctx.createOscillator();
               var gain = ctx.createGain();
               osc.frequency.value = 600;
@@ -379,9 +380,9 @@
               gain.gain.linearRampToValueAtTime(0.0001, t + dur);
               osc.start(t);
               osc.stop(t + dur + 0.02);
-              t += dur + unit;
+              t += dur + gapUnit;
             });
-            t += unit * 2;
+            t += gapUnit * 2;
           });
           setTimeout(function () {
             playing = false;
