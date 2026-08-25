@@ -85,6 +85,11 @@
       transition: opacity 0.8s ease;
     }
     .matrix-svg .outer-ring.show { opacity: 0.85; }
+    .matrix-svg .tv-symbol { opacity: 0; transition: opacity 1s ease; }
+    .matrix-svg .tv-symbol.show { opacity: 1; }
+    .matrix-svg .tv-frame { fill: rgba(0,0,0,0.5); stroke: var(--gr-dim); stroke-width: 1.5; }
+    .matrix-svg .tv-screen { fill: var(--gr-faint); animation: tvFlicker 3s ease-in-out infinite; }
+    @keyframes tvFlicker { 0%, 100% { opacity: 0.55; } 50% { opacity: 0.9; } }
 
     .side-stack { display: flex; flex-direction: column; gap: 16px; }
     .kv-row { display: flex; justify-content: space-between; font-size: 11px; padding: 3px 0; border-bottom: 1px dashed var(--gr-faint); color: var(--text-muted); }
@@ -273,7 +278,7 @@
         </div>
       </div>
 
-      <p class="envelope-hint" id="envelopeHint">Look for an envelope in your room.</p>
+      <p class="envelope-hint" id="envelopeHint">Use the Sherlock Matrix to find an envelope in your room.</p>
       <div class="code-row">
         <input type="text" class="code-input" id="codeInput" autocomplete="off" placeholder="&gt;">
       </div>
@@ -344,6 +349,42 @@
         matrixSvg.appendChild(lbl);
       }
 
+      // --- TV symbol: narrow rectangle in front of the y-axis, as tall as the axis.
+      // Fades in once only the target node keeps blinking (see narrowPulse below).
+      var tvGroup = document.createElementNS(svgNS, 'g');
+      tvGroup.setAttribute('class', 'tv-symbol');
+      tvGroup.setAttribute('id', 'tvSymbol');
+      var tvTop = gy(4), tvBottom = gy(0);
+      var tvX = 10, tvW = 16;
+      var tvCenterX = tvX + tvW / 2;
+      function tvLine(x1, y1, x2, y2) {
+        var l = document.createElementNS(svgNS, 'line');
+        l.setAttribute('x1', x1); l.setAttribute('y1', y1);
+        l.setAttribute('x2', x2); l.setAttribute('y2', y2);
+        l.setAttribute('stroke', 'var(--gr-dim)');
+        l.setAttribute('stroke-width', '1.2');
+        tvGroup.appendChild(l);
+      }
+      tvLine(tvCenterX, tvTop, tvX - 6, tvTop - 18);
+      tvLine(tvCenterX, tvTop, tvX + tvW + 6, tvTop - 18);
+      var tvFrame = document.createElementNS(svgNS, 'rect');
+      tvFrame.setAttribute('class', 'tv-frame');
+      tvFrame.setAttribute('x', tvX);
+      tvFrame.setAttribute('y', tvTop);
+      tvFrame.setAttribute('width', tvW);
+      tvFrame.setAttribute('height', tvBottom - tvTop);
+      tvFrame.setAttribute('rx', 2);
+      tvGroup.appendChild(tvFrame);
+      var tvScreen = document.createElementNS(svgNS, 'rect');
+      tvScreen.setAttribute('class', 'tv-screen');
+      tvScreen.setAttribute('x', tvX + 3);
+      tvScreen.setAttribute('y', tvTop + 6);
+      tvScreen.setAttribute('width', tvW - 6);
+      tvScreen.setAttribute('height', (tvBottom - tvTop) - 12);
+      tvScreen.setAttribute('rx', 1);
+      tvGroup.appendChild(tvScreen);
+      matrixSvg.appendChild(tvGroup);
+
       var nodeEls = [];
       var targetRingEl = null;
       nodes.forEach(function (n) {
@@ -384,6 +425,7 @@
           nodeEls.forEach(function (n) {
             if (!n.target) n.el.classList.remove('pulse');
           });
+          document.getElementById('tvSymbol').classList.add('show');
         }
         if (elapsed >= 600) {
           nodeEls.forEach(function (n) {
