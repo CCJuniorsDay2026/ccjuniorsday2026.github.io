@@ -169,14 +169,30 @@ function pageKey(n) {
 return 'page_' + (n < 10 ? '0' + n : String(n));
 }
 
+function formatDotTime(iso) {
+if (!iso) return '';
+var d = new Date(iso);
+if (isNaN(d.getTime())) return '';
+return d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+}
+
 function renderProgress(t) {
 var dots = '';
 for (var p = 1; p <= PAGE_COUNT; p++) {
 var val = t[pageKey(p)];
 var cls = '';
 var title = 'Seite ' + p + ': offen';
-if (val === 'open') { cls = ' active'; title = 'Seite ' + p + ': in Bearbeitung'; }
-else if (val) { cls = ' done'; title = 'Seite ' + p + ': erledigt'; }
+if (val === 'open') {
+cls = ' active';
+// Kein eigener Zeitstempel pro Seite beim Betreten gespeichert - last_update
+// trifft nur zu, solange dies wirklich die zuletzt aktive Seite des Teams ist.
+var openTime = formatDotTime(t.last_update);
+title = 'Seite ' + p + ': in Bearbeitung' + (openTime ? ' (seit ' + openTime + ')' : '');
+} else if (val) {
+cls = ' done';
+var doneTime = formatDotTime(val);
+title = 'Seite ' + p + (doneTime ? ': ' + doneTime : ': erledigt');
+}
 dots += '<span class="dot-step' + cls + '" title="' + title + '"></span>';
 }
 return '<div class="progress-track">' + dots + '</div>';
