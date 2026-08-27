@@ -400,7 +400,7 @@
       var tableGroup = document.createElementNS(svgNS, 'g');
       tableGroup.setAttribute('class', 'table-symbol');
       tableGroup.setAttribute('id', 'tableSymbol');
-      var tableX = gx(2.5), tableW = cellX;
+      var tableX = gx(1), tableW = gx(5) - gx(1);
       var tableY = gy(2.2), tableH = 24;
       var tableRect = document.createElementNS(svgNS, 'rect');
       tableRect.setAttribute('class', 'table-frame');
