@@ -87,6 +87,9 @@
     .matrix-svg .outer-ring.show { opacity: 0.85; }
     .matrix-svg .tv-symbol { opacity: 0; transition: opacity 1s ease; }
     .matrix-svg .tv-symbol.show { opacity: 1; }
+    .matrix-svg .table-symbol { opacity: 0; transition: opacity 1s ease; }
+    .matrix-svg .table-symbol.show { opacity: 1; }
+    .matrix-svg .table-frame { fill: rgba(57,255,20,0.1); stroke: var(--gr-dim); stroke-width: 1.2; }
     .matrix-svg .tv-frame { fill: rgba(0,0,0,0.5); stroke: var(--gr-dim); stroke-width: 1.5; }
     .matrix-svg .tv-screen { fill: var(--gr-faint); animation: tvFlicker 3s ease-in-out infinite; }
     @keyframes tvFlicker { 0%, 100% { opacity: 0.55; } 50% { opacity: 0.9; } }
@@ -393,6 +396,22 @@
       tvGroup.appendChild(tvScreen);
       matrixSvg.appendChild(tvGroup);
 
+      // --- Table symbol: rectangle between the two rows, appears at minute 12 ---
+      var tableGroup = document.createElementNS(svgNS, 'g');
+      tableGroup.setAttribute('class', 'table-symbol');
+      tableGroup.setAttribute('id', 'tableSymbol');
+      var tableX = gx(2.5), tableW = cellX;
+      var tableY = gy(2.2), tableH = 24;
+      var tableRect = document.createElementNS(svgNS, 'rect');
+      tableRect.setAttribute('class', 'table-frame');
+      tableRect.setAttribute('x', tableX);
+      tableRect.setAttribute('y', tableY);
+      tableRect.setAttribute('width', tableW);
+      tableRect.setAttribute('height', tableH);
+      tableRect.setAttribute('rx', 3);
+      tableGroup.appendChild(tableRect);
+      matrixSvg.appendChild(tableGroup);
+
       var nodeEls = [];
       var targetRingEl = null;
       nodes.forEach(function (n) {
@@ -442,6 +461,9 @@
           if (targetRingEl) targetRingEl.classList.add('show');
         }
         if (elapsed >= 720) {
+          document.getElementById('tableSymbol').classList.add('show');
+        }
+        if (elapsed >= 900) {
           document.getElementById('envelopeHint').style.display = 'block';
         }
       }
