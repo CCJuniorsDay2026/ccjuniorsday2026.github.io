@@ -365,8 +365,16 @@
         l.setAttribute('stroke-width', '1.2');
         tvGroup.appendChild(l);
       }
-      tvLine(tvCenterX, tvTop, tvX - 6, tvTop - 18);
-      tvLine(tvCenterX, tvTop, tvX + tvW + 6, tvTop - 18);
+      var tvLabel = document.createElementNS(svgNS, 'text');
+      tvLabel.setAttribute('x', tvCenterX);
+      tvLabel.setAttribute('y', tvTop - 10);
+      tvLabel.setAttribute('text-anchor', 'middle');
+      tvLabel.setAttribute('font-size', '11px');
+      tvLabel.setAttribute('font-weight', '700');
+      tvLabel.setAttribute('fill', 'var(--gr-dim)');
+      tvLabel.setAttribute('letter-spacing', '0.5px');
+      tvLabel.textContent = 'VC';
+      tvGroup.appendChild(tvLabel);
       var tvFrame = document.createElementNS(svgNS, 'rect');
       tvFrame.setAttribute('class', 'tv-frame');
       tvFrame.setAttribute('x', tvX);
