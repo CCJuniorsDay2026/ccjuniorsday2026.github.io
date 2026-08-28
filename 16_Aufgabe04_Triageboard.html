@@ -43,30 +43,63 @@
       margin: 0 0 12px;
     }
 
-    .card-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 30px; }
-    @media (max-width: 640px) { .card-grid { grid-template-columns: 1fr; } }
-    .piece-card {
-      text-align: left;
-      padding: 14px 16px;
-      border-radius: 10px;
-      border: 1px solid var(--border);
+    .clip-block {
       background: var(--panel);
+      border: 1px solid var(--panel-border);
+      border-radius: 12px;
+      padding: 18px 20px;
+      margin-bottom: 14px;
+      text-align: left;
+    }
+    .clip-block.answered { border-color: var(--accent); }
+    .clip-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+    .clip-title { font-size: 12px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--accent); }
+    .clip-play-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 18px;
+      border-radius: 999px;
+      border: 1px solid var(--accent);
+      background: transparent;
+      color: var(--accent);
+      font-family: inherit;
+      font-size: 12.5px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+    .clip-play-btn:hover { background: rgba(255,215,0,0.08); }
+    .clip-play-btn.playing { animation: clipPulse 1.4s ease-in-out infinite; }
+    @keyframes clipPulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(255,215,0,0.35); }
+      50% { box-shadow: 0 0 0 8px rgba(255,215,0,0); }
+    }
+    .clip-status { font-size: 11.5px; color: var(--text-muted); }
+    .clip-status.answered { color: var(--accent); font-weight: 600; }
+    .clip-options { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; min-height: 0; }
+    .clip-opt-btn {
+      text-align: left;
+      padding: 11px 14px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: transparent;
       color: var(--text);
       font-family: inherit;
       font-size: 13.5px;
-      line-height: 1.55;
       cursor: pointer;
-      transition: border-color 0.15s ease, background 0.15s ease;
+      transition: background 0.15s ease, border-color 0.15s ease;
     }
-    .piece-card:hover { border-color: var(--accent); }
-    .piece-card.selected { background: rgba(255,215,0,0.1); border-color: var(--accent); }
+    .clip-opt-btn:hover { border-color: var(--accent); }
+    .clip-opt-btn.picked { background: rgba(255,215,0,0.12); border-color: var(--accent); }
+    .clip-opt-btn.locked { cursor: default; }
 
     .missing-panel {
       background: var(--panel);
       border: 1px dashed var(--border);
       border-radius: 12px;
       padding: 20px 22px;
-      margin-bottom: 30px;
+      margin: 22px 0 30px;
     }
     .missing-panel.unlocked { border-style: solid; border-color: var(--accent); background: rgba(255,215,0,0.08); }
     .missing-label { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--accent); margin: 0 0 8px; }
@@ -102,7 +135,8 @@
     .unlock-code-btn:hover { border-color: var(--accent); }
     .missing-status { min-height: 18px; font-size: 12.5px; font-weight: 600; color: #FF8A80; margin-top: 8px; }
 
-    .send-row { text-align: center; }
+    .send-row { text-align: center; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+    .send-row.show { opacity: 1; pointer-events: auto; }
     .next-btn {
       display: inline-block;
       padding: 14px 40px;
@@ -132,6 +166,16 @@
       text-align: left;
     }
     .result-msg.show { display: block; }
+
+    .ending-msg {
+      display: none;
+      text-align: center;
+      font-size: 13px;
+      color: var(--accent);
+      letter-spacing: 0.5px;
+      margin: 0 0 22px;
+    }
+    .ending-msg.show { display: block; }
 
     .help-btn {
       position: fixed;
@@ -166,11 +210,11 @@
         <div class="protocol-label">Protocol 16</div>
         <div class="kicker">Task 4</div>
         <h1>Rebuild Sherlock's Response.</h1>
-        <p class="lede">The channel's open. Below are the pieces on the table &mdash; some are exactly right, some only sound right. Pick the ones that actually belong in the reply to Leonie Schneider. One piece is missing until your Field Agents get back.</p>
+        <p class="lede">Please help me. We need to send an apology to Leonie &mdash; but Moratti is still trying to sabotage me. I need you by my side. I need your support.</p>
       </div>
 
-      <p class="section-label">Available Pieces</p>
-      <div class="card-grid" id="cardGrid"></div>
+      <p class="section-label">Signal Fragments</p>
+      <div id="clipList"></div>
 
       <div class="missing-panel" id="missingPanel">
         <p class="missing-label">Missing Piece</p>
@@ -183,10 +227,11 @@
         <p class="missing-status" id="missingStatus"></p>
       </div>
 
-      <p class="result-msg" id="resultMsg">Not quite &mdash; this draft doesn't hold together yet. Some of what you picked doesn't match the case file, or something correct is still missing. Recheck your pieces and try again.</p>
+      <p class="result-msg" id="resultMsg">Check your answers &mdash; something's not right yet.</p>
+      <p class="ending-msg" id="endingMsg">Moratti is still on the line...</p>
 
-      <div class="send-row">
-        <button class="next-btn" id="sendBtn" type="button">Send Draft</button>
+      <div class="send-row" id="sendRow">
+        <button class="next-btn" id="sendBtn" type="button">Check</button>
       </div>
     </div>
 
@@ -197,42 +242,155 @@
         fetch(API_URL, { method: 'POST', body: new URLSearchParams({ team: team, action: 'progress', page: '16', status: 'open' }) });
       }
 
-      var CARDS = [
-        { id: 'c1', correct: true, text: "One direct contact, with personal advice whenever a decision really matters — that's exactly how Mittelstandsbank Direkt works." },
-        { id: 'c2', correct: true, text: "For your CAD exposure: FX Live Trader Web lets you monitor rates and trade yourself, almost around the clock." },
-        { id: 'c3', correct: true, text: "Your Asia supply-chain delays are exactly what Trade Finance Direkt handles — letters of credit, collections, guarantees, import and export financing." },
-        { id: 'c4', correct: true, text: "Before any financing decision, we'll walk you through the full picture ourselves — credit lines, collateral, terms, and the right process — so nothing gets decided in the dark." },
-        { id: 'd1', correct: false, text: "Mittelstandsbank Direkt also lets you place FX trades yourself, any time you like." },
-        { id: 'd2', correct: false, text: "FX Live Trader Web is only available Monday to Friday, 9 to 5." },
-        { id: 'd3', correct: false, text: "For the delays from Asia, we'd point you toward LoanPilot's exposure dashboard." },
-        { id: 'd4', correct: false, text: "Our platform already solves everything you've described — one system, no gaps." },
-        { id: 'd5', correct: false, text: "We're confident Commerzbank is your only serious option among the banks you're evaluating." },
-        { id: 'd6', correct: false, text: "Trade Finance Direkt can also manage your day-to-day currency conversions." },
-        { id: 'd7', correct: false, text: "LoanPilot is a portal Globex Toys can log into directly, any time." }
+      // --- Six signal-fragment clips: audio plays, answer cards appear only while it plays. ---
+      var CLIPS = [
+        {
+          key: 1, file: 'Task 4 - Clip 1.mp3',
+          options: [
+            { text: '100', correct: true },
+            { text: '50', correct: false },
+            { text: '200', correct: false },
+            { text: '20', correct: false }
+          ]
+        },
+        {
+          key: 2, file: 'Task 4 - Clip 2.mp3',
+          options: [
+            { text: '€500,000', correct: true },
+            { text: '€250,000', correct: false },
+            { text: '€1,000,000', correct: false },
+            { text: '€750,000', correct: false }
+          ]
+        },
+        {
+          key: 3, file: 'Task 4 - Clip 3.mp3',
+          options: [
+            { text: 'avals', correct: true },
+            { text: 'overdraft credit lines', correct: false },
+            { text: 'fixed-term deposits', correct: false },
+            { text: 'export insurance', correct: false }
+          ]
+        },
+        {
+          key: 4, file: 'Task 4 - Clip 4.mp3',
+          options: [
+            { text: 'Laura Schmidt', correct: true },
+            { text: 'Leonie Schneider', correct: false },
+            { text: 'Ingrid Vogt', correct: false },
+            { text: 'Sabine Krüger', correct: false }
+          ]
+        },
+        {
+          key: 5, file: 'Task 4 - Clip 5.mp3',
+          options: [
+            { text: 'a personal specialist', correct: true },
+            { text: 'an automated algorithm', correct: false },
+            { text: 'a dedicated AI agent', correct: false },
+            { text: 'one of our external consultants', correct: false }
+          ]
+        },
+        {
+          key: 6, file: 'Task 4 - Clip 6.mp3',
+          options: [
+            { text: 'around the clock, 365 days a year', correct: false },
+            { text: 'Mon–Thu 08:00–17:00, Fri 08:00–16:30', correct: true },
+            { text: 'Mon–Fri 09:00–18:00', correct: false },
+            { text: 'Mon–Fri 09:00–18:00, Sat 09:00–13:00', correct: false }
+          ]
+        }
       ];
-      var APOLOGY_TEXT = "On behalf of Commerzbank, I want to personally apologise for yesterday's rushed proposal — you deserve a partner who listens first.";
-      var CODE = 'ownership';
 
-      var selected = {};
-      var apologyUnlocked = false;
+      function shuffle(arr) {
+        var a = arr.slice();
+        for (var i = a.length - 1; i > 0; i--) {
+          var j = Math.floor(Math.random() * (i + 1));
+          var tmp = a[i]; a[i] = a[j]; a[j] = tmp;
+        }
+        return a;
+      }
 
-      var cardGrid = document.getElementById('cardGrid');
-      CARDS.forEach(function (card) {
-        var btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'piece-card';
-        btn.textContent = card.text;
-        btn.addEventListener('click', function () {
-          if (selected[card.id]) {
-            delete selected[card.id];
-            btn.classList.remove('selected');
+      var clipAnswers = {}; // key -> chosen text, or undefined if not answered
+      var clipList = document.getElementById('clipList');
+
+      CLIPS.forEach(function (clip) {
+        var block = document.createElement('div');
+        block.className = 'clip-block';
+        block.id = 'clipBlock' + clip.key;
+
+        var head = document.createElement('div');
+        head.className = 'clip-head';
+        var title = document.createElement('span');
+        title.className = 'clip-title';
+        title.textContent = 'Fragment ' + clip.key;
+        var playBtn = document.createElement('button');
+        playBtn.type = 'button';
+        playBtn.className = 'clip-play-btn';
+        playBtn.textContent = 'Play';
+        var status = document.createElement('span');
+        status.className = 'clip-status';
+        status.id = 'clipStatus' + clip.key;
+        status.textContent = 'No answer yet';
+        head.appendChild(title);
+        head.appendChild(playBtn);
+        head.appendChild(status);
+        block.appendChild(head);
+
+        var optionsWrap = document.createElement('div');
+        optionsWrap.className = 'clip-options';
+        optionsWrap.id = 'clipOptions' + clip.key;
+        block.appendChild(optionsWrap);
+
+        clipList.appendChild(block);
+
+        var audio = new Audio(encodeURI('assets/' + clip.file));
+        audio.preload = 'auto';
+        var pendingPick = null;
+
+        playBtn.addEventListener('click', function () {
+          audio.currentTime = 0;
+          pendingPick = null;
+          optionsWrap.innerHTML = '';
+          shuffle(clip.options).forEach(function (opt) {
+            var optBtn = document.createElement('button');
+            optBtn.type = 'button';
+            optBtn.className = 'clip-opt-btn';
+            optBtn.textContent = opt.text;
+            optBtn.addEventListener('click', function () {
+              pendingPick = opt.text;
+              var siblings = optionsWrap.querySelectorAll('.clip-opt-btn');
+              siblings.forEach(function (s) { s.classList.remove('picked'); });
+              optBtn.classList.add('picked');
+            });
+            optionsWrap.appendChild(optBtn);
+          });
+          playBtn.classList.add('playing');
+          audio.play().catch(function (err) { console.error('Clip ' + clip.key + ' failed to play:', err); });
+        });
+
+        audio.addEventListener('ended', function () {
+          playBtn.classList.remove('playing');
+          if (pendingPick) {
+            clipAnswers[clip.key] = pendingPick;
+            optionsWrap.innerHTML = '';
+            var lockedBtn = document.createElement('button');
+            lockedBtn.type = 'button';
+            lockedBtn.className = 'clip-opt-btn picked locked';
+            lockedBtn.textContent = pendingPick;
+            lockedBtn.disabled = true;
+            optionsWrap.appendChild(lockedBtn);
+            block.classList.add('answered');
+            status.textContent = 'Answered';
+            status.classList.add('answered');
           } else {
-            selected[card.id] = true;
-            btn.classList.add('selected');
+            delete clipAnswers[clip.key];
+            optionsWrap.innerHTML = '';
+            block.classList.remove('answered');
+            status.textContent = 'No answer yet';
+            status.classList.remove('answered');
           }
           document.getElementById('resultMsg').classList.remove('show');
+          updateSendVisibility();
         });
-        cardGrid.appendChild(btn);
       });
 
       var missingPanel = document.getElementById('missingPanel');
@@ -242,6 +400,9 @@
       var codeInput = document.getElementById('codeInput');
       var unlockCodeBtn = document.getElementById('unlockCodeBtn');
       var missingStatus = document.getElementById('missingStatus');
+      var APOLOGY_TEXT = "On behalf of Commerzbank, I want to personally apologise for yesterday's rushed proposal — you deserve a partner who listens first.";
+      var CODE = 'ownership';
+      var apologyUnlocked = false;
 
       function tryUnlock() {
         var entered = (codeInput.value || '').trim().toLowerCase();
@@ -255,6 +416,7 @@
           missingRevealed.textContent = APOLOGY_TEXT;
           missingRevealed.style.display = 'block';
           document.getElementById('resultMsg').classList.remove('show');
+          updateSendVisibility();
         } else {
           missingStatus.textContent = 'Not recognised. Check the word with your Field Agents.';
         }
@@ -262,31 +424,47 @@
       unlockCodeBtn.addEventListener('click', tryUnlock);
       codeInput.addEventListener('keydown', function (ev) { if (ev.key === 'Enter') tryUnlock(); });
 
+      var sendRow = document.getElementById('sendRow');
       var sendBtn = document.getElementById('sendBtn');
       var resultMsg = document.getElementById('resultMsg');
-      var sending = false;
+      var endingMsg = document.getElementById('endingMsg');
+
+      function updateSendVisibility() {
+        var allAnswered = CLIPS.every(function (c) { return !!clipAnswers[c.key]; });
+        sendRow.classList.toggle('show', apologyUnlocked && allAnswered);
+      }
+
+      var checking = false;
       sendBtn.addEventListener('click', function () {
-        if (sending) return;
-        sending = true;
+        if (checking) return;
+        checking = true;
         sendBtn.disabled = true;
         sendBtn.textContent = 'Checking...';
 
         setTimeout(function () {
-          var selectedIds = Object.keys(selected);
-          var correctIds = CARDS.filter(function (c) { return c.correct; }).map(function (c) { return c.id; });
-          var allCorrectPicked = correctIds.every(function (id) { return selected[id]; });
-          var noWrongPicked = selectedIds.every(function (id) { return correctIds.indexOf(id) !== -1; });
-          var complete = apologyUnlocked && allCorrectPicked && noWrongPicked;
+          var allCorrect = CLIPS.every(function (c) {
+            var correctOpt = c.options.filter(function (o) { return o.correct; })[0];
+            return clipAnswers[c.key] === correctOpt.text;
+          });
 
-          sending = false;
+          checking = false;
           sendBtn.disabled = false;
-          sendBtn.textContent = 'Send Draft';
+          sendBtn.textContent = 'Check';
 
-          if (complete) {
+          if (allCorrect && apologyUnlocked) {
             if (team) {
               fetch(API_URL, { method: 'POST', keepalive: true, body: new URLSearchParams({ team: team, action: 'progress', page: '16', status: 'done' }) });
             }
-            window.location.href = '17_Aufgabe04_Chat.html';
+            sendRow.classList.remove('show');
+            endingMsg.classList.add('show');
+            var endAudio = new Audio(encodeURI('assets/Task 4 - Morattis Ende.mp3'));
+            endAudio.addEventListener('ended', function () {
+              window.location.href = '17_Aufgabe04_Chat.html';
+            });
+            endAudio.play().catch(function (err) {
+              console.error('Ending clip failed to play:', err);
+              window.location.href = '17_Aufgabe04_Chat.html';
+            });
           } else {
             resultMsg.classList.add('show');
           }
