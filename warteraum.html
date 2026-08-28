@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Protocol 16 - Standby</title>
+  <style>
+    :root {
+      --bg: #002E3C;
+      --bg-deep: #001B24;
+      --accent: #FFD700;
+      --text: #F1EFED;
+      --text-muted: #A0AEAC;
+      --border: #537173;
+    }
+    * { box-sizing: border-box; }
+    html { min-height: 100%; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: radial-gradient(circle at 50% 32%, #0a4457 0%, var(--bg) 45%, var(--bg-deep) 100%);
+      color: var(--text);
+      font-family: -apple-system, "Segoe UI", Arial, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .stage { text-align: center; max-width: 460px; }
+    .protocol-label {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 6px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 44px;
+    }
+    .lede-top {
+      font-size: 14.5px;
+      color: var(--text-muted);
+      margin: 0 0 18px;
+    }
+    .timer-box {
+      font-size: 56px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: var(--accent);
+      font-variant-numeric: tabular-nums;
+      margin: 0 0 48px;
+      text-shadow: 0 0 30px rgba(255,215,0,0.35);
+      animation: timerPulse 2.4s ease-in-out infinite;
+    }
+    @keyframes timerPulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.78; }
+    }
+    .info-panel {
+      border-top: 1px solid var(--border);
+      padding-top: 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .info-line {
+      font-size: 14px;
+      line-height: 1.65;
+      color: var(--text);
+      margin: 0;
+    }
+    .info-line strong { color: var(--accent); }
+    .status-note {
+      margin-top: 32px;
+      font-size: 11.5px;
+      color: var(--text-muted);
+      letter-spacing: 0.5px;
+    }
+  </style>
+  </head>
+  <body>
+    <div class="stage">
+      <div class="protocol-label">Protocol 16</div>
+      <p class="lede-top">The mission starts in</p>
+      <div class="timer-box" id="timerBox">&ndash;&ndash;:&ndash;&ndash;</div>
+      <div class="info-panel">
+        <p class="info-line">You'll solve <strong>4 tasks</strong> in this mission. Sometimes a task breaks down into several smaller steps.</p>
+        <p class="info-line">You'll have <strong>90 minutes</strong> for all of it.</p>
+      </div>
+      <p class="status-note" id="statusNote">Syncing with mission control&hellip;</p>
+    </div>
+
+    <script>
+      var API_URL = 'https://script.google.com/macros/s/AKfycbxc0QIIyaYTbGBMyhsUdYD01_AAYyrIsySqgF4rSWHPH8t73wHdP6iGEYUQMc5ImVsZ/exec';
+      var team = sessionStorage.getItem('teamNumber');
+      if (!team) {
+        window.location.href = 'index.html';
+      }
+
+      var timerBox = document.getElementById('timerBox');
+      var statusNote = document.getElementById('statusNote');
+
+      var targetMs = null;
+      var clockOffset = 0;
+      var navigating = false;
+      var settingsFailCount = 0;
+
+      function formatRemaining(ms) {
+        var totalSeconds = Math.max(0, Math.ceil(ms / 1000));
+        var hours = Math.floor(totalSeconds / 3600);
+        var minutes = Math.floor((totalSeconds % 3600) / 60);
+        var seconds = totalSeconds % 60;
+        var mm = (minutes < 10 ? '0' : '') + minutes;
+        var ss = (seconds < 10 ? '0' : '') + seconds;
+        if (hours > 0) {
+          var hh = (hours < 10 ? '0' : '') + hours;
+          return hh + ':' + mm + ':' + ss;
+        }
+        return mm + ':' + ss;
+      }
+
+      function goToRules() {
+        if (navigating) return;
+        navigating = true;
+        window.location.href = '02_Rules.html';
+      }
+
+      function tick() {
+        if (navigating) return;
+        if (targetMs === null) return;
+        var effectiveNow = Date.now() + clockOffset;
+        var remaining = targetMs - effectiveNow;
+        if (remaining <= 0) {
+          timerBox.textContent = '00:00';
+          goToRules();
+          return;
+        }
+        timerBox.textContent = formatRemaining(remaining);
+      }
+
+      function loadSettings() {
+        fetch(API_URL + '?t=' + Date.now())
+          .then(function (res) { return res.json(); })
+          .then(function (data) {
+            if (data.status !== 'ok') throw new Error(data.message || 'Fehler beim Laden');
+            settingsFailCount = 0;
+            var serverNowMs = data.serverTime ? new Date(data.serverTime).getTime() : Date.now();
+            clockOffset = serverNowMs - Date.now();
+            if (!data.startTime) {
+              // No start time configured (or it was cleared) - don't hold the team back.
+              goToRules();
+              return;
+            }
+            var parsed = new Date(data.startTime).getTime();
+            if (isNaN(parsed)) {
+              goToRules();
+              return;
+            }
+            targetMs = parsed;
+            statusNote.textContent = '';
+            tick();
+          })
+          .catch(function () {
+            settingsFailCount++;
+            if (settingsFailCount === 1) {
+              statusNote.textContent = 'Connection hiccup - still trying.';
+            }
+          });
+      }
+
+      loadSettings();
+      setInterval(tick, 1000);
+      setInterval(loadSettings, 15000);
+    </script>
+  </body>
+</html>

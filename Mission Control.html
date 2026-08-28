@@ -43,6 +43,16 @@ button.btn-outline:disabled { opacity: 0.5; cursor: default; }
 .confirm-panel .confirm-btn { background: var(--danger); color: #fff; border: none; border-radius: 999px; padding: 10px 22px; font-weight: 600; font-size: 13px; cursor: pointer; }
 .confirm-panel .confirm-btn:disabled { opacity: 0.4; cursor: default; }
 .confirm-panel .cancel-btn { background: transparent; color: var(--text-muted); border: 1px solid var(--border); border-radius: 999px; padding: 10px 18px; font-weight: 600; font-size: 13px; cursor: pointer; }
+.start-panel { max-width: 1300px; margin: 0 auto 20px; background: rgba(255,215,0,0.06); border: 1px solid var(--accent); border-radius: 12px; padding: 18px 20px; }
+.start-panel .label { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--accent); margin: 0 0 12px; }
+.start-panel .row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+.start-panel input[type="datetime-local"] { padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: rgba(255,255,255,0.06); color: var(--text); font-size: 14px; font-family: inherit; }
+.start-panel button.save-start { background: var(--accent); color: #1A1500; border: none; border-radius: 999px; padding: 10px 22px; font-weight: 600; font-size: 13px; cursor: pointer; }
+.start-panel button.save-start:hover { transform: scale(1.03); }
+.start-panel button.now-start { background: transparent; color: var(--accent); border: 1px solid var(--accent); border-radius: 999px; padding: 10px 22px; font-weight: 600; font-size: 13px; cursor: pointer; }
+.start-panel button.now-start:hover { background: rgba(255,215,0,0.12); }
+.start-panel .start-status { font-size: 13px; color: var(--text); margin-top: 12px; }
+.start-panel .start-status.running { color: #6FE39B; }
 .error-banner { max-width: 1300px; margin: 0 auto 16px; background: rgba(197,0,14,0.15); border: 1px solid var(--danger); color: var(--text); padding: 12px 16px; border-radius: 10px; font-size: 13px; display: none; }
 .error-banner.show { display: block; }
 .table-wrap { max-width: 1300px; margin: 0 auto; overflow-x: auto; border-radius: 12px; border: 1px solid var(--border); }
@@ -98,6 +108,16 @@ tbody tr.help-active:hover { background: rgba(197,0,14,0.34); }
 </div>
 </div>
 
+<div class="start-panel">
+<p class="label">Mission-Start</p>
+<div class="row">
+<input type="datetime-local" id="startTimeInput">
+<button class="save-start" id="saveStartBtn" type="button">Speichern</button>
+<button class="now-start" id="startNowBtn" type="button">Jetzt sofort starten</button>
+</div>
+<p class="start-status" id="startStatus">Lade&hellip;</p>
+</div>
+
 <div class="confirm-panel" id="confirmPanel">
 <p>Setzt Tracking-Daten (Login-Status, Fortschritt, Update-Zeit) zurück – Raum, Sprache und Mission Control bleiben erhalten.</p>
 <div class="row">
@@ -151,6 +171,59 @@ var confirmPanel = document.getElementById('confirmPanel');
 var confirmInput = document.getElementById('confirmInput');
 var confirmBtn = document.getElementById('confirmBtn');
 var cancelBtn = document.getElementById('cancelBtn');
+var startTimeInput = document.getElementById('startTimeInput');
+var saveStartBtn = document.getElementById('saveStartBtn');
+var startNowBtn = document.getElementById('startNowBtn');
+var startStatus = document.getElementById('startStatus');
+
+var currentStartTimeIso = null;
+var clockOffset = 0;
+
+function isoToLocalInputValue(iso) {
+if (!iso) return '';
+var d = new Date(iso);
+if (isNaN(d.getTime())) return '';
+var pad = function (n) { return (n < 10 ? '0' : '') + n; };
+return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + 'T' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+}
+
+function isEditingStartInput() {
+return document.activeElement === startTimeInput;
+}
+
+function formatCountdown(ms) {
+var totalSeconds = Math.max(0, Math.ceil(ms / 1000));
+var hours = Math.floor(totalSeconds / 3600);
+var minutes = Math.floor((totalSeconds % 3600) / 60);
+var seconds = totalSeconds % 60;
+var pad = function (n) { return (n < 10 ? '0' : '') + n; };
+return (hours > 0 ? hours + ':' : '') + pad(minutes) + ':' + pad(seconds);
+}
+
+function updateStartStatus() {
+if (!currentStartTimeIso) {
+startStatus.textContent = 'Kein Startzeitpunkt gesetzt – Teams starten sofort nach dem Einloggen.';
+startStatus.classList.remove('running');
+return;
+}
+var targetMs = new Date(currentStartTimeIso).getTime();
+if (isNaN(targetMs)) {
+startStatus.textContent = 'Kein Startzeitpunkt gesetzt – Teams starten sofort nach dem Einloggen.';
+startStatus.classList.remove('running');
+return;
+}
+var effectiveNow = Date.now() + clockOffset;
+var remaining = targetMs - effectiveNow;
+if (remaining <= 0) {
+startStatus.textContent = 'Mission läuft (gestartet um ' + new Date(currentStartTimeIso).toLocaleString('de-DE') + ').';
+startStatus.classList.add('running');
+} else {
+startStatus.textContent = 'Startet in ' + formatCountdown(remaining) + ' (um ' + new Date(currentStartTimeIso).toLocaleString('de-DE') + ').';
+startStatus.classList.remove('running');
+}
+}
+
+setInterval(updateStartStatus, 1000);
 
 function formatTime(iso) {
 if (!iso) return '–';
@@ -298,6 +371,46 @@ var active = document.activeElement;
 return !!(active && active.classList && active.classList.contains('editable-field'));
 }
 
+function saveStartField(action, value) {
+saveStartBtn.disabled = true;
+startNowBtn.disabled = true;
+var params = { action: action };
+if (value !== undefined) params.value = value;
+fetch(API_URL, {
+method: 'POST',
+body: new URLSearchParams(params)
+})
+.then(function (res) { return res.json(); })
+.then(function (data) {
+if (data.status !== 'ok') throw new Error(data.message || 'Speichern fehlgeschlagen');
+currentStartTimeIso = data.startTime || null;
+if (!isEditingStartInput()) startTimeInput.value = isoToLocalInputValue(currentStartTimeIso);
+updateStartStatus();
+})
+.catch(function (err) {
+errorBanner.className = 'error-banner show';
+errorBanner.textContent = 'Speichern fehlgeschlagen: ' + err.message;
+})
+.finally(function () {
+saveStartBtn.disabled = false;
+startNowBtn.disabled = false;
+});
+}
+
+saveStartBtn.addEventListener('click', function () {
+if (!startTimeInput.value) {
+errorBanner.className = 'error-banner show';
+errorBanner.textContent = 'Bitte zuerst ein Datum/Uhrzeit wählen.';
+return;
+}
+var iso = new Date(startTimeInput.value).toISOString();
+saveStartField('setStartTime', iso);
+});
+
+startNowBtn.addEventListener('click', function () {
+saveStartField('startNow');
+});
+
 function load() {
 statusText.textContent = 'Aktualisiere…';
 fetch(API_URL + '?t=' + Date.now())
@@ -305,6 +418,11 @@ fetch(API_URL + '?t=' + Date.now())
 .then(function (data) {
 if (data.status !== 'ok') throw new Error(data.message || 'Fehler beim Laden');
 if (!isEditing()) render(data.teams);
+var serverNowMs = data.serverTime ? new Date(data.serverTime).getTime() : Date.now();
+clockOffset = serverNowMs - Date.now();
+currentStartTimeIso = data.startTime || null;
+if (!isEditingStartInput()) startTimeInput.value = isoToLocalInputValue(currentStartTimeIso);
+updateStartStatus();
 statusDot.className = 'status-dot';
 statusText.textContent = 'Aktualisiert um ' + new Date().toLocaleTimeString('de-DE');
 errorBanner.className = 'error-banner';

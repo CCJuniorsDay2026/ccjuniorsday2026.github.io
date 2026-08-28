@@ -122,7 +122,15 @@
                       if (data.status === 'ok') {
                                   sessionStorage.setItem('teamNumber', team);
                                         fetch(API_URL, { method: 'POST', keepalive: true, body: new URLSearchParams({ team: team, action: 'progress', page: '01' }) });
-                                  window.location.href = '02_Rules.html';
+                                  var startTimeMs = data.startTime ? new Date(data.startTime).getTime() : null;
+                                  var serverNowMs = data.serverTime ? new Date(data.serverTime).getTime() : Date.now();
+                                  var clockOffset = serverNowMs - Date.now();
+                                  var effectiveNow = Date.now() + clockOffset;
+                                  if (!startTimeMs || isNaN(startTimeMs) || effectiveNow >= startTimeMs) {
+                                              window.location.href = '02_Rules.html';
+                                  } else {
+                                              window.location.href = 'warteraum.html';
+                                  }
                       } else if (data.code === 'DUPLICATE') {
                                   errorEl.textContent = 'This team number is already logged in.';
                       } else {
