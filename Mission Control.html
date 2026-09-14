@@ -340,15 +340,24 @@ saveField(el);
 });
 }
 
+function postWithRetry(params, retriesLeft) {
+if (retriesLeft === undefined) retriesLeft = 2;
+return fetch(API_URL, { method: 'POST', body: new URLSearchParams(params) })
+.then(function (res) { return res.json(); })
+.catch(function (err) {
+if (retriesLeft > 0) {
+return new Promise(function (resolve) { setTimeout(resolve, 800); })
+.then(function () { return postWithRetry(params, retriesLeft - 1); });
+}
+throw err;
+});
+}
+
 function saveField(el) {
 var team = el.getAttribute('data-team');
 var field = el.getAttribute('data-field');
 var value = el.value;
-fetch(API_URL, {
-method: 'POST',
-body: new URLSearchParams({ action: 'update', team: team, field: field, value: value })
-})
-.then(function (res) { return res.json(); })
+postWithRetry({ action: 'update', team: team, field: field, value: value })
 .then(function (data) {
 if (data.status !== 'ok') throw new Error(data.message || 'Speichern fehlgeschlagen');
 el.classList.add('field-saved');
@@ -376,11 +385,7 @@ saveStartBtn.disabled = true;
 startNowBtn.disabled = true;
 var params = { action: action };
 if (value !== undefined) params.value = value;
-fetch(API_URL, {
-method: 'POST',
-body: new URLSearchParams(params)
-})
-.then(function (res) { return res.json(); })
+postWithRetry(params)
 .then(function (data) {
 if (data.status !== 'ok') throw new Error(data.message || 'Speichern fehlgeschlagen');
 currentStartTimeIso = data.startTime || null;
@@ -480,11 +485,7 @@ confirmBtn.disabled = true;
 confirmBtn.textContent = 'Setze zurück…';
 var params = { action: 'reset', confirm: 'CLEAR_ALL' };
 if (parsed.team) params.team = String(parsed.team);
-fetch(API_URL, {
-method: 'POST',
-body: new URLSearchParams(params)
-})
-.then(function (res) { return res.json(); })
+postWithRetry(params)
 .then(function (data) {
 if (data.status !== 'ok') throw new Error(data.message || 'Reset fehlgeschlagen');
 confirmPanel.className = 'confirm-panel';
