@@ -416,6 +416,8 @@ startNowBtn.addEventListener('click', function () {
 saveStartField('startNow');
 });
 
+var consecutiveLoadFailures = 0;
+
 function load(retriesLeft) {
 if (typeof retriesLeft !== 'number') retriesLeft = 1;
 statusText.textContent = 'Aktualisiere…';
@@ -432,10 +434,18 @@ updateStartStatus();
 statusDot.className = 'status-dot';
 statusText.textContent = 'Aktualisiert um ' + new Date().toLocaleTimeString('de-DE');
 errorBanner.className = 'error-banner';
+consecutiveLoadFailures = 0;
 })
 .catch(function (err) {
 if (retriesLeft > 0) {
 setTimeout(function () { load(retriesLeft - 1); }, 800);
+return;
+}
+consecutiveLoadFailures++;
+if (consecutiveLoadFailures < 2) {
+// One full failed cycle (incl. its own retry) - stay quiet, the next
+// automatic poll in a few seconds will very likely recover on its own.
+statusText.textContent = 'Kurzer Aussetzer, versuche es gleich erneut…';
 return;
 }
 statusDot.className = 'status-dot error';

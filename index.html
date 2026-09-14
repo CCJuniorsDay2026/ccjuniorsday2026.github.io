@@ -103,7 +103,21 @@
     var input = document.getElementById('teamNumber');
     var errorEl = document.getElementById('loginError');
 
-    function doLogin(team, retriesLeft) {
+    function proceedToMission(team, startTime, serverTime) {
+          sessionStorage.setItem('teamNumber', team);
+          fetch(API_URL, { method: 'POST', keepalive: true, body: new URLSearchParams({ team: team, action: 'progress', page: '01' }) });
+          var startTimeMs = startTime ? new Date(startTime).getTime() : null;
+          var serverNowMs = serverTime ? new Date(serverTime).getTime() : Date.now();
+          var clockOffset = serverNowMs - Date.now();
+          var effectiveNow = Date.now() + clockOffset;
+          if (!startTimeMs || isNaN(startTimeMs) || effectiveNow >= startTimeMs) {
+                      window.location.href = '02_Rules.html';
+          } else {
+                      window.location.href = 'warteraum.html';
+          }
+    }
+
+    function doLogin(team, retriesLeft, isRetry) {
           fetch(API_URL, {
                   method: 'POST',
                   body: new URLSearchParams({ team: team, action: 'login' })
@@ -111,17 +125,23 @@
             .then(function (res) { return res.json(); })
             .then(function (data) {
                       if (data.status === 'ok') {
-                                  sessionStorage.setItem('teamNumber', team);
-                                        fetch(API_URL, { method: 'POST', keepalive: true, body: new URLSearchParams({ team: team, action: 'progress', page: '01' }) });
-                                  var startTimeMs = data.startTime ? new Date(data.startTime).getTime() : null;
-                                  var serverNowMs = data.serverTime ? new Date(data.serverTime).getTime() : Date.now();
-                                  var clockOffset = serverNowMs - Date.now();
-                                  var effectiveNow = Date.now() + clockOffset;
-                                  if (!startTimeMs || isNaN(startTimeMs) || effectiveNow >= startTimeMs) {
-                                              window.location.href = '02_Rules.html';
-                                  } else {
-                                              window.location.href = 'warteraum.html';
-                                  }
+                                  proceedToMission(team, data.startTime, data.serverTime);
+                      } else if (data.code === 'DUPLICATE' && isRetry) {
+                                  // A previous automatic retry likely already wrote the login
+                                  // server-side, and only the response back to us got lost
+                                  // (known Apps-Script hiccup) - don't lock the team out for that.
+                                  // Confirm with a fresh read and proceed as if login succeeded.
+                                  btn.textContent = 'Reconnecting...';
+                                  fetch(API_URL + '?t=' + Date.now())
+                                    .then(function (res2) { return res2.json(); })
+                                    .then(function (data2) {
+                                              proceedToMission(team, data2.startTime, data2.serverTime);
+                                    })
+                                    .catch(function () {
+                                              errorEl.textContent = 'This team number is already logged in.';
+                                              btn.disabled = false;
+                                              btn.textContent = 'Enter the Mission';
+                                    });
                       } else if (data.code === 'DUPLICATE') {
                                   errorEl.textContent = 'This team number is already logged in.';
                                   btn.disabled = false;
@@ -135,7 +155,7 @@
             .catch(function () {
                       if (retriesLeft > 0) {
                                   btn.textContent = 'Reconnecting...';
-                                  setTimeout(function () { doLogin(team, retriesLeft - 1); }, 900);
+                                  setTimeout(function () { doLogin(team, retriesLeft - 1, true); }, 900);
                       } else {
                                   errorEl.textContent = 'Connection failed. Please check your network.';
                                   btn.disabled = false;
@@ -153,7 +173,7 @@
           btn.disabled = true;
           btn.textContent = 'Checking...';
           errorEl.textContent = '';
-          doLogin(team, 3);
+          doLogin(team, 3, false);
     });
 </script>
   
