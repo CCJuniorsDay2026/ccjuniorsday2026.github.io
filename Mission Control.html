@@ -411,7 +411,8 @@ startNowBtn.addEventListener('click', function () {
 saveStartField('startNow');
 });
 
-function load() {
+function load(retriesLeft) {
+if (typeof retriesLeft !== 'number') retriesLeft = 1;
 statusText.textContent = 'Aktualisiere…';
 fetch(API_URL + '?t=' + Date.now())
 .then(function (res) { return res.json(); })
@@ -428,6 +429,10 @@ statusText.textContent = 'Aktualisiert um ' + new Date().toLocaleTimeString('de-
 errorBanner.className = 'error-banner';
 })
 .catch(function (err) {
+if (retriesLeft > 0) {
+setTimeout(function () { load(retriesLeft - 1); }, 800);
+return;
+}
 statusDot.className = 'status-dot error';
 statusText.textContent = 'Verbindung fehlgeschlagen';
 errorBanner.className = 'error-banner show';

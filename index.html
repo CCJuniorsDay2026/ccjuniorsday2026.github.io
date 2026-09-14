@@ -103,16 +103,7 @@
     var input = document.getElementById('teamNumber');
     var errorEl = document.getElementById('loginError');
 
-    btn.addEventListener('click', function () {
-          var team = input.value.trim();
-          if (!team || isNaN(team) || Number(team) < 1 || Number(team) > 16) {
-                  errorEl.textContent = 'Please enter a valid team number (1-16).';
-                  return;
-          }
-          btn.disabled = true;
-          btn.textContent = 'Checking...';
-          errorEl.textContent = '';
-
+    function doLogin(team, retriesLeft) {
           fetch(API_URL, {
                   method: 'POST',
                   body: new URLSearchParams({ team: team, action: 'login' })
@@ -133,17 +124,36 @@
                                   }
                       } else if (data.code === 'DUPLICATE') {
                                   errorEl.textContent = 'This team number is already logged in.';
+                                  btn.disabled = false;
+                                  btn.textContent = 'Enter the Mission';
                       } else {
                                   errorEl.textContent = data.message || 'Login failed. Please try again.';
+                                  btn.disabled = false;
+                                  btn.textContent = 'Enter the Mission';
                       }
             })
             .catch(function () {
-                      errorEl.textContent = 'Connection failed. Please check your network.';
-            })
-            .finally(function () {
-                      btn.disabled = false;
-                      btn.textContent = 'Enter the Mission';
+                      if (retriesLeft > 0) {
+                                  btn.textContent = 'Reconnecting...';
+                                  setTimeout(function () { doLogin(team, retriesLeft - 1); }, 900);
+                      } else {
+                                  errorEl.textContent = 'Connection failed. Please check your network.';
+                                  btn.disabled = false;
+                                  btn.textContent = 'Enter the Mission';
+                      }
             });
+    }
+
+    btn.addEventListener('click', function () {
+          var team = input.value.trim();
+          if (!team || isNaN(team) || Number(team) < 1 || Number(team) > 16) {
+                  errorEl.textContent = 'Please enter a valid team number (1-16).';
+                  return;
+          }
+          btn.disabled = true;
+          btn.textContent = 'Checking...';
+          errorEl.textContent = '';
+          doLogin(team, 3);
     });
 </script>
   
