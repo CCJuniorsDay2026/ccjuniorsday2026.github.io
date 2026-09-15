@@ -170,17 +170,16 @@
       <div class="pending-panel" id="pendingPanel">Digit 4 is logged. Report to Mission Control and head to the lockers.</div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+    <script src="mission-common.js"></script>
     <script>
       // DIGIT: placeholder value, same-for-all-teams-for-now convention as pages 05/11.
       var DIGIT = '9';
       // NEXT_PAGE: final sign-off page.
       var NEXT_PAGE = '19_Aufgabe04_Signoff.html';
 
-      var API_URL = 'https://script.google.com/macros/s/AKfycbxc0QIIyaYTbGBMyhsUdYD01_AAYyrIsySqgF4rSWHPH8t73wHdP6iGEYUQMc5ImVsZ/exec';
       var team = sessionStorage.getItem('teamNumber');
-      if (team) {
-        fetch(API_URL, { method: 'POST', body: new URLSearchParams({ team: team, action: 'progress', page: '18', status: 'open' }) });
-      }
+      Mission.initPage('18');
 
       document.getElementById('digitBox').textContent = DIGIT;
 
@@ -225,9 +224,7 @@
       proceedBtn.addEventListener('click', function () {
         if (advanced) return;
         advanced = true;
-        if (team) {
-          fetch(API_URL, { method: 'POST', keepalive: true, body: new URLSearchParams({ team: team, action: 'progress', page: '18', status: 'done' }) });
-        }
+        Mission.markDone('18');
         playNoiseBurst();
         document.body.classList.add('blackout');
         stage.style.opacity = '0';
@@ -242,42 +239,6 @@
         }, 1200);
       });
 
-      var helpBtn = document.getElementById('helpBtn');
-      function setHelpState(active) {
-        if (!helpBtn) return;
-        helpBtn.textContent = active ? 'Help Requested - Cancel' : 'Request Help';
-        helpBtn.classList.toggle('active', !!active);
-        helpBtn.classList.remove('pending');
-      }
-      if (team && helpBtn) {
-        fetch(API_URL + '?t=' + Date.now())
-          .then(function (res) { return res.json(); })
-          .then(function (data) {
-            var mine = (data.teams || []).filter(function (t) { return Number(t.team) === Number(team); })[0];
-            setHelpState(mine && mine.hilfe_angefordert);
-          });
-        helpBtn.addEventListener('click', function () {
-          var wasActive = helpBtn.classList.contains('active');
-          helpBtn.disabled = true;
-          helpBtn.classList.add('pending');
-          helpBtn.textContent = wasActive ? 'Canceling...' : 'Requesting...';
-          fetch(API_URL, { method: 'POST', body: new URLSearchParams({ team: team, action: 'help' }) })
-            .then(function (res) { return res.json(); })
-            .then(function (data) {
-              if (data.status !== 'ok') {
-                console.error('Help toggle failed:', data.message);
-                setHelpState(wasActive);
-                return;
-              }
-              setHelpState(data.hilfe_angefordert);
-            })
-            .catch(function (err) {
-              console.error('Help toggle request failed:', err);
-              setHelpState(wasActive);
-            })
-            .finally(function () { helpBtn.disabled = false; });
-        });
-      }
     </script>
   </body>
 </html>

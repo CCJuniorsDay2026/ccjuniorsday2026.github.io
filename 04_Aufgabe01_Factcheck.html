@@ -176,6 +176,8 @@
       </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+    <script src="mission-common.js"></script>
     <script>
       var CLAIMS = [
         {
@@ -278,11 +280,8 @@
         feedback.textContent = message;
       }
 
-      var API_URL = 'https://script.google.com/macros/s/AKfycbxc0QIIyaYTbGBMyhsUdYD01_AAYyrIsySqgF4rSWHPH8t73wHdP6iGEYUQMc5ImVsZ/exec';
       var team = sessionStorage.getItem('teamNumber');
-      if (team) {
-        fetch(API_URL, { method: 'POST', body: new URLSearchParams({ team: team, action: 'progress', page: '04', status: 'open' }) });
-      }
+      Mission.initPage('04');
 
       var solved = false;
       submitBtn.addEventListener('click', function () {
@@ -290,51 +289,13 @@
         if (allCorrect) {
           solved = true;
           submitBtn.disabled = true;
-          if (team) {
-            fetch(API_URL, { method: 'POST', keepalive: true, body: new URLSearchParams({ team: team, action: 'progress', page: '04', status: 'done' }) });
-          }
+          Mission.markDone('04');
           window.location.href = '05_Aufgabe01_Digit1.html';
         } else {
           showFeedback('error', 'Not quite. Check the case file again — not every claim holds up.');
         }
       });
 
-      var helpBtn = document.getElementById('helpBtn');
-      function setHelpState(active) {
-        if (!helpBtn) return;
-        helpBtn.textContent = active ? 'Help Requested - Cancel' : 'Request Help';
-        helpBtn.classList.toggle('active', !!active);
-        helpBtn.classList.remove('pending');
-      }
-      if (team && helpBtn) {
-        fetch(API_URL + '?t=' + Date.now())
-          .then(function (res) { return res.json(); })
-          .then(function (data) {
-            var mine = (data.teams || []).filter(function (t) { return Number(t.team) === Number(team); })[0];
-            setHelpState(mine && mine.hilfe_angefordert);
-          });
-        helpBtn.addEventListener('click', function () {
-          var wasActive = helpBtn.classList.contains('active');
-          helpBtn.disabled = true;
-          helpBtn.classList.add('pending');
-          helpBtn.textContent = wasActive ? 'Canceling...' : 'Requesting...';
-          fetch(API_URL, { method: 'POST', body: new URLSearchParams({ team: team, action: 'help' }) })
-            .then(function (res) { return res.json(); })
-            .then(function (data) {
-              if (data.status !== 'ok') {
-                console.error('Help toggle failed:', data.message);
-                setHelpState(wasActive);
-                return;
-              }
-              setHelpState(data.hilfe_angefordert);
-            })
-            .catch(function (err) {
-              console.error('Help toggle request failed:', err);
-              setHelpState(wasActive);
-            })
-            .finally(function () { helpBtn.disabled = false; });
-        });
-      }
     </script>
   </body>
 </html>

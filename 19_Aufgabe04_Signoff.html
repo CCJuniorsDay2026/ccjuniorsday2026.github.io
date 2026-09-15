@@ -120,12 +120,11 @@
       <div class="signed-off-panel" id="signedOffPanel"><strong>Logged.</strong> Mission Control has you marked as complete on-screen. Everything from here happens off it &mdash; good luck at the locker.</div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+    <script src="mission-common.js"></script>
     <script>
-      var API_URL = 'https://script.google.com/macros/s/AKfycbxc0QIIyaYTbGBMyhsUdYD01_AAYyrIsySqgF4rSWHPH8t73wHdP6iGEYUQMc5ImVsZ/exec';
       var team = sessionStorage.getItem('teamNumber');
-      if (team) {
-        fetch(API_URL, { method: 'POST', body: new URLSearchParams({ team: team, action: 'progress', page: '19', status: 'open' }) });
-      }
+      Mission.initPage('19');
 
       var reportBtn = document.getElementById('reportBtn');
       var signedOffPanel = document.getElementById('signedOffPanel');
@@ -133,49 +132,11 @@
       reportBtn.addEventListener('click', function () {
         if (reported) return;
         reported = true;
-        if (team) {
-          fetch(API_URL, { method: 'POST', keepalive: true, body: new URLSearchParams({ team: team, action: 'progress', page: '19', status: 'done' }) });
-        }
+        Mission.markDone('19');
         reportBtn.classList.add('hidden');
         signedOffPanel.classList.add('show');
       });
 
-      var helpBtn = document.getElementById('helpBtn');
-      function setHelpState(active) {
-        if (!helpBtn) return;
-        helpBtn.textContent = active ? 'Help Requested - Cancel' : 'Request Help';
-        helpBtn.classList.toggle('active', !!active);
-        helpBtn.classList.remove('pending');
-      }
-      if (team && helpBtn) {
-        fetch(API_URL + '?t=' + Date.now())
-          .then(function (res) { return res.json(); })
-          .then(function (data) {
-            var mine = (data.teams || []).filter(function (t) { return Number(t.team) === Number(team); })[0];
-            setHelpState(mine && mine.hilfe_angefordert);
-          });
-        helpBtn.addEventListener('click', function () {
-          var wasActive = helpBtn.classList.contains('active');
-          helpBtn.disabled = true;
-          helpBtn.classList.add('pending');
-          helpBtn.textContent = wasActive ? 'Canceling...' : 'Requesting...';
-          fetch(API_URL, { method: 'POST', body: new URLSearchParams({ team: team, action: 'help' }) })
-            .then(function (res) { return res.json(); })
-            .then(function (data) {
-              if (data.status !== 'ok') {
-                console.error('Help toggle failed:', data.message);
-                setHelpState(wasActive);
-                return;
-              }
-              setHelpState(data.hilfe_angefordert);
-            })
-            .catch(function (err) {
-              console.error('Help toggle request failed:', err);
-              setHelpState(wasActive);
-            })
-            .finally(function () { helpBtn.disabled = false; });
-        });
-      }
     </script>
   </body>
 </html>

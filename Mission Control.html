@@ -149,9 +149,10 @@ tbody tr.help-active:hover { background: rgba(197,0,14,0.34); }
 </table>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="mission-common.js"></script>
 <script>
-var API_URL = 'https://script.google.com/macros/s/AKfycbxc0QIIyaYTbGBMyhsUdYD01_AAYyrIsySqgF4rSWHPH8t73wHdP6iGEYUQMc5ImVsZ/exec';
-var REFRESH_MS = 10000;
+var REFRESH_MS = 60000; // Fallback-Poll - Live-Updates kommen primär über Realtime (siehe Mission.subscribeTeams unten)
 var PAGE_COUNT = 19;
 
 var MC_STATIONS = [
@@ -251,8 +252,9 @@ return d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
 
 function renderProgress(t) {
 var dots = '';
+var progress = t.progress || {};
 for (var p = 1; p <= PAGE_COUNT; p++) {
-var val = t[pageKey(p)];
+var val = progress[pageKey(p)];
 var cls = '';
 var title = 'Seite ' + p + ': offen';
 if (val === 'open') {
@@ -287,7 +289,7 @@ function render(teams) {
 teams.sort(function (a, b) { return Number(a.team) - Number(b.team); });
 var rows = teams.map(function (t) {
 var loggedIn = !!t.locked_in_at;
-var signedOff = !!t.page_19;
+var signedOff = !!(t.progress && t.progress.page_19);
 var badge = signedOff
 ? '<span class="badge done"><span class="dot"></span>Abgemeldet</span>'
 : loggedIn
@@ -340,26 +342,13 @@ saveField(el);
 });
 }
 
-function postWithRetry(params, retriesLeft) {
-if (retriesLeft === undefined) retriesLeft = 2;
-return fetch(API_URL, { method: 'POST', body: new URLSearchParams(params) })
-.then(function (res) { return res.json(); })
-.catch(function (err) {
-if (retriesLeft > 0) {
-return new Promise(function (resolve) { setTimeout(resolve, 800); })
-.then(function () { return postWithRetry(params, retriesLeft - 1); });
-}
-throw err;
-});
-}
-
 function saveField(el) {
 var team = el.getAttribute('data-team');
 var field = el.getAttribute('data-field');
 var value = el.value;
-postWithRetry({ action: 'update', team: team, field: field, value: value })
-.then(function (data) {
-if (data.status !== 'ok') throw new Error(data.message || 'Speichern fehlgeschlagen');
+Mission.updateField(team, field, value)
+.then(function (res) {
+if (res.error) throw res.error;
 el.classList.add('field-saved');
 setTimeout(function () { el.classList.remove('field-saved'); }, 1200);
 if (field === 'mission_control') {
@@ -371,7 +360,7 @@ if (cls) tr.classList.add(cls);
 })
 .catch(function (err) {
 errorBanner.className = 'error-banner show';
-errorBanner.textContent = 'Speichern fehlgeschlagen: ' + err.message;
+errorBanner.textContent = 'Speichern fehlgeschlagen: ' + (err.message || err);
 });
 }
 
@@ -380,21 +369,20 @@ var active = document.activeElement;
 return !!(active && active.classList && active.classList.contains('editable-field'));
 }
 
-function saveStartField(action, value) {
+function saveStartField(mode, value) {
 saveStartBtn.disabled = true;
 startNowBtn.disabled = true;
-var params = { action: action };
-if (value !== undefined) params.value = value;
-postWithRetry(params)
-.then(function (data) {
-if (data.status !== 'ok') throw new Error(data.message || 'Speichern fehlgeschlagen');
-currentStartTimeIso = data.startTime || null;
+var promise = mode === 'startNow' ? Mission.startNow() : Mission.setStartTime(value);
+promise
+.then(function (result) {
+if (result && result.error) throw result.error;
+currentStartTimeIso = (mode === 'startNow') ? result : value;
 if (!isEditingStartInput()) startTimeInput.value = isoToLocalInputValue(currentStartTimeIso);
 updateStartStatus();
 })
 .catch(function (err) {
 errorBanner.className = 'error-banner show';
-errorBanner.textContent = 'Speichern fehlgeschlagen: ' + err.message;
+errorBanner.textContent = 'Speichern fehlgeschlagen: ' + (err.message || err);
 })
 .finally(function () {
 saveStartBtn.disabled = false;
@@ -418,17 +406,16 @@ saveStartField('startNow');
 
 var consecutiveLoadFailures = 0;
 
-function load(retriesLeft) {
-if (typeof retriesLeft !== 'number') retriesLeft = 1;
+function load() {
 statusText.textContent = 'Aktualisiere…';
-fetch(API_URL + '?t=' + Date.now())
-.then(function (res) { return res.json(); })
-.then(function (data) {
-if (data.status !== 'ok') throw new Error(data.message || 'Fehler beim Laden');
-if (!isEditing()) render(data.teams);
-var serverNowMs = data.serverTime ? new Date(data.serverTime).getTime() : Date.now();
+Promise.all([Mission.getTeams(), Mission.getStatus()])
+.then(function (results) {
+var teams = results[0];
+var status = results[1];
+if (!isEditing()) render(teams);
+var serverNowMs = status.serverTime ? new Date(status.serverTime).getTime() : Date.now();
 clockOffset = serverNowMs - Date.now();
-currentStartTimeIso = data.startTime || null;
+currentStartTimeIso = status.startTime || null;
 if (!isEditingStartInput()) startTimeInput.value = isoToLocalInputValue(currentStartTimeIso);
 updateStartStatus();
 statusDot.className = 'status-dot';
@@ -437,21 +424,17 @@ errorBanner.className = 'error-banner';
 consecutiveLoadFailures = 0;
 })
 .catch(function (err) {
-if (retriesLeft > 0) {
-setTimeout(function () { load(retriesLeft - 1); }, 800);
-return;
-}
 consecutiveLoadFailures++;
 if (consecutiveLoadFailures < 2) {
-// One full failed cycle (incl. its own retry) - stay quiet, the next
-// automatic poll in a few seconds will very likely recover on its own.
+// Ein einzelner Aussetzer - bleib still, der nächste Realtime-Event oder
+// Fallback-Poll wird sich sehr wahrscheinlich von selbst erholen.
 statusText.textContent = 'Kurzer Aussetzer, versuche es gleich erneut…';
 return;
 }
 statusDot.className = 'status-dot error';
 statusText.textContent = 'Verbindung fehlgeschlagen';
 errorBanner.className = 'error-banner show';
-errorBanner.textContent = 'Live-Daten konnten nicht geladen werden: ' + err.message + '. Letzter bekannter Stand bleibt sichtbar.';
+errorBanner.textContent = 'Live-Daten konnten nicht geladen werden: ' + (err.message || err) + '. Letzter bekannter Stand bleibt sichtbar.';
 });
 }
 
@@ -493,18 +476,17 @@ var parsed = parseConfirm(confirmInput.value);
 if (!parsed) return;
 confirmBtn.disabled = true;
 confirmBtn.textContent = 'Setze zurück…';
-var params = { action: 'reset', confirm: 'CLEAR_ALL' };
-if (parsed.team) params.team = String(parsed.team);
-postWithRetry(params)
-.then(function (data) {
-if (data.status !== 'ok') throw new Error(data.message || 'Reset fehlgeschlagen');
+var action = parsed.team ? Mission.resetTeam(parsed.team) : Mission.resetAll();
+action
+.then(function (res) {
+if (res.error) throw res.error;
 confirmPanel.className = 'confirm-panel';
 confirmInput.value = '';
 load();
 })
 .catch(function (err) {
 errorBanner.className = 'error-banner show';
-errorBanner.textContent = 'Reset fehlgeschlagen: ' + err.message;
+errorBanner.textContent = 'Reset fehlgeschlagen: ' + (err.message || err);
 })
 .finally(function () {
 confirmBtn.disabled = false;
@@ -513,6 +495,7 @@ confirmBtn.textContent = 'Bestätigen';
 });
 
 load();
+Mission.subscribeTeams(function () { load(); });
 setInterval(load, REFRESH_MS);
 </script>
 </body>

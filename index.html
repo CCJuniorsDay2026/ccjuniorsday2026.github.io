@@ -97,15 +97,17 @@
         <button class="enter" id="enterBtn" type="button">Enter the Mission</button>
                 <p class="login-error" id="loginError"></p>
   </div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="mission-common.js"></script>
 <script>
-    var API_URL = 'https://script.google.com/macros/s/AKfycbxc0QIIyaYTbGBMyhsUdYD01_AAYyrIsySqgF4rSWHPH8t73wHdP6iGEYUQMc5ImVsZ/exec';
+    var client = Mission.client;
     var btn = document.getElementById('enterBtn');
     var input = document.getElementById('teamNumber');
     var errorEl = document.getElementById('loginError');
 
     function proceedToMission(team, startTime, serverTime) {
           sessionStorage.setItem('teamNumber', team);
-          fetch(API_URL, { method: 'POST', keepalive: true, body: new URLSearchParams({ team: team, action: 'progress', page: '01' }) });
+          client.rpc('set_progress', { p_team: Number(team), p_page: '01', p_status: 'open' });
           var startTimeMs = startTime ? new Date(startTime).getTime() : null;
           var serverNowMs = serverTime ? new Date(serverTime).getTime() : Date.now();
           var clockOffset = serverNowMs - Date.now();
@@ -117,45 +119,33 @@
           }
     }
 
-    function doLogin(team, retriesLeft, isRetry) {
-          fetch(API_URL, {
-                  method: 'POST',
-                  body: new URLSearchParams({ team: team, action: 'login' })
-          })
-            .then(function (res) { return res.json(); })
-            .then(function (data) {
-                      if (data.status === 'ok') {
-                                  proceedToMission(team, data.startTime, data.serverTime);
-                      } else if (data.code === 'DUPLICATE' && isRetry) {
-                                  // A previous automatic retry likely already wrote the login
-                                  // server-side, and only the response back to us got lost
-                                  // (known Apps-Script hiccup) - don't lock the team out for that.
-                                  // Confirm with a fresh read and proceed as if login succeeded.
-                                  btn.textContent = 'Reconnecting...';
-                                  fetch(API_URL + '?t=' + Date.now())
-                                    .then(function (res2) { return res2.json(); })
-                                    .then(function (data2) {
-                                              proceedToMission(team, data2.startTime, data2.serverTime);
-                                    })
-                                    .catch(function () {
-                                              errorEl.textContent = 'This team number is already logged in.';
-                                              btn.disabled = false;
-                                              btn.textContent = 'Enter the Mission';
-                                    });
-                      } else if (data.code === 'DUPLICATE') {
+    // login_team() prüft "schon eingeloggt?" und setzt locked_in_at in einem
+    // einzigen atomaren Datenbank-Update (Postgres) - zwei Logins für dasselbe
+    // Team können sich dadurch nicht mehr überschreiben oder in einen unklaren
+    // Fehlerzustand laufen, wie es beim alten Apps-Script-Backend passieren konnte.
+    function doLogin(team, retriesLeft) {
+          client.rpc('login_team', { p_team: Number(team) })
+            .then(function (res) {
+                      if (res.error) throw res.error;
+                      var row = res.data && res.data[0];
+                      if (!row || row.status === 'error') {
+                                  errorEl.textContent = 'Unbekannte Teamnummer.';
+                                  btn.disabled = false;
+                                  btn.textContent = 'Enter the Mission';
+                                  return;
+                      }
+                      if (row.already_logged_in) {
                                   errorEl.textContent = 'This team number is already logged in.';
                                   btn.disabled = false;
                                   btn.textContent = 'Enter the Mission';
-                      } else {
-                                  errorEl.textContent = data.message || 'Login failed. Please try again.';
-                                  btn.disabled = false;
-                                  btn.textContent = 'Enter the Mission';
+                                  return;
                       }
+                      proceedToMission(team, row.start_time, row.server_time);
             })
             .catch(function () {
                       if (retriesLeft > 0) {
                                   btn.textContent = 'Reconnecting...';
-                                  setTimeout(function () { doLogin(team, retriesLeft - 1, true); }, 900);
+                                  setTimeout(function () { doLogin(team, retriesLeft - 1); }, 900);
                       } else {
                                   errorEl.textContent = 'Connection failed. Please check your network.';
                                   btn.disabled = false;
@@ -173,7 +163,7 @@
           btn.disabled = true;
           btn.textContent = 'Checking...';
           errorEl.textContent = '';
-          doLogin(team, 3, false);
+          doLogin(team, 3);
     });
 </script>
   
