@@ -134,6 +134,13 @@
       return client.rpc('reset_all_teams');
     },
 
+    // Hilfe-Anfrage eines Teams gezielt deaktivieren (von Mission Control aus).
+    // Bewusst kein "toggle" wie beim Team-eigenen Button, sondern ein explizites
+    // "aus" - so bleibt das Ergebnis eindeutig, egal was das Team gerade selbst tut.
+    clearHelp: function (t) {
+      return client.rpc('set_help', { p_team: Number(t), p_value: false });
+    },
+
     // Realtime-Abo auf Änderungen an der teams-Tabelle (ersetzt Polling).
     // callback wird bei jeder Änderung ohne Argumente aufgerufen - der Aufrufer
     // liest sich per getTeams() den aktuellen Gesamtstand.

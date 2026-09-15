@@ -78,6 +78,9 @@ tbody tr.help-active:hover { background: rgba(197,0,14,0.34); }
 .badge.done { background: rgba(255,215,0,0.18); color: var(--accent); font-weight: 700; }
 .badge.help { background: var(--danger); color: #fff; animation: helpPulse 1.2s ease-in-out infinite; }
 .badge .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+button.badge.help { border: none; font: inherit; cursor: pointer; }
+button.badge.help:hover { filter: brightness(1.15); }
+button.badge.help:disabled { opacity: 0.7; cursor: default; animation: none; }
 @keyframes helpPulse {
 0%, 100% { box-shadow: 0 0 0 0 rgba(197,0,14,0.6); }
 50% { box-shadow: 0 0 0 6px rgba(197,0,14,0); }
@@ -150,7 +153,7 @@ tbody tr.help-active:hover { background: rgba(197,0,14,0.34); }
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-<script src="mission-common.js?v=2"></script>
+<script src="mission-common.js?v=3"></script>
 <script>
 var REFRESH_MS = 60000; // Fallback-Poll - Live-Updates kommen primär über Realtime (siehe Mission.subscribeTeams unten)
 var PAGE_COUNT = 19;
@@ -297,7 +300,7 @@ var badge = signedOff
 : '<span class="badge out"><span class="dot"></span>Wartet</span>';
 var helpActive = !!t.hilfe_angefordert;
 var helpBadge = helpActive
-? '<span class="badge help"><span class="dot"></span>Hilfe!</span>'
+? '<button type="button" class="badge help help-clear-btn" data-team="' + escapeHtml(t.team) + '" title="Klicken um die Hilfe-Anfrage zu deaktivieren"><span class="dot"></span>Hilfe!</button>'
 : '<span class="muted">–</span>';
 var updated = t.last_update ? '<span class="timestamp">' + formatTime(t.last_update) + '</span>' : '<span class="muted">–</span>';
 var sprachOptions = optionsHtml([
@@ -330,6 +333,7 @@ return '<tr' + trClassAttr + '>' +
 }).join('');
 tableBody.innerHTML = rows;
 bindEditableFields();
+bindHelpButtons();
 }
 
 function bindEditableFields() {
@@ -339,6 +343,32 @@ var eventName = el.tagName === 'SELECT' ? 'change' : 'blur';
 el.addEventListener(eventName, function () {
 saveField(el);
 });
+});
+}
+
+function bindHelpButtons() {
+var buttons = tableBody.querySelectorAll('.help-clear-btn');
+buttons.forEach(function (btn) {
+btn.addEventListener('click', function () {
+clearHelp(btn);
+});
+});
+}
+
+function clearHelp(btn) {
+var team = btn.getAttribute('data-team');
+btn.disabled = true;
+btn.textContent = 'Wird deaktiviert…';
+Mission.clearHelp(team)
+.then(function (res) {
+if (res.error) throw res.error;
+load();
+})
+.catch(function (err) {
+errorBanner.className = 'error-banner show';
+errorBanner.textContent = 'Hilfe deaktivieren fehlgeschlagen: ' + (err.message || err);
+btn.disabled = false;
+btn.innerHTML = '<span class="dot"></span>Hilfe!';
 });
 }
 
