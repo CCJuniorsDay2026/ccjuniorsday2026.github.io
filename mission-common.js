@@ -54,6 +54,16 @@
         setHelpState(!!(res.data && res.data.hilfe_angefordert));
       });
 
+    // Live mithören: falls Mission Control (oder ein anderes Gerät desselben
+    // Teams) den Hilfe-Status ändert, soll der Button das ohne Reload zeigen -
+    // sonst bleibt er "an", auch nachdem Mission Control ihn ausgeschaltet hat.
+    client.channel('help-status-' + t)
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'teams', filter: 'team=eq.' + t }, function (payload) {
+        if (btn.classList.contains('pending')) return; // eigener Klick läuft gerade, der regelt den Endzustand selbst
+        setHelpState(!!(payload.new && payload.new.hilfe_angefordert));
+      })
+      .subscribe();
+
     btn.addEventListener('click', function () {
       var wasActive = btn.classList.contains('active');
       btn.disabled = true;
