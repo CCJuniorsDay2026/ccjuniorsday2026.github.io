@@ -83,7 +83,10 @@
 
     initPage: function (page) {
       var t = team();
-      if (t) client.rpc('set_progress', { p_team: Number(t), p_page: page, p_status: 'open' });
+      // Wichtig: der Supabase-Client baut die Anfrage nur zusammen, verschickt
+      // sie aber erst mit .then()/await - ohne das passiert hier nichts.
+      if (t) client.rpc('set_progress', { p_team: Number(t), p_page: page, p_status: 'open' })
+        .then(function (res) { if (res.error) console.error('set_progress(open) fehlgeschlagen:', res.error.message); });
       wireHelpButton();
     },
 

@@ -107,7 +107,8 @@
 
     function proceedToMission(team, startTime, serverTime) {
           sessionStorage.setItem('teamNumber', team);
-          client.rpc('set_progress', { p_team: Number(team), p_page: '01', p_status: 'open' });
+          client.rpc('set_progress', { p_team: Number(team), p_page: '01', p_status: 'open' })
+            .then(function (res) { if (res.error) console.error('set_progress(open) fehlgeschlagen:', res.error.message); });
           var startTimeMs = startTime ? new Date(startTime).getTime() : null;
           var serverNowMs = serverTime ? new Date(serverTime).getTime() : Date.now();
           var clockOffset = serverNowMs - Date.now();
