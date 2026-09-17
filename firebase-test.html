@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Firebase Netzwerktest</title>
+<style>
+  :root { --bg: #0d1117; --panel: #161b22; --border: #30363d; --text: #e6edf3; --muted: #8b949e; --ok: #3fb950; --fail: #f85149; --pending: #d29922; }
+  * { box-sizing: border-box; }
+  body { margin: 0; min-height: 100vh; background: var(--bg); color: var(--text); font-family: -apple-system, "Segoe UI", Arial, sans-serif; padding: 32px 20px; }
+  .wrap { max-width: 560px; margin: 0 auto; }
+  h1 { font-size: 22px; margin: 0 0 6px; }
+  p.sub { color: var(--muted); font-size: 14px; margin: 0 0 28px; }
+  .row { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; margin-bottom: 12px; display: flex; align-items: center; gap: 14px; }
+  .dot { width: 12px; height: 12px; border-radius: 50%; background: var(--pending); flex-shrink: 0; }
+  .dot.ok { background: var(--ok); }
+  .dot.fail { background: var(--fail); }
+  .row .label { font-weight: 600; font-size: 15px; }
+  .row .detail { color: var(--muted); font-size: 12.5px; margin-top: 2px; word-break: break-word; }
+  .summary { margin-top: 24px; padding: 16px 18px; border-radius: 10px; font-weight: 600; font-size: 15px; display: none; }
+  .summary.ok { background: rgba(63,185,80,0.12); border: 1px solid var(--ok); color: var(--ok); display: block; }
+  .summary.fail { background: rgba(248,81,73,0.12); border: 1px solid var(--fail); color: var(--fail); display: block; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Firebase Netzwerktest</h1>
+  <p class="sub">Testet Schreiben, Lesen und Live-Updates gegen ein echtes Firebase-Projekt. Einfach warten, das Ergebnis erscheint automatisch.</p>
+
+  <div class="row"><div class="dot" id="dot-init"></div><div><div class="label">Verbindung aufbauen</div><div class="detail" id="detail-init">läuft…</div></div></div>
+  <div class="row"><div class="dot" id="dot-write"></div><div><div class="label">Schreiben</div><div class="detail" id="detail-write">wartet…</div></div></div>
+  <div class="row"><div class="dot" id="dot-read"></div><div><div class="label">Lesen</div><div class="detail" id="detail-read">wartet…</div></div></div>
+  <div class="row"><div class="dot" id="dot-live"></div><div><div class="label">Live-Update (Realtime)</div><div class="detail" id="detail-live">wartet…</div></div></div>
+
+  <div class="summary" id="summary"></div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+  import { getFirestore, doc, setDoc, getDoc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDJfW69cVuCN7zNnAXJqIUUd9DPjq7gk_A",
+    authDomain: "protocol16.firebaseapp.com",
+    projectId: "protocol16",
+    storageBucket: "protocol16.firebasestorage.app",
+    messagingSenderId: "1029357758272",
+    appId: "1:1029357758272:web:9f5d5f076fc23d40967ca5"
+  };
+
+  function setStatus(key, state, text) {
+    document.getElementById('dot-' + key).className = 'dot ' + state;
+    document.getElementById('detail-' + key).textContent = text;
+  }
+
+  function finish(ok, text) {
+    var el = document.getElementById('summary');
+    el.className = 'summary ' + (ok ? 'ok' : 'fail');
+    el.textContent = text;
+  }
+
+  var results = { write: null, read: null, live: null };
+  var timeout = setTimeout(function () {
+    if (results.live === null) {
+      setStatus('live', 'fail', 'Zeitüberschreitung (10s) - kein Live-Update angekommen');
+      results.live = false;
+      checkDone();
+    }
+  }, 10000);
+
+  function checkDone() {
+    if (results.write === null || results.read === null || results.live === null) return;
+    if (results.write && results.read && results.live) {
+      finish(true, 'Alles läuft. Firebase funktioniert auf diesem Netzwerk vollständig, inklusive Live-Updates.');
+    } else if (results.write && results.read) {
+      finish(false, 'Schreiben/Lesen klappt, Live-Updates aber nicht. Firebase-Datenbank wäre nutzbar, aber ohne Echtzeit-Funktion auf diesem Netzwerk.');
+    } else {
+      finish(false, 'Verbindung zu Firebase schlägt fehl. Screenshot von dieser Seite senden.');
+    }
+  }
+
+  try {
+    var app = initializeApp(firebaseConfig);
+    var db = getFirestore(app);
+    setStatus('init', 'ok', 'verbunden');
+
+    var testId = 'nettest-' + Date.now();
+    var ref = doc(db, 'network_test', testId);
+
+    // Live-Update: auf Änderungen an diesem Dokument hören, BEVOR wir schreiben.
+    var unsub = onSnapshot(ref, function (snap) {
+      if (snap.exists() && results.live === null) {
+        clearTimeout(timeout);
+        setStatus('live', 'ok', 'Live-Update angekommen, ohne Reload');
+        results.live = true;
+        checkDone();
+      }
+    }, function (err) {
+      clearTimeout(timeout);
+      setStatus('live', 'fail', 'Fehler: ' + err.message);
+      results.live = false;
+      checkDone();
+    });
+
+    setDoc(ref, { ts: serverTimestamp(), from: 'network-test-page' })
+      .then(function () {
+        setStatus('write', 'ok', 'Dokument geschrieben');
+        results.write = true;
+        checkDone();
+        return getDoc(ref);
+      })
+      .then(function (snap) {
+        if (snap.exists()) {
+          setStatus('read', 'ok', 'Dokument zurückgelesen');
+          results.read = true;
+        } else {
+          setStatus('read', 'fail', 'Dokument nicht gefunden');
+          results.read = false;
+        }
+        checkDone();
+      })
+      .catch(function (err) {
+        if (results.write === null) { setStatus('write', 'fail', 'Fehler: ' + err.message); results.write = false; }
+        else { setStatus('read', 'fail', 'Fehler: ' + err.message); results.read = false; }
+        checkDone();
+      });
+  } catch (err) {
+    setStatus('init', 'fail', 'Fehler: ' + err.message);
+    setStatus('write', 'fail', 'übersprungen');
+    setStatus('read', 'fail', 'übersprungen');
+    setStatus('live', 'fail', 'übersprungen');
+    finish(false, 'Verbindung zu Firebase schlägt fehl: ' + err.message);
+  }
+</script>
+</body>
+</html>
