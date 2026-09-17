@@ -1,9 +1,12 @@
 /**
- * Protocol 16 – gemeinsame Supabase-Anbindung für alle Spielseiten.
- * Ersetzt die bisherigen einzelnen fetch(API_URL, ...)-Aufrufe gegen Apps Script.
+ * Protocol 16 – gemeinsame Firebase/Firestore-Anbindung für alle Spielseiten.
+ * Ersetzt die bisherige Supabase-Anbindung, weil Supabase auf manchen
+ * Firmennetzen (z. B. Bank-Notebooks) von der Netzwerk-Firewall blockiert
+ * wird, Firebase/Google-Domains dort aber durchgehen.
  *
  * Eingebunden wird das so (Reihenfolge wichtig):
- *   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+ *   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+ *   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
  *   <script src="mission-common.js"></script>
  *
  * Auf jeder Spielseite reicht dann:
@@ -11,29 +14,41 @@
  *   Mission.markDone('13');           // wenn die Aufgabe gelöst ist, vor dem Seitenwechsel
  */
 (function (global) {
-  var SUPABASE_URL = 'https://heqdrhhfxuukxacehymk.supabase.co';
-  var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhlcWRyaGhmeHV1a3hhY2VoeW1rIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk0ODY0MjMsImV4cCI6MjEwNTA2MjQyM30.o2MxDF4stp5BfFtpWRRZgzPBE-9SKIYgM9KlqSBz_fM';
+  var firebaseConfig = {
+    apiKey: "AIzaSyDJfW69cVuCN7zNnAXJqIUUd9DPjq7gk_A",
+    authDomain: "protocol16.firebaseapp.com",
+    projectId: "protocol16",
+    storageBucket: "protocol16.firebasestorage.app",
+    messagingSenderId: "1029357758272",
+    appId: "1:1029357758272:web:9f5d5f076fc23d40967ca5"
+  };
 
-  var client = global.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-  var RPC_URL = SUPABASE_URL + '/rest/v1/rpc/';
+  global.firebase.initializeApp(firebaseConfig);
+  var db = global.firebase.firestore();
+  var FieldValue = global.firebase.firestore.FieldValue;
+
+  var FIRESTORE_REST_BASE = 'https://firestore.googleapis.com/v1/projects/' + firebaseConfig.projectId + '/databases/(default)/documents';
 
   function team() {
     return sessionStorage.getItem('teamNumber');
   }
 
+  function teamRef(t) {
+    return db.collection('teams').doc(String(t));
+  }
+
   // Zuverlässiger "Fire and forget"-Aufruf, auch wenn direkt danach die Seite
-  // verlassen wird (Ersatz für fetch(..., { keepalive: true })).
-  function rpcKeepalive(fn, params) {
+  // verlassen wird (Ersatz für fetch(..., { keepalive: true })). Geht bewusst
+  // über die Firestore-REST-API statt über das SDK, weil das SDK Schreibvorgänge
+  // nicht zuverlässig genug über eine sofortige Navigation hinweg garantiert.
+  function restKeepaliveUpdate(t, fields, maskPaths) {
     try {
-      fetch(RPC_URL + fn, {
-        method: 'POST',
+      var qs = maskPaths.map(function (p) { return 'updateMask.fieldPaths=' + encodeURIComponent(p); }).join('&');
+      fetch(FIRESTORE_REST_BASE + '/teams/' + t + '?' + qs, {
+        method: 'PATCH',
         keepalive: true,
-        headers: {
-          'Content-Type': 'application/json',
-          apikey: SUPABASE_ANON_KEY,
-          Authorization: 'Bearer ' + SUPABASE_ANON_KEY
-        },
-        body: JSON.stringify(params)
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fields: fields })
       });
     } catch (e) { /* best effort, bewusst kein Fehlerhandling */ }
   }
@@ -49,82 +64,135 @@
       btn.classList.remove('pending');
     }
 
-    client.from('teams').select('hilfe_angefordert').eq('team', Number(t)).maybeSingle()
-      .then(function (res) {
-        setHelpState(!!(res.data && res.data.hilfe_angefordert));
-      });
+    teamRef(t).get().then(function (snap) {
+      var data = snap.data();
+      setHelpState(!!(data && data.hilfe_angefordert));
+    });
 
     // Live mithören: falls Mission Control (oder ein anderes Gerät desselben
     // Teams) den Hilfe-Status ändert, soll der Button das ohne Reload zeigen -
     // sonst bleibt er "an", auch nachdem Mission Control ihn ausgeschaltet hat.
-    client.channel('help-status-' + t)
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'teams', filter: 'team=eq.' + t }, function (payload) {
-        if (btn.classList.contains('pending')) return; // eigener Klick läuft gerade, der regelt den Endzustand selbst
-        setHelpState(!!(payload.new && payload.new.hilfe_angefordert));
-      })
-      .subscribe();
+    teamRef(t).onSnapshot(function (snap) {
+      if (btn.classList.contains('pending')) return; // eigener Klick läuft gerade, der regelt den Endzustand selbst
+      var data = snap.data();
+      setHelpState(!!(data && data.hilfe_angefordert));
+    });
 
     btn.addEventListener('click', function () {
       var wasActive = btn.classList.contains('active');
       btn.disabled = true;
       btn.classList.add('pending');
       btn.textContent = wasActive ? 'Canceling...' : 'Requesting...';
-      client.rpc('toggle_help', { p_team: Number(t) })
-        .then(function (res) {
-          if (res.error) {
-            console.error('Help toggle failed:', res.error.message);
-            setHelpState(wasActive);
-            return;
-          }
-          var row = res.data && res.data[0];
-          setHelpState(!!(row && row.hilfe_angefordert));
-        })
+
+      // Transaktion statt einfachem Update: liest den aktuellen Stand und schreibt
+      // das Gegenteil, atomar - zwei fast gleichzeitige Klicks (Team + Mission
+      // Control) können sich so nicht widersprüchlich überschreiben.
+      db.runTransaction(function (tx) {
+        var ref = teamRef(t);
+        return tx.get(ref).then(function (snap) {
+          var current = snap.data() && snap.data().hilfe_angefordert;
+          var next = current ? null : FieldValue.serverTimestamp();
+          tx.update(ref, { hilfe_angefordert: next, last_update: FieldValue.serverTimestamp() });
+          return !current;
+        });
+      })
+        .then(function (nowActive) { setHelpState(nowActive); })
         .catch(function (err) {
-          console.error('Help toggle request failed:', err);
+          console.error('Help toggle failed:', err);
           setHelpState(wasActive);
         })
         .finally(function () { btn.disabled = false; });
     });
   }
 
+  function normalizeTeam(data) {
+    var out = {};
+    for (var k in data) out[k] = data[k];
+    ['locked_in_at', 'last_update', 'hilfe_angefordert'].forEach(function (k) {
+      if (out[k] && out[k].toDate) out[k] = out[k].toDate().toISOString();
+    });
+    if (out.progress) {
+      var p = {};
+      for (var pk in out.progress) {
+        var v = out.progress[pk];
+        p[pk] = (v && v.toDate) ? v.toDate().toISOString() : v;
+      }
+      out.progress = p;
+    }
+    return out;
+  }
+
   global.Mission = {
-    client: client,
+    db: db,
     team: team,
+
+    // Login: setzt locked_in_at nur, wenn das Team noch nicht eingeloggt ist.
+    // Per Transaktion atomar - zwei Logins für dasselbe Team können sich
+    // dadurch nicht mehr überschreiben oder in einen unklaren Zustand laufen.
+    login: function (t) {
+      return db.runTransaction(function (tx) {
+        var ref = teamRef(t);
+        return tx.get(ref).then(function (snap) {
+          if (!snap.exists) return { status: 'error' };
+          var data = snap.data();
+          if (data.locked_in_at) {
+            return { status: 'ok', already_logged_in: true };
+          }
+          tx.update(ref, { locked_in_at: FieldValue.serverTimestamp(), last_update: FieldValue.serverTimestamp() });
+          return { status: 'ok', already_logged_in: false };
+        });
+      });
+    },
 
     initPage: function (page) {
       var t = team();
-      // Wichtig: der Supabase-Client baut die Anfrage nur zusammen, verschickt
-      // sie aber erst mit .then()/await - ohne das passiert hier nichts.
-      if (t) client.rpc('set_progress', { p_team: Number(t), p_page: page, p_status: 'open' })
-        .then(function (res) { if (res.error) console.error('set_progress(open) fehlgeschlagen:', res.error.message); });
+      if (t) {
+        var update = { last_update: FieldValue.serverTimestamp() };
+        update['progress.page_' + page] = 'open';
+        teamRef(t).update(update)
+          .catch(function (err) { console.error('set_progress(open) fehlgeschlagen:', err.message); });
+      }
       wireHelpButton();
     },
 
     markDone: function (page) {
       var t = team();
-      if (t) rpcKeepalive('set_progress', { p_team: Number(t), p_page: page, p_status: 'done' });
+      if (!t) return;
+      var nowIso = new Date().toISOString();
+      var progressFields = {};
+      progressFields['page_' + page] = { stringValue: nowIso };
+      restKeepaliveUpdate(t, {
+        progress: { mapValue: { fields: progressFields } },
+        last_update: { timestampValue: nowIso }
+      }, ['progress.page_' + page, 'last_update']);
     },
 
     wireHelpButton: wireHelpButton,
 
-    // Startzeitpunkt + aktuelle Serverzeit in einem Aufruf (fuer Countdown-Sync).
+    // Startzeitpunkt + aktuelle Zeit in einem Aufruf (fuer Countdown-Sync).
+    // Hinweis: "serverTime" ist hier die Uhrzeit des jeweiligen Geräts, nicht
+    // eine echte Serverzeit wie vorher bei Postgres - Firestore hat dafür
+    // keinen einfachen Abruf ohne zusätzlichen Schreibvorgang. In der Praxis
+    // unkritisch, solange die Geräte halbwegs synchron laufen (NTP).
     getStatus: function () {
-      return client.rpc('get_mission_status').then(function (res) {
-        if (res.error) throw res.error;
-        var row = res.data && res.data[0];
-        return { startTime: row ? row.start_time : null, serverTime: row ? row.server_time : null };
+      return db.collection('mission_settings').doc('config').get().then(function (snap) {
+        var data = snap.data() || {};
+        var startTime = null;
+        if (data.start_time) {
+          startTime = data.start_time.toDate ? data.start_time.toDate().toISOString() : data.start_time;
+        }
+        return { startTime: startTime, serverTime: new Date().toISOString() };
       });
     },
 
     getTeams: function () {
-      return client.from('teams').select('*').order('team').then(function (res) {
-        if (res.error) throw res.error;
-        return res.data;
+      return db.collection('teams').orderBy('team').get().then(function (snap) {
+        return snap.docs.map(function (d) { return normalizeTeam(d.data()); });
       });
     },
 
     setStartTime: function (value) {
-      return client.from('mission_settings').upsert({ key: 'start_time', value: value || null });
+      return db.collection('mission_settings').doc('config').set({ start_time: value || null }, { merge: true });
     },
 
     startNow: function () {
@@ -133,31 +201,38 @@
     },
 
     updateField: function (t, field, value) {
-      return client.rpc('update_field', { p_team: Number(t), p_field: field, p_value: value });
+      if (['raum', 'sprache', 'mission_control'].indexOf(field) === -1) return Promise.resolve();
+      var update = {};
+      update[field] = value;
+      return teamRef(t).update(update);
     },
 
     resetTeam: function (t) {
-      return client.rpc('reset_team', { p_team: Number(t) });
+      return teamRef(t).update({ locked_in_at: null, last_update: null, hilfe_angefordert: null, progress: {} });
     },
 
     resetAll: function () {
-      return client.rpc('reset_all_teams');
+      return db.collection('teams').get().then(function (snap) {
+        var batch = db.batch();
+        snap.docs.forEach(function (d) {
+          batch.update(d.ref, { locked_in_at: null, last_update: null, hilfe_angefordert: null, progress: {} });
+        });
+        return batch.commit();
+      });
     },
 
     // Hilfe-Anfrage eines Teams gezielt deaktivieren (von Mission Control aus).
     // Bewusst kein "toggle" wie beim Team-eigenen Button, sondern ein explizites
     // "aus" - so bleibt das Ergebnis eindeutig, egal was das Team gerade selbst tut.
     clearHelp: function (t) {
-      return client.rpc('set_help', { p_team: Number(t), p_value: false });
+      return teamRef(t).update({ hilfe_angefordert: null, last_update: FieldValue.serverTimestamp() });
     },
 
-    // Realtime-Abo auf Änderungen an der teams-Tabelle (ersetzt Polling).
+    // Realtime-Abo auf Änderungen an der teams-Sammlung (ersetzt Polling).
     // callback wird bei jeder Änderung ohne Argumente aufgerufen - der Aufrufer
     // liest sich per getTeams() den aktuellen Gesamtstand.
     subscribeTeams: function (callback) {
-      return client.channel('teams-changes')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'teams' }, callback)
-        .subscribe();
+      return db.collection('teams').onSnapshot(function () { callback(); });
     }
   };
 })(window);

@@ -97,18 +97,17 @@
         <button class="enter" id="enterBtn" type="button">Enter the Mission</button>
                 <p class="login-error" id="loginError"></p>
   </div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-<script src="mission-common.js?v=4"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+<script src="mission-common.js?v=5"></script>
 <script>
-    var client = Mission.client;
     var btn = document.getElementById('enterBtn');
     var input = document.getElementById('teamNumber');
     var errorEl = document.getElementById('loginError');
 
     function proceedToMission(team, startTime, serverTime) {
           sessionStorage.setItem('teamNumber', team);
-          client.rpc('set_progress', { p_team: Number(team), p_page: '01', p_status: 'open' })
-            .then(function (res) { if (res.error) console.error('set_progress(open) fehlgeschlagen:', res.error.message); });
+          Mission.initPage('01');
           var startTimeMs = startTime ? new Date(startTime).getTime() : null;
           var serverNowMs = serverTime ? new Date(serverTime).getTime() : Date.now();
           var clockOffset = serverNowMs - Date.now();
@@ -120,28 +119,27 @@
           }
     }
 
-    // login_team() prüft "schon eingeloggt?" und setzt locked_in_at in einem
-    // einzigen atomaren Datenbank-Update (Postgres) - zwei Logins für dasselbe
-    // Team können sich dadurch nicht mehr überschreiben oder in einen unklaren
-    // Fehlerzustand laufen, wie es beim alten Apps-Script-Backend passieren konnte.
+    // Mission.login() prüft "schon eingeloggt?" und setzt locked_in_at in einer
+    // Firestore-Transaktion atomar - zwei Logins für dasselbe Team können sich
+    // dadurch nicht mehr überschreiben oder in einen unklaren Zustand laufen.
     function doLogin(team, retriesLeft) {
-          client.rpc('login_team', { p_team: Number(team) })
-            .then(function (res) {
-                      if (res.error) throw res.error;
-                      var row = res.data && res.data[0];
-                      if (!row || row.status === 'error') {
+          Mission.login(Number(team))
+            .then(function (result) {
+                      if (!result || result.status === 'error') {
                                   errorEl.textContent = 'Unbekannte Teamnummer.';
                                   btn.disabled = false;
                                   btn.textContent = 'Enter the Mission';
                                   return;
                       }
-                      if (row.already_logged_in) {
+                      if (result.already_logged_in) {
                                   errorEl.textContent = 'This team number is already logged in.';
                                   btn.disabled = false;
                                   btn.textContent = 'Enter the Mission';
                                   return;
                       }
-                      proceedToMission(team, row.start_time, row.server_time);
+                      return Mission.getStatus().then(function (status) {
+                                  proceedToMission(team, status.startTime, status.serverTime);
+                      });
             })
             .catch(function () {
                       if (retriesLeft > 0) {

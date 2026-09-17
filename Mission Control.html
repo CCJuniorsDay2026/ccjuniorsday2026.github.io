@@ -152,8 +152,9 @@ button.badge.help:disabled { opacity: 0.7; cursor: default; animation: none; }
 </table>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-<script src="mission-common.js?v=4"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+<script src="mission-common.js?v=5"></script>
 <script>
 var REFRESH_MS = 60000; // Fallback-Poll - Live-Updates kommen primär über Realtime (siehe Mission.subscribeTeams unten)
 var PAGE_COUNT = 19;
@@ -360,8 +361,7 @@ var team = btn.getAttribute('data-team');
 btn.disabled = true;
 btn.textContent = 'Wird deaktiviert…';
 Mission.clearHelp(team)
-.then(function (res) {
-if (res.error) throw res.error;
+.then(function () {
 load();
 })
 .catch(function (err) {
@@ -377,8 +377,7 @@ var team = el.getAttribute('data-team');
 var field = el.getAttribute('data-field');
 var value = el.value;
 Mission.updateField(team, field, value)
-.then(function (res) {
-if (res.error) throw res.error;
+.then(function () {
 el.classList.add('field-saved');
 setTimeout(function () { el.classList.remove('field-saved'); }, 1200);
 if (field === 'mission_control') {
@@ -508,8 +507,7 @@ confirmBtn.disabled = true;
 confirmBtn.textContent = 'Setze zurück…';
 var action = parsed.team ? Mission.resetTeam(parsed.team) : Mission.resetAll();
 action
-.then(function (res) {
-if (res.error) throw res.error;
+.then(function () {
 confirmPanel.className = 'confirm-panel';
 confirmInput.value = '';
 load();
