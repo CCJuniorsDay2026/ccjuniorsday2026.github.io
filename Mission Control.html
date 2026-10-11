@@ -31,6 +31,8 @@ h1 { font-size: 28px; letter-spacing: 2px; color: var(--accent); margin: 0 0 8px
 .toolbar-actions { display: flex; gap: 12px; }
 button.refresh { background: var(--accent); color: #1A1500; border: none; border-radius: 999px; padding: 10px 22px; font-weight: 600; font-size: 13px; cursor: pointer; }
 button.refresh:hover { transform: scale(1.03); }
+a.solutions-link { display: inline-flex; align-items: center; background: transparent; color: var(--accent); border: 1px solid var(--accent); border-radius: 999px; padding: 10px 22px; font-weight: 600; font-size: 13px; text-decoration: none; }
+a.solutions-link:hover { background: rgba(255,215,0,0.12); }
 button.btn-outline { background: transparent; color: #FF8A80; border: 1px solid var(--danger); border-radius: 999px; padding: 10px 22px; font-weight: 600; font-size: 13px; cursor: pointer; }
 button.btn-outline:hover { background: rgba(197,0,14,0.12); }
 button.btn-outline:disabled { opacity: 0.5; cursor: default; }
@@ -106,6 +108,7 @@ button.badge.help:disabled { opacity: 0.7; cursor: default; animation: none; }
 <div class="toolbar">
 <div class="status-line"><span class="status-dot" id="statusDot"></span><span id="statusText">Lade…</span></div>
 <div class="toolbar-actions">
+<a class="solutions-link" href="crew/mc_a63fce1e95.html" target="_blank" rel="noopener">Lösungen ↗</a>
 <button class="btn-outline" id="resetBtn" type="button">Zurücksetzen</button>
 <button class="refresh" id="refreshBtn" type="button">Jetzt aktualisieren</button>
 </div>
