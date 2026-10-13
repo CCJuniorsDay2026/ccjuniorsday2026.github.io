@@ -191,7 +191,7 @@ td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
       <p>Für die Event Guides am Check-in-Counter.</p>
       <form id="loginForm" autocomplete="on">
         <label for="lgName">Dein Name</label>
-        <input id="lgName" required placeholder="z. B. Silas" autocomplete="nickname">
+        <input id="lgName" required autocomplete="off">
         <input id="lgMail" type="hidden" value="checkin@juniorsday2026.de" autocomplete="username">
         <label for="lgPw">Passwort (gemeinsam für alle Event Guides)</label>
         <input id="lgPw" type="password" required autocomplete="current-password">
@@ -326,7 +326,10 @@ function makeDemoStore(){
 let DAY = ls.get("jd-ci-day") || (new Date().toISOString().slice(0, 10) === "2026-10-15" ? "d15" : "d16");
 let ADMIN_DAY = null;
 let TAB = "checkin", FILTER = "all", GUIDE = ls.get("jd-ci-guide") || "", OPENTEAM = null;
-const active = () => [...PEOPLE.values()].filter(p => !p.removed);
+const all = () => [...PEOPLE.values()].filter(p => !p.removed);
+// angemeldet: Do = Eintrag in "QR-Gruppe (Do)", Fr = Eintrag in "Freitag-Team"; Nachmeldungen für den Tag, an dem sie erfasst wurden
+const onDay = (p, day = DAY) => day === "d15" ? (!!p.grp || p.nachDay === "d15") : (!!p.team || p.nachDay === "d16");
+const active = (day = DAY) => all().filter(p => onDay(p, day));
 const st = (p, day = DAY) => (p[day] || {}).st || null;
 function status(p, day = DAY){
   const s = st(p, day);
@@ -411,14 +414,14 @@ function renderCheckin(){
   if (FILTER === "ml") list = list.filter(p => p.ml);
   else if (FILTER !== "all") list = list.filter(p => status(p) === FILTER);
   list.sort((a, b) => norm(a.nn).localeCompare(norm(b.nn)) || norm(a.vn).localeCompare(norm(b.vn)));
-  const shown = qs.length ? list.slice(0, 30) : list.slice(0, 60);
+  const shown = list;
   $("#results").innerHTML = shown.length ? shown.map((p, i) => {
     const s = status(p), clickable = !(DAY === "d16" && s !== "open");
     return `<div class="pc ${clickable ? "click" : ""} is-${s} ${i === 0 && qs.length ? "first" : ""}" data-id="${esc(p.id)}">
       <div class="nm"><b>${p.ml ? '<span class="tag ml">MISSION LEAD</span>' : ""}${p.src === "nach" ? '<span class="tag nach">NACHGEMELDET</span>' : ""}${esc(fullName(p))}</b><small>${personMeta(p)}</small></div>
       ${stBadge(p)}
       <button class="btn ghost sm" data-menu="${esc(p.id)}" title="Weitere Aktionen">⋯</button></div>`;
-  }).join("") + (list.length > shown.length ? `<div class="empty">… ${list.length - shown.length} weitere – bitte weitertippen</div>` : "")
+  }).join("")
     : `<div class="empty">Niemand gefunden. Ist die Person nicht auf der Liste? → <b>+ Person</b></div>`;
   const c = counts(active());
   $("#kpis").innerHTML = DAY === "d16"
@@ -467,7 +470,7 @@ function showMenu(p){
 }
 function teamLoad(){
   const L = {}; for (let t = 1; t <= 16; t++) L[t] = {exp: 0, in: 0};
-  active().forEach(p => { if (p.team && L[p.team] && status(p, "d16") !== "cancel"){ L[p.team].exp++; if (status(p, "d16") === "in") L[p.team].in++; } });
+  active("d16").forEach(p => { if (p.team && L[p.team] && status(p, "d16") !== "cancel"){ L[p.team].exp++; if (status(p, "d16") === "in") L[p.team].in++; } });
   return L;
 }
 function suggestTeam(german){
@@ -484,7 +487,7 @@ function showTeamChange(p){
     <div class="row"><button class="btn ghost" data-close>Abbrechen</button><button class="btn" id="tcOk">Speichern</button></div></div>`);
   $("#tcOk").onclick = async () => {
     const t = Number($("#tcSel").value) || null;
-    const raum = t ? (active().find(x => x.team === t && x.raum) || {}).raum || "" : "";
+    const raum = t ? (all().find(x => x.team === t && x.raum) || {}).raum || "" : "";
     await store.update(p.id, {team: t, raum, teamChangedBy: GUIDE, teamChangedTs: Date.now()});
     store.log({pid: p.id, name: fullName(p), day: DAY, st: "team:" + t, ts: Date.now(), by: GUIDE});
     closeModal(); toast(`${fullName(p)} → Team ${t || "–"}`);
@@ -493,11 +496,11 @@ function showTeamChange(p){
 /* ---------- Nachmeldung ---------- */
 function showAdd(){
   const q = $("#q").value.trim().split(/\s+/);
-  const bereiche = [...new Set(active().map(p => p.bereich).filter(Boolean))].sort();
+  const bereiche = [...new Set(all().filter(p => p.src !== "nach").map(p => p.bereich).filter(Boolean))].sort((a, b) => a.localeCompare(b, "de"));
   openModal(`<div class="mbox"><h2>Person nachmelden</h2><div class="note">Für Teilnehmer, die nicht auf der Liste stehen. Wird als „nachgemeldet“ markiert.</div>
     <label>Vorname</label><input id="adVn" value="${esc(q.length > 1 ? q.slice(0, -1).join(" ") : "")}">
     <label>Nachname</label><input id="adNn" value="${esc(q.length > 1 ? q[q.length - 1] : q[0] || "")}">
-    <label>Bereich</label><input id="adBer" list="berList"><datalist id="berList">${bereiche.map(b => `<option value="${esc(b)}">`).join("")}</datalist>
+    <label>Executivebereich</label><select id="adBer"><option value="">– bitte wählen –</option>${bereiche.map(b => `<option value="${esc(b)}">${esc(b)}</option>`).join("")}</select>
     <label>Lokation</label><input id="adOrt">
     <label>Gruppe (Donnerstag)</label><select id="adGrp"><option value="">–</option>${"ABCDE".split("").map(g => `<option>${g}</option>`).join("")}</select>
     <label>Team (Freitag) – Vorschlag: das kleinste passende Team</label>
@@ -512,9 +515,10 @@ function showAdd(){
     const id = "nach-" + keyOf(vn, nn);
     if (PEOPLE.has(id) || PEOPLE.has(keyOf(vn, nn))) return alertInModal("Diese Person gibt es schon – bitte in der Suche nachsehen.");
     const t = Number($("#adTeam").value) || null;
-    const raum = t ? (active().find(x => x.team === t && x.raum) || {}).raum || "" : "";
-    const data = {vn, nn, bereich: $("#adBer").value.trim(), ort: $("#adOrt").value.trim(), grp: $("#adGrp").value, team: t, raum, ml: false,
-                  src: "nach", nachBy: GUIDE, nachTs: Date.now(), d15: {}, d16: {}};
+    const raum = t ? (all().find(x => x.team === t && x.raum) || {}).raum || "" : "";
+    if (!$("#adBer").value) return alertInModal("Bitte den Executivebereich auswählen.");
+    const data = {vn, nn, bereich: $("#adBer").value, ort: $("#adOrt").value.trim(), grp: $("#adGrp").value, team: t, raum, ml: false,
+                  src: "nach", nachDay: DAY, nachBy: GUIDE, nachTs: Date.now(), d15: {}, d16: {}};
     if (DAY === "d16") data.d16 = {st: "in", ts: Date.now(), by: GUIDE};
     await store.set(id, data);
     store.log({pid: id, name: vn + " " + nn, day: DAY, st: "nachgemeldet", ts: Date.now(), by: GUIDE});
@@ -561,20 +565,21 @@ function renderGroups(){
 
 /* ---------- Auswertung ---------- */
 function renderReport(){
-  const L = active(), c15 = counts(L, "d15"), c16 = counts(L, "d16");
-  const both = L.filter(p => status(p, "d15") === "in" && status(p, "d16") === "in").length;
+  const L = all(), L15 = active("d15"), L16 = active("d16"), c15 = counts(L15, "d15"), c16 = counts(L16, "d16");
+  const both = L.filter(p => onDay(p, "d15") && onDay(p, "d16") && status(p, "d15") === "in" && status(p, "d16") === "in").length;
+  const bothReg = L.filter(p => onDay(p, "d15") && onDay(p, "d16")).length;
   const nach = L.filter(p => p.src === "nach").length;
   const pct = (a, b) => b ? Math.round(a / b * 100) + " %" : "–";
   let h = `<div class="rgrid">
-    <div class="rk"><b>${L.length}</b><span>Personen gesamt</span></div>
-    <div class="rk"><b>${c15.in}</b><span>Do da (${pct(c15.in, L.length - c15.cancel)})</span></div>
-    <div class="rk"><b>${c16.in}</b><span>Fr da (${pct(c16.in, L.length - c16.cancel)})</span></div>
-    <div class="rk"><b>${both}</b><span>an beiden Tagen da</span></div>
+    <div class="rk"><b>${L.length}</b><span>Personen gesamt (Do angemeldet ${L15.length} · Fr ${L16.length})</span></div>
+    <div class="rk"><b>${c15.in}</b><span>Do da (${pct(c15.in, L15.length - c15.cancel)})</span></div>
+    <div class="rk"><b>${c16.in}</b><span>Fr da (${pct(c16.in, L16.length - c16.cancel)})</span></div>
+    <div class="rk"><b>${both}</b><span>an beiden Tagen da (von ${bothReg} für beide angemeldet)</span></div>
     <div class="rk"><b>${c15.absent + c16.open}</b><span>nicht erschienen (Do ${c15.absent} · Fr ${c16.open})</span></div>
     <div class="rk"><b>${c15.cancel + c16.cancel}</b><span>Absagen (Do ${c15.cancel} · Fr ${c16.cancel})</span></div>
     <div class="rk"><b>${nach}</b><span>nachgemeldet</span></div></div>`;
   // Ankunftskurve Freitag
-  const ts = L.filter(p => status(p, "d16") === "in" && p.d16.ts).map(p => new Date(p.d16.ts));
+  const ts = L16.filter(p => status(p, "d16") === "in" && p.d16 && p.d16.ts).map(p => new Date(p.d16.ts));
   if (ts.length){
     const bins = {}; ts.forEach(d => { const m = d.getHours() * 60 + Math.floor(d.getMinutes() / 5) * 5; bins[m] = (bins[m] || 0) + 1; });
     const ks = Object.keys(bins).map(Number).sort((a, b) => a - b), lo = ks[0], hi = ks[ks.length - 1], mx = Math.max(...Object.values(bins));
@@ -583,17 +588,19 @@ function renderReport(){
   }
   const grp = key => {
     const m = {}; L.forEach(p => { const k = p[key] || "(leer)"; m[k] = m[k] || {n: 0, d15: 0, d16: 0, e15: 0, e16: 0}; const r = m[k]; r.n++;
-      if (status(p, "d15") !== "cancel"){ r.e15++; if (status(p, "d15") === "in") r.d15++; }
-      if (status(p, "d16") !== "cancel"){ r.e16++; if (status(p, "d16") === "in") r.d16++; } });
+      if (onDay(p, "d15") && status(p, "d15") !== "cancel"){ r.e15++; if (status(p, "d15") === "in") r.d15++; }
+      if (onDay(p, "d16") && status(p, "d16") !== "cancel"){ r.e16++; if (status(p, "d16") === "in") r.d16++; } });
     return Object.entries(m).sort((a, b) => b[1].n - a[1].n);
   };
   const tbl = (title, key) => `<div class="panel"><h3>${title}</h3><table><tr><th>${title.split(" ")[1] || ""}</th><th class="n">Pers.</th><th class="n">Do da</th><th class="n">Fr da</th></tr>${grp(key).map(([k, r]) =>
     `<tr><td>${esc(k)}</td><td class="n">${r.n}</td><td class="n">${r.d15}/${r.e15} (${pct(r.d15, r.e15)})</td><td class="n">${r.d16}/${r.e16} (${pct(r.d16, r.e16)})</td></tr>`).join("")}</table></div>`;
   h += `<div class="two">${tbl("Nach Bereich", "bereich")}${tbl("Nach Lokation", "ort")}</div>`;
-  const miss = L.filter(p => status(p, "d15") === "absent" || status(p, "d16") === "open" || status(p, "d15") === "cancel" || status(p, "d16") === "cancel")
+  const s15 = p => onDay(p, "d15") ? {in: "da", absent: "nicht da", cancel: "abgesagt"}[status(p, "d15")] : "–";
+  const s16 = p => onDay(p, "d16") ? {in: "da", open: "nicht da", cancel: "abgesagt"}[status(p, "d16")] : "–";
+  const miss = L.filter(p => (onDay(p, "d15") && status(p, "d15") !== "in") || (onDay(p, "d16") && status(p, "d16") !== "in"))
     .sort((a, b) => (a.bereich || "").localeCompare(b.bereich || "") || norm(a.nn).localeCompare(norm(b.nn)));
   h += `<div class="panel"><h3>Nicht erschienen / abgesagt (${miss.length})</h3><table><tr><th>Name</th><th>Bereich</th><th>Do</th><th>Fr</th></tr>${miss.map(p =>
-    `<tr><td>${esc(fullName(p))}</td><td>${esc(p.bereich || "")}</td><td>${{in: "da", absent: "nicht da", cancel: "abgesagt"}[status(p, "d15")]}</td><td>${{in: "da", open: "nicht da", cancel: "abgesagt"}[status(p, "d16")]}</td></tr>`).join("")}</table></div>`;
+    `<tr><td>${esc(fullName(p))}</td><td>${esc(p.bereich || "")}</td><td>${s15(p)}</td><td>${s16(p)}</td></tr>`).join("")}</table></div>`;
   h += `<div class="panel"><h3>Export</h3><p class="note">Alle Personen mit Status und Uhrzeit beider Tage als CSV (öffnet in Excel).</p><button class="btn" id="expBtn">CSV exportieren</button></div>`;
   $("#report").innerHTML = h;
   $("#expBtn").onclick = exportCSV;
@@ -602,7 +609,7 @@ function exportCSV(){
   const lbl15 = {in: "da", absent: "nicht erschienen", cancel: "abgesagt"}, lbl16 = {in: "da", open: "nicht erschienen", cancel: "abgesagt"};
   const rows = [["Vorname","Nachname","Bereich","Lokation","Gruppe (Do)","Team (Fr)","Raum (Fr)","Mission Lead","Quelle","Do Status","Do Uhrzeit","Do erfasst von","Fr Status","Fr Uhrzeit","Fr erfasst von","Fr Schild übergeben"]];
   [...PEOPLE.values()].sort((a, b) => norm(a.nn).localeCompare(norm(b.nn))).forEach(p => rows.push([p.vn, p.nn, p.bereich, p.ort, p.grp, p.team, p.raum, p.ml ? "ja" : "", p.removed ? "nicht mehr in Liste" : p.src === "nach" ? "nachgemeldet" : "Liste",
-    lbl15[status(p, "d15")], hhmm((p.d15 || {}).ts), (p.d15 || {}).by, lbl16[status(p, "d16")], hhmm((p.d16 || {}).ts), (p.d16 || {}).by, (p.d16 || {}).sign ? "ja" : ""]));
+    onDay(p, "d15") ? lbl15[status(p, "d15")] : "nicht angemeldet", hhmm((p.d15 || {}).ts), (p.d15 || {}).by, onDay(p, "d16") ? lbl16[status(p, "d16")] : "nicht angemeldet", hhmm((p.d16 || {}).ts), (p.d16 || {}).by, (p.d16 || {}).sign ? "ja" : ""]));
   const csv = "﻿" + rows.map(r => r.map(v => `"${String(v ?? "").replace(/"/g, '""')}"`).join(";")).join("\r\n");
   const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv], {type: "text/csv;charset=utf-8"}));
   a.download = "Juniors-Day-2026_Check-in_" + new Date().toISOString().slice(0, 16).replace(/[:T]/g, "-") + ".csv"; a.click();
@@ -711,7 +718,6 @@ $("#loginForm").addEventListener("submit", async e => {
 /* ===================== Start ===================== */
 store = DEMO ? makeDemoStore() : makeFirebaseStore();
 if (DEMO) document.title += " (DEMO)", document.querySelector(".brand").insertAdjacentHTML("beforeend", ' <span style="background:#c5221f;color:#fff;padding:2px 8px;border-radius:6px;font-size:12px">DEMO – Testdaten</span>');
-$("#lgName").value = GUIDE;
 let listening = false;
 store.onAuth(ok => {
   $("#login").hidden = ok; $("#tabs").hidden = !ok; $("#hstat").hidden = !ok;
