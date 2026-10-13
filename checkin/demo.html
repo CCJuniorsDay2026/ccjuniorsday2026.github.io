@@ -1,0 +1,722 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow, noarchive">
+<meta name="referrer" content="no-referrer">
+<title>Check-in · Juniors Day 2026</title>
+<style>
+:root{
+  --pet:#06303a; --pet2:#0b4250; --pet3:#14596a; --yel:#ffd200; --yel-l:#fff6cf; --ink:#14262b; --grey:#5f6b6d; --muted:#8a9597;
+  --line:#dfe5e6; --bg:#f3f6f6; --card:#fff; --ok:#1d8a4e; --ok-l:#e3f4ea; --bad:#c5221f; --bad-l:#fde8e7; --warn:#b26a00; --warn-l:#fff1d6;
+  --r:14px; --font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.4 var(--font)}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+[hidden]{display:none!important}
+
+/* header */
+header{background:var(--pet);color:#fff;position:sticky;top:0;z-index:20;box-shadow:0 2px 10px rgba(0,0,0,.15)}
+.hrow{max-width:1400px;margin:0 auto;padding:10px 20px;display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.brand{font-weight:800;letter-spacing:.02em;font-size:17px;white-space:nowrap}
+.brand span{color:var(--yel)}
+.days{display:flex;background:rgba(0,0,0,.25);border-radius:999px;padding:3px}
+.days button{border:0;background:transparent;color:rgba(255,255,255,.8);padding:6px 14px;border-radius:999px;font-weight:700;font-size:14px}
+.days button[aria-pressed=true]{background:var(--yel);color:var(--pet)}
+nav.tabs{display:flex;gap:4px}
+nav.tabs button{border:0;background:transparent;color:rgba(255,255,255,.75);padding:8px 12px;border-radius:10px;font-weight:600}
+nav.tabs button[aria-selected=true]{background:rgba(255,255,255,.14);color:#fff;box-shadow:inset 0 -3px 0 var(--yel)}
+.hstat{margin-left:auto;display:flex;align-items:center;gap:14px;font-size:13px;color:rgba(255,255,255,.85)}
+.big{font-size:20px;font-weight:800;color:#fff}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:#4cd17f;margin-right:6px;vertical-align:1px}
+.dot.off{background:#ff8a65}
+.hstat button{border:1px solid rgba(255,255,255,.3);background:transparent;color:#fff;border-radius:999px;padding:4px 10px;font-size:12px}
+
+main{max-width:1400px;margin:0 auto;padding:20px}
+section[hidden]{display:none}
+
+/* login */
+.login{max-width:420px;margin:60px auto;background:var(--card);border-radius:var(--r);padding:26px;box-shadow:0 6px 30px rgba(6,48,58,.12)}
+.login h1{margin:0 0 4px;font-size:22px;color:var(--pet)}
+.login p{margin:0 0 18px;color:var(--grey)}
+.login label{display:block;font-size:13px;font-weight:600;color:var(--grey);margin:12px 0 4px}
+.login input{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:10px;font-size:16px}
+.login button{margin-top:18px;width:100%;border:0;border-radius:10px;padding:12px;background:var(--pet);color:#fff;font-weight:700;font-size:16px}
+.err{color:var(--bad);font-size:14px;margin-top:10px;min-height:1.2em}
+
+/* check-in */
+.ci{display:grid;grid-template-columns:1fr 340px;gap:20px;align-items:start}
+@media(max-width:1000px){.ci{grid-template-columns:1fr}}
+.searchbox{display:flex;gap:10px}
+.searchbox input{flex:1;padding:16px 18px;font-size:22px;border:2px solid var(--pet3);border-radius:14px;outline:none;background:#fff}
+.searchbox input:focus{border-color:var(--pet);box-shadow:0 0 0 4px rgba(255,210,0,.45)}
+.btn{border:0;border-radius:12px;padding:12px 16px;font-weight:700;background:var(--pet);color:#fff}
+.btn.y{background:var(--yel);color:var(--pet)}
+.btn.ghost{background:#fff;color:var(--pet);border:1px solid var(--line)}
+.btn.red{background:var(--bad)}
+.btn.sm{padding:7px 11px;font-size:13px;border-radius:9px}
+.filters{display:flex;gap:6px;margin:12px 0;flex-wrap:wrap;align-items:center}
+.chip{border:1px solid var(--line);background:#fff;border-radius:999px;padding:5px 12px;font-size:13px;font-weight:600;color:var(--grey)}
+.chip[aria-pressed=true]{background:var(--pet);color:#fff;border-color:var(--pet)}
+.hint{color:var(--muted);font-size:13px;margin-left:auto}
+.results{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px}
+.pc{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;display:flex;gap:12px;align-items:center;transition:transform .05s}
+.pc.click{cursor:pointer}
+.pc.click:hover{border-color:var(--pet3);box-shadow:0 3px 14px rgba(6,48,58,.1)}
+.pc.click:active{transform:scale(.99)}
+.pc.first{outline:3px solid var(--yel)}
+.pc .nm{flex:1;min-width:0}
+.pc .nm b{display:block;font-size:17px;line-height:1.2}
+.pc .nm small{display:block;color:var(--grey);font-size:13px;margin-top:2px}
+.tag{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.04em;padding:2px 7px;border-radius:6px;margin-right:4px;vertical-align:1px}
+.tag.ml{background:var(--yel);color:var(--pet)}
+.tag.nach{background:#e8e3ff;color:#4b3aa8}
+.tag.rem{background:#eee;color:#777}
+.st{font-size:12px;font-weight:800;padding:5px 9px;border-radius:8px;white-space:nowrap;text-align:center}
+.st.in{background:var(--ok-l);color:var(--ok)}
+.st.open{background:#eef2f3;color:var(--grey)}
+.st.cancel{background:var(--warn-l);color:var(--warn)}
+.st.absent{background:var(--bad-l);color:var(--bad)}
+.st small{display:block;font-weight:600;font-size:11px;opacity:.85}
+.pc.is-in{background:#f6fbf8}
+.pc.is-absent{background:#fff8f8}
+.empty{color:var(--muted);padding:30px;text-align:center;background:#fff;border-radius:var(--r);border:1px dashed var(--line)}
+.side{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px;position:sticky;top:80px}
+.side h3{margin:0 0 8px;font-size:14px;color:var(--grey);text-transform:uppercase;letter-spacing:.05em}
+.feed{list-style:none;margin:0;padding:0;max-height:60vh;overflow:auto}
+.feed li{display:flex;gap:8px;align-items:center;padding:7px 0;border-top:1px solid var(--line);font-size:14px}
+.feed li:first-child{border-top:0}
+.feed .t{color:var(--muted);font-size:12px;width:38px;flex:none}
+.feed .n{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.kpi{background:var(--bg);border-radius:10px;padding:8px;text-align:center}
+.kpi b{display:block;font-size:22px;color:var(--pet)}
+.kpi span{font-size:11px;color:var(--grey);font-weight:600}
+
+/* modal */
+.modal{position:fixed;inset:0;background:rgba(3,34,42,.55);display:grid;place-items:center;z-index:50;padding:20px}
+.mbox{background:#fff;border-radius:20px;max-width:560px;width:100%;padding:26px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.mbox h2{margin:0 0 10px;color:var(--pet)}
+.mbox .row{display:flex;gap:10px;margin-top:20px;justify-content:flex-end;flex-wrap:wrap}
+.mbox label{display:block;font-size:13px;font-weight:600;color:var(--grey);margin:10px 0 4px}
+.mbox input,.mbox select,.mbox textarea{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;font-size:15px}
+.mlbox{background:var(--yel);text-align:center;padding:30px 26px}
+.mlbox .k{font-weight:900;letter-spacing:.12em;font-size:16px;color:var(--pet)}
+.mlbox .team{font-size:84px;font-weight:900;line-height:1;color:var(--pet);margin:10px 0 6px}
+.mlbox .who{font-size:22px;font-weight:800;color:var(--pet)}
+.mlbox .todo{background:#fff;border-radius:14px;padding:14px 16px;margin-top:18px;text-align:left;color:var(--ink);font-size:17px}
+.mlbox .todo div+div{margin-top:8px}
+.mlbox .row{justify-content:center}
+.mlbox .btn{font-size:17px;padding:14px 22px}
+
+/* toast */
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--pet);color:#fff;border-radius:12px;padding:12px 14px 12px 18px;display:flex;gap:14px;align-items:center;box-shadow:0 10px 30px rgba(0,0,0,.25);z-index:60;font-weight:600}
+.toast button{background:var(--yel);color:var(--pet);border:0;border-radius:8px;padding:6px 12px;font-weight:800}
+
+/* teams */
+.tgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.tc{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px;cursor:pointer}
+.tc.warn{border-color:var(--bad);box-shadow:inset 0 0 0 1px var(--bad)}
+.tc h3{margin:0;font-size:20px;color:var(--pet);display:flex;justify-content:space-between;align-items:baseline}
+.tc h3 small{font-size:12px;color:var(--grey);font-weight:600}
+.tc .meta{font-size:12.5px;color:var(--grey);margin:2px 0 10px}
+.bar{height:10px;border-radius:999px;background:#e9eeef;overflow:hidden;display:flex}
+.bar i{display:block;height:100%}
+.bar .a{background:var(--ok)} .bar .c{background:#f0b44c}
+.tc .nums{display:flex;justify-content:space-between;font-size:13px;margin-top:6px;color:var(--grey)}
+.tc .nums b{color:var(--ink);font-size:16px}
+.mls{margin-top:10px;font-size:13px}
+.mls div{display:flex;justify-content:space-between;gap:6px;padding:3px 0}
+.mls .ok{color:var(--ok);font-weight:700}
+.mls .no{color:var(--bad);font-weight:700}
+.members{margin-top:10px;border-top:1px solid var(--line);padding-top:8px;font-size:13px}
+.members div{display:flex;justify-content:space-between;padding:2px 0}
+
+/* report */
+.rgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-bottom:20px}
+.rk{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:14px}
+.rk b{display:block;font-size:30px;color:var(--pet);line-height:1.1}
+.rk span{color:var(--grey);font-size:13px;font-weight:600}
+.panel{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:16px;margin-bottom:16px}
+.panel h3{margin:0 0 12px;color:var(--pet);font-size:16px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line)}
+th{font-size:12px;color:var(--grey);text-transform:uppercase;letter-spacing:.04em}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:1000px){.two{grid-template-columns:1fr}}
+.hist{display:flex;align-items:flex-end;gap:3px;height:160px;padding-top:10px}
+.hist div{flex:1;background:var(--pet3);border-radius:4px 4px 0 0;position:relative;min-width:6px}
+.hist div span{position:absolute;bottom:-20px;left:50%;transform:translateX(-50%);font-size:10px;color:var(--grey);white-space:nowrap}
+.hist div b{position:absolute;top:-17px;left:50%;transform:translateX(-50%);font-size:11px;color:var(--ink)}
+.histwrap{padding-bottom:24px}
+.adm label{display:block;font-size:13px;font-weight:600;color:var(--grey);margin:12px 0 4px}
+.adm input[type=text],.adm textarea{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px}
+.note{color:var(--grey);font-size:13.5px}
+.okmsg{color:var(--ok);font-weight:600}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hrow">
+    <div class="brand">Juniors Day 2026 · <span>Check-in</span></div>
+    <div class="days" id="days">
+      <button data-day="d15" aria-pressed="false">Do 15.10.</button>
+      <button data-day="d16" aria-pressed="false">Fr 16.10.</button>
+    </div>
+    <nav class="tabs" id="tabs" hidden>
+      <button data-tab="checkin" aria-selected="true">Check-in</button>
+      <button data-tab="teams" aria-selected="false">Teams</button>
+      <button data-tab="report" aria-selected="false">Auswertung</button>
+      <button data-tab="admin" aria-selected="false">Verwaltung</button>
+    </nav>
+    <div class="hstat" id="hstat" hidden>
+      <span><span class="big" id="hcount">0</span> / <span id="htotal">0</span> da</span>
+      <span><span class="dot" id="netdot"></span><span id="nettext">online</span></span>
+      <span id="guideName"></span>
+      <button id="logout" type="button">Abmelden</button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <!-- login -->
+  <section id="login">
+    <div class="login">
+      <h1>Check-in</h1>
+      <p>Für die Event Guides am Check-in-Counter.</p>
+      <form id="loginForm" autocomplete="on">
+        <label for="lgName">Dein Name</label>
+        <input id="lgName" required placeholder="z. B. Silas" autocomplete="nickname">
+        <label for="lgMail">E-Mail (gemeinsamer Zugang)</label>
+        <input id="lgMail" type="email" required autocomplete="username">
+        <label for="lgPw">Passwort</label>
+        <input id="lgPw" type="password" required autocomplete="current-password">
+        <button type="submit">Anmelden</button>
+        <div class="err" id="lgErr"></div>
+      </form>
+    </div>
+  </section>
+
+  <!-- check-in -->
+  <section id="checkin" hidden>
+    <div class="ci">
+      <div>
+        <div class="searchbox">
+          <input id="q" placeholder="Vor- oder Nachname eintippen …" autocomplete="off" spellcheck="false">
+          <button class="btn y" id="addBtn" type="button">+ Person</button>
+        </div>
+        <div class="filters" id="filters"></div>
+        <div class="results" id="results"></div>
+      </div>
+      <aside class="side">
+        <div class="kpis" id="kpis"></div>
+        <h3 id="feedTitle">Zuletzt</h3>
+        <ul class="feed" id="feed"></ul>
+      </aside>
+    </div>
+  </section>
+
+  <section id="teams" hidden></section>
+  <section id="report" hidden></section>
+  <section id="admin" hidden></section>
+</main>
+
+<div id="modal" class="modal" hidden></div>
+<div id="toast" class="toast" hidden></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+<script>
+/* ===================== Konfiguration ===================== */
+const FIREBASE_CONFIG = null;
+const DEMO = new URLSearchParams(location.search).has("demo") || !FIREBASE_CONFIG;
+
+// Teams 1–16: Raum, Garten/Mission Control, Sprache (Stand Running Order)
+const MC = {1:"Baker Street",2:"Baker Street",3:"Baker Street",4:"Baker Street",5:"Scotland Yard",6:"Scotland Yard",7:"Scotland Yard",8:"Scotland Yard",
+  9:"Whitehall",10:"Whitehall",11:"Whitehall",12:"Whitehall",13:"Charing Cross",14:"Charing Cross",15:"Charing Cross",16:"Charing Cross"};
+const GARDEN = {"Baker Street":"35. OG","Scotland Yard":"39. OG","Whitehall":"23. OG","Charing Cross":"27. OG"};
+const LANG = n => n >= 13 ? "Deutsch" : "Englisch";
+const DAYLBL = {d15: "Do 15.10.", d16: "Fr 16.10."};
+
+/* ===================== Helfer ===================== */
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const norm = s => String(s || "").toLowerCase().replace(/ß/g, "ss").normalize("NFD").replace(/[̀-ͯ]/g, "");
+const normAlt = s => String(s || "").toLowerCase().replace(/ä/g, "ae").replace(/ö/g, "oe").replace(/ü/g, "ue").replace(/ß/g, "ss");
+const keyOf = (vn, nn) => (norm(vn) + "_" + norm(nn)).replace(/[^a-z0-9_]+/g, "-");
+const hhmm = ts => { if (!ts) return ""; const d = new Date(ts); return String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0"); };
+const ls = { get(k){ try { return localStorage.getItem(k); } catch(e){ return null; } }, set(k, v){ try { localStorage.setItem(k, v); } catch(e){} } };
+const fullName = p => (p.vn || "") + " " + (p.nn || "");
+
+/* ===================== Datenhaltung ===================== */
+// people: { id, vn, nn, grp, team, raum, ml, bereich, ort, src, removed, d15:{st,ts,by}, d16:{st,ts,by,sign} }
+// d15.st: null = da (Standard), "absent" = Namensschild liegt noch, "cancel" = abgesagt
+// d16.st: null = erwartet,      "in" = eingecheckt,                "cancel" = abgesagt
+let PEOPLE = new Map(), CONFIG = {sammelplatz: ""}, store;
+
+function makeFirebaseStore(){
+  firebase.initializeApp(FIREBASE_CONFIG);
+  const auth = firebase.auth(), db = firebase.firestore();
+  try { db.enablePersistence({synchronizeTabs: true}).catch(() => {}); } catch(e){}
+  return {
+    onAuth: cb => auth.onAuthStateChanged(u => cb(!!u)),
+    login: (m, p) => auth.signInWithEmailAndPassword(m, p),
+    logout: () => auth.signOut(),
+    listen(cb){
+      db.collection("people").onSnapshot({includeMetadataChanges: true}, snap => {
+        PEOPLE = new Map(snap.docs.map(d => [d.id, Object.assign({id: d.id}, d.data())]));
+        net(snap.metadata.fromCache, snap.metadata.hasPendingWrites); cb();
+      }, e => toast("Fehler beim Laden: " + e.message));
+      db.collection("config").doc("main").onSnapshot(d => { CONFIG = Object.assign({sammelplatz: ""}, d.data() || {}); cb(); });
+    },
+    update: (id, patch) => db.collection("people").doc(id).update(patch),
+    set: (id, data) => db.collection("people").doc(id).set(data, {merge: true}),
+    log: entry => db.collection("log").add(entry).catch(() => {}),
+    saveConfig: c => db.collection("config").doc("main").set(c, {merge: true}),
+    async batch(ops){
+      for (let i = 0; i < ops.length; i += 400){
+        const b = db.batch();
+        ops.slice(i, i + 400).forEach(o => b.set(db.collection("people").doc(o.id), o.data, {merge: true}));
+        await b.commit();
+      }
+    },
+  };
+}
+function makeDemoStore(){
+  let cb = () => {}, authCb = () => {};
+  const FN = ["Anna","Ben","Clara","David","Elif","Felix","Greta","Hannes","Ida","Jonas","Kim","Lea","Max","Nora","Omar","Paula","Quentin","Rosa","Sven","Tara","Ulrich","Vera","Yusuf","Zoe","Jörg","Sophie","Lukas","Mia","Emre","Laura"];
+  const LN = ["Müller","Schmidt","Becker","Wagner","Hoffmann","Schäfer","Koch","Richter","Klein","Wolf","Schröder","Neumann","Schwarz","Zimmermann","Braun","Krüger","Hartmann","Lange","Werner","Krause","Meier","Lehmann","Schmitz","Köhler","Maier","Walter","König","Möller","Huber","Kaiser"];
+  const BER = ["Capital Markets","Mittelstandsbank Nord/West","International Corporates","Lending","Mittelstandsbank Süd"];
+  const ORT = ["Frankfurt","London","Düsseldorf","Hamburg","München"];
+  const RAUM = {1:"34. OG 00 0028",2:"36. OG 00 0067",3:"37. OG 02 0212",4:"38. OG 01 0167",5:"39. OG 00 0067",6:"40. OG 02 0201",7:"41. OG 00 0067",8:"43. OG 00 0067",9:"24. OG 01 0108",10:"22. OG 01 0112",11:"20. OG 01 0140",12:"21. OG 00 0020",13:"27. OG 01 0167",14:"27. OG 02 0214",15:"29. OG 01 0167",16:"30. OG 01 0167"};
+  let k = 0;
+  for (let t = 1; t <= 16; t++) for (let j = 0; j < 8 + (t % 2); j++){
+    const vn = FN[(k * 7) % FN.length], nn = LN[(k * 11 + t) % LN.length] + (k > 200 ? k : ""); k++;
+    const id = keyOf(vn, nn) + "-" + k;
+    PEOPLE.set(id, {id, vn, nn, grp: t >= 13 ? "A" : "BCDE"[k % 4], team: t, raum: RAUM[t], ml: j < 2, bereich: BER[k % 5], ort: ORT[k % 5], src: "liste", d15: {}, d16: {}});
+  }
+  const apply = (id, patch) => { const p = PEOPLE.get(id); for (const [k2, v] of Object.entries(patch)){ const [a, b] = k2.split("."); if (b){ p[a] = Object.assign({}, p[a], {[b]: v}); } else p[a] = v; } };
+  return {
+    onAuth: c => { authCb = c; c(ls.get("jd-demo-auth") === "1"); },
+    login: async () => { ls.set("jd-demo-auth", "1"); authCb(true); },
+    logout: async () => { ls.set("jd-demo-auth", "0"); authCb(false); },
+    listen: c => { cb = c; c(); },
+    update: async (id, patch) => { apply(id, patch); cb(); },
+    set: async (id, data) => { PEOPLE.set(id, Object.assign(PEOPLE.get(id) || {id}, data)); cb(); },
+    log: async () => {},
+    saveConfig: async c => { Object.assign(CONFIG, c); cb(); },
+    batch: async ops => { ops.forEach(o => PEOPLE.set(o.id, Object.assign(PEOPLE.get(o.id) || {id: o.id}, o.data))); cb(); },
+  };
+}
+
+/* ===================== Zustand ===================== */
+let DAY = ls.get("jd-ci-day") || (new Date().toISOString().slice(0, 10) === "2026-10-15" ? "d15" : "d16");
+let ADMIN_DAY = null;
+let TAB = "checkin", FILTER = "all", GUIDE = ls.get("jd-ci-guide") || "", OPENTEAM = null;
+const active = () => [...PEOPLE.values()].filter(p => !p.removed);
+const st = (p, day = DAY) => (p[day] || {}).st || null;
+function status(p, day = DAY){
+  const s = st(p, day);
+  if (day === "d15") return s === "absent" ? "absent" : s === "cancel" ? "cancel" : "in";
+  return s === "in" ? "in" : s === "cancel" ? "cancel" : "open";
+}
+const counts = (list, day = DAY) => { const c = {in: 0, open: 0, absent: 0, cancel: 0}; list.forEach(p => c[status(p, day)]++); return c; };
+
+/* ===================== Aktionen ===================== */
+let lastUndo = null;
+async function setStatus(p, s, extra = {}){
+  const prev = Object.assign({}, p[DAY] || {});
+  const patch = {[DAY + ".st"]: s, [DAY + ".ts"]: s ? Date.now() : null, [DAY + ".by"]: s ? GUIDE : null};
+  for (const [k, v] of Object.entries(extra)) patch[DAY + "." + k] = v;
+  await store.update(p.id, patch);
+  store.log({pid: p.id, name: fullName(p), day: DAY, st: s, ts: Date.now(), by: GUIDE});
+  lastUndo = {id: p.id, day: DAY, prev};
+}
+async function undo(){
+  if (!lastUndo) return;
+  const u = lastUndo; lastUndo = null;
+  await store.update(u.id, {[u.day]: Object.keys(u.prev).length ? u.prev : {}});
+  const p = PEOPLE.get(u.id);
+  store.log({pid: u.id, name: p ? fullName(p) : "", day: u.day, st: "undo", ts: Date.now(), by: GUIDE});
+  hideToast(); toast("Rückgängig gemacht"); focusSearch();
+}
+function primaryAction(p){
+  const s = status(p);
+  if (DAY === "d16"){
+    if (s === "in") return; // bereits da – nichts tun
+    if (p.ml) return showML(p);
+    setStatus(p, "in").then(() => { toast(`${fullName(p)} eingecheckt · Team ${p.team || "–"}`, true); clearSearch(); });
+  } else {
+    if (s === "absent") return setStatus(p, null).then(() => { toast(`${fullName(p)}: doch da`, true); clearSearch(); });
+    setStatus(p, "absent").then(() => { toast(`${fullName(p)}: Namensschild liegt noch → nicht erschienen`, true); clearSearch(); });
+  }
+}
+
+/* ===================== Rendering ===================== */
+function render(){
+  document.querySelectorAll("#days button").forEach(b => b.setAttribute("aria-pressed", b.dataset.day === DAY));
+  const list = active(), c = counts(list);
+  $("#hcount").textContent = c.in; $("#htotal").textContent = list.length - c.cancel;
+  if (TAB === "checkin") renderCheckin();
+  if (TAB === "teams") renderTeams();
+  if (TAB === "report") renderReport();
+  if (TAB === "admin" && ADMIN_DAY !== DAY){ ADMIN_DAY = DAY; renderAdmin(); }
+}
+function stBadge(p){
+  const s = status(p), d = p[DAY] || {};
+  if (DAY === "d16"){
+    if (s === "in") return `<span class="st in">DA ✓<small>${hhmm(d.ts)}${d.by ? " · " + esc(d.by) : ""}</small></span>`;
+    if (s === "cancel") return `<span class="st cancel">ABGESAGT</span>`;
+    return `<span class="st open">EINCHECKEN</span>`;
+  }
+  if (s === "absent") return `<span class="st absent">NICHT DA<small>${hhmm(d.ts)}${d.by ? " · " + esc(d.by) : ""}</small></span>`;
+  if (s === "cancel") return `<span class="st cancel">ABGESAGT</span>`;
+  return `<span class="st in">DA<small>Schild abgeholt</small></span>`;
+}
+function personMeta(p){
+  const bits = [];
+  if (DAY === "d15") bits.push(p.grp ? "Gruppe " + p.grp : "ohne Gruppe");
+  bits.push(p.team ? `Team ${p.team}` : "ohne Team");
+  if (DAY === "d16" && p.raum) bits.push(p.raum);
+  if (p.bereich) bits.push(p.bereich);
+  return bits.map(esc).join(" · ");
+}
+function match(p, qs){
+  if (!qs.length) return true;
+  const h = norm(fullName(p)) + " " + normAlt(fullName(p));
+  return qs.every(t => h.includes(t));
+}
+function renderCheckin(){
+  const F = DAY === "d16" ? [["all","Alle"],["open","Noch offen"],["in","Eingecheckt"],["cancel","Abgesagt"],["ml","Mission Leads"]]
+                          : [["all","Alle"],["in","Da"],["absent","Nicht da"],["cancel","Abgesagt"]];
+  if (!F.some(f => f[0] === FILTER)) FILTER = "all";
+  const hint = DAY === "d16" ? "Enter = ersten Treffer einchecken · Esc = Suche leeren"
+                             : "Do: Alle gelten als da. Liegt ein Namensschild noch, Person antippen → „nicht da“.";
+  $("#filters").innerHTML = F.map(f => `<button class="chip" data-f="${f[0]}" aria-pressed="${FILTER === f[0]}">${f[1]}</button>`).join("") + `<span class="hint">${hint}</span>`;
+  const qs = norm($("#q").value).split(/\s+/).filter(Boolean).concat([]);
+  let list = active().filter(p => match(p, qs));
+  if (FILTER === "ml") list = list.filter(p => p.ml);
+  else if (FILTER !== "all") list = list.filter(p => status(p) === FILTER);
+  list.sort((a, b) => norm(a.nn).localeCompare(norm(b.nn)) || norm(a.vn).localeCompare(norm(b.vn)));
+  const shown = qs.length ? list.slice(0, 30) : list.slice(0, 60);
+  $("#results").innerHTML = shown.length ? shown.map((p, i) => {
+    const s = status(p), clickable = !(DAY === "d16" && s !== "open");
+    return `<div class="pc ${clickable ? "click" : ""} is-${s} ${i === 0 && qs.length ? "first" : ""}" data-id="${esc(p.id)}">
+      <div class="nm"><b>${p.ml ? '<span class="tag ml">MISSION LEAD</span>' : ""}${p.src === "nach" ? '<span class="tag nach">NACHGEMELDET</span>' : ""}${esc(fullName(p))}</b><small>${personMeta(p)}</small></div>
+      ${stBadge(p)}
+      <button class="btn ghost sm" data-menu="${esc(p.id)}" title="Weitere Aktionen">⋯</button></div>`;
+  }).join("") + (list.length > shown.length ? `<div class="empty">… ${list.length - shown.length} weitere – bitte weitertippen</div>` : "")
+    : `<div class="empty">Niemand gefunden. Ist die Person nicht auf der Liste? → <b>+ Person</b></div>`;
+  const c = counts(active());
+  $("#kpis").innerHTML = DAY === "d16"
+    ? `<div class="kpi"><b>${c.in}</b><span>eingecheckt</span></div><div class="kpi"><b>${c.open}</b><span>offen</span></div><div class="kpi"><b>${c.cancel}</b><span>abgesagt</span></div>`
+    : `<div class="kpi"><b>${c.in}</b><span>da</span></div><div class="kpi"><b>${c.absent}</b><span>nicht da</span></div><div class="kpi"><b>${c.cancel}</b><span>abgesagt</span></div>`;
+  const feed = active().filter(p => (p[DAY] || {}).ts).sort((a, b) => b[DAY].ts - a[DAY].ts).slice(0, 25);
+  $("#feedTitle").textContent = DAY === "d16" ? "Zuletzt eingecheckt" : "Zuletzt als „nicht da“ markiert";
+  $("#feed").innerHTML = feed.map(p => `<li><span class="t">${hhmm(p[DAY].ts)}</span><span class="n">${p.ml ? "★ " : ""}${esc(fullName(p))}</span>${stBadge(p).replace(/<small>.*?<\/small>/, "")}</li>`).join("") || `<li class="note">Noch nichts.</li>`;
+}
+
+/* ---------- Mission-Lead-Popup ---------- */
+function showML(p){
+  const sp = CONFIG.sammelplatz ? esc(CONFIG.sammelplatz) : "<i>(Sammelplatz in „Verwaltung“ eintragen)</i>";
+  openModal(`<div class="mbox mlbox"><div class="k">★ MISSION LEAD ★</div><div class="team">Team ${p.team || "?"}</div>
+    <div class="who">${esc(fullName(p))}</div>
+    <div class="todo"><div>1. Schild mit der <b>Teamnummer ${p.team || "?"}</b> übergeben.</div><div>2. Sammelplatz: <b>${sp}</b></div>
+    <div class="note" style="margin-top:10px">Teamraum ${esc(p.raum || "–")} · Mission Control „${esc(MC[p.team] || "–")}“</div></div>
+    <div class="row"><button class="btn ghost" data-close>Abbrechen</button><button class="btn" id="mlOk">Schild übergeben ✓ einchecken</button></div></div>`);
+  $("#mlOk").onclick = () => { closeModal(); setStatus(p, "in", {sign: true}).then(() => { toast(`Mission Lead ${fullName(p)} eingecheckt · Team ${p.team}`, true); clearSearch(); }); };
+  $("#mlOk").focus();
+}
+/* ---------- Menü pro Person ---------- */
+function showMenu(p){
+  const s = status(p), opts = [];
+  if (DAY === "d16"){
+    if (s !== "in") opts.push(["in", "Einchecken"]);
+    if (s === "in") opts.push(["reset", "Check-in zurücknehmen"]);
+    if (s !== "cancel") opts.push(["cancel", "Als abgesagt markieren"]); else opts.push(["reset", "Absage zurücknehmen"]);
+  } else {
+    if (s !== "absent") opts.push(["absent", "Nicht da (Namensschild liegt noch)"]);
+    if (s !== "in") opts.push(["reset", "Doch da"]);
+    if (s !== "cancel") opts.push(["cancel", "Als abgesagt markieren"]);
+  }
+  opts.push(["team", "Team ändern"]);
+  openModal(`<div class="mbox"><h2>${esc(fullName(p))}</h2><div class="note">${personMeta(p)} · ${DAYLBL[DAY]}</div>
+    <div class="row" style="justify-content:flex-start">${opts.map(o => `<button class="btn ${o[0] === "cancel" ? "ghost" : ""}" data-act="${o[0]}">${o[1]}</button>`).join("")}</div>
+    <div class="row"><button class="btn ghost" data-close>Schließen</button></div></div>`);
+  document.querySelectorAll("[data-act]").forEach(b => b.onclick = () => {
+    const a = b.dataset.act; closeModal();
+    if (a === "in") return p.ml ? showML(p) : setStatus(p, "in").then(() => toast(`${fullName(p)} eingecheckt`, true));
+    if (a === "reset") return setStatus(p, null).then(() => toast("Zurückgesetzt", true));
+    if (a === "cancel") return setStatus(p, "cancel").then(() => toast(`${fullName(p)}: abgesagt`, true));
+    if (a === "absent") return setStatus(p, "absent").then(() => toast(`${fullName(p)}: nicht da`, true));
+    if (a === "team") return showTeamChange(p);
+  });
+}
+function teamLoad(){
+  const L = {}; for (let t = 1; t <= 16; t++) L[t] = {exp: 0, in: 0};
+  active().forEach(p => { if (p.team && L[p.team] && status(p, "d16") !== "cancel"){ L[p.team].exp++; if (status(p, "d16") === "in") L[p.team].in++; } });
+  return L;
+}
+function suggestTeam(german){
+  const L = teamLoad(); const cand = Object.keys(L).map(Number).filter(t => german === null ? true : (german ? t >= 13 : t < 13));
+  return cand.sort((a, b) => (L[a].exp - L[b].exp) || (a - b))[0];
+}
+function teamOptions(sel){
+  const L = teamLoad();
+  return `<option value="">– ohne Team –</option>` + Array.from({length: 16}, (_, i) => i + 1).map(t => `<option value="${t}" ${t === sel ? "selected" : ""}>Team ${t} · ${LANG(t)} · ${L[t].exp} Personen</option>`).join("");
+}
+function showTeamChange(p){
+  openModal(`<div class="mbox"><h2>Team ändern</h2><div class="note">${esc(fullName(p))}</div>
+    <label>Team</label><select id="tcSel">${teamOptions(p.team)}</select>
+    <div class="row"><button class="btn ghost" data-close>Abbrechen</button><button class="btn" id="tcOk">Speichern</button></div></div>`);
+  $("#tcOk").onclick = async () => {
+    const t = Number($("#tcSel").value) || null;
+    const raum = t ? (active().find(x => x.team === t && x.raum) || {}).raum || "" : "";
+    await store.update(p.id, {team: t, raum, teamChangedBy: GUIDE, teamChangedTs: Date.now()});
+    store.log({pid: p.id, name: fullName(p), day: DAY, st: "team:" + t, ts: Date.now(), by: GUIDE});
+    closeModal(); toast(`${fullName(p)} → Team ${t || "–"}`);
+  };
+}
+/* ---------- Nachmeldung ---------- */
+function showAdd(){
+  const q = $("#q").value.trim().split(/\s+/);
+  const bereiche = [...new Set(active().map(p => p.bereich).filter(Boolean))].sort();
+  openModal(`<div class="mbox"><h2>Person nachmelden</h2><div class="note">Für Teilnehmer, die nicht auf der Liste stehen. Wird als „nachgemeldet“ markiert.</div>
+    <label>Vorname</label><input id="adVn" value="${esc(q.length > 1 ? q.slice(0, -1).join(" ") : "")}">
+    <label>Nachname</label><input id="adNn" value="${esc(q.length > 1 ? q[q.length - 1] : q[0] || "")}">
+    <label>Bereich</label><input id="adBer" list="berList"><datalist id="berList">${bereiche.map(b => `<option value="${esc(b)}">`).join("")}</datalist>
+    <label>Lokation</label><input id="adOrt">
+    <label>Gruppe (Donnerstag)</label><select id="adGrp"><option value="">–</option>${"ABCDE".split("").map(g => `<option>${g}</option>`).join("")}</select>
+    <label>Team (Freitag) – Vorschlag: das kleinste passende Team</label>
+    <div style="display:flex;gap:8px"><select id="adTeam" style="flex:1">${teamOptions(null)}</select>
+      <button class="btn ghost sm" type="button" id="sugEn">Vorschlag EN</button><button class="btn ghost sm" type="button" id="sugDe">Vorschlag DE</button></div>
+    <div class="row"><button class="btn ghost" data-close>Abbrechen</button><button class="btn" id="adOk">Nachmelden & ${DAY === "d16" ? "einchecken" : "speichern"}</button></div></div>`);
+  $("#sugEn").onclick = () => $("#adTeam").value = suggestTeam(false);
+  $("#sugDe").onclick = () => $("#adTeam").value = suggestTeam(true);
+  $("#adOk").onclick = async () => {
+    const vn = $("#adVn").value.trim(), nn = $("#adNn").value.trim();
+    if (!vn || !nn) return alertInModal("Bitte Vor- und Nachname eingeben.");
+    const id = "nach-" + keyOf(vn, nn);
+    if (PEOPLE.has(id) || PEOPLE.has(keyOf(vn, nn))) return alertInModal("Diese Person gibt es schon – bitte in der Suche nachsehen.");
+    const t = Number($("#adTeam").value) || null;
+    const raum = t ? (active().find(x => x.team === t && x.raum) || {}).raum || "" : "";
+    const data = {vn, nn, bereich: $("#adBer").value.trim(), ort: $("#adOrt").value.trim(), grp: $("#adGrp").value, team: t, raum, ml: false,
+                  src: "nach", nachBy: GUIDE, nachTs: Date.now(), d15: {}, d16: {}};
+    if (DAY === "d16") data.d16 = {st: "in", ts: Date.now(), by: GUIDE};
+    await store.set(id, data);
+    store.log({pid: id, name: vn + " " + nn, day: DAY, st: "nachgemeldet", ts: Date.now(), by: GUIDE});
+    closeModal(); clearSearch(); toast(`${vn} ${nn} nachgemeldet${t ? " · Team " + t : ""}`);
+  };
+  $("#adVn").focus();
+}
+function alertInModal(m){ let e = document.querySelector("#modal .err"); if (!e){ e = document.createElement("div"); e.className = "err"; document.querySelector("#modal .mbox .row").before(e); } e.textContent = m; }
+
+/* ---------- Teams ---------- */
+function renderTeams(){
+  if (DAY === "d15") return renderGroups();
+  const now = new Date(), late = now.getHours() * 60 + now.getMinutes() >= 9 * 60 + 15;
+  let h = `<div class="filters"><span class="note">Freitag · Belegung der Teams. Rot = mindestens ein Mission Lead fehlt${late ? "" : " (Warnung zählt ab 09:15)"}. Team anklicken für Namensliste.</span></div><div class="tgrid">`;
+  for (let t = 1; t <= 16; t++){
+    const mem = active().filter(p => p.team === t);
+    const exp = mem.filter(p => status(p) !== "cancel"), inn = mem.filter(p => status(p) === "in"), canc = mem.filter(p => status(p) === "cancel");
+    const mls = mem.filter(p => p.ml), mlIn = mls.filter(p => status(p) === "in");
+    const warn = late && mlIn.length < mls.length;
+    const raum = (mem.find(p => p.raum) || {}).raum || "";
+    h += `<div class="tc ${warn ? "warn" : ""}" data-team="${t}"><h3>Team ${t}<small>${LANG(t)}</small></h3>
+      <div class="meta">${esc(raum)} · Garten „${MC[t]}“ (${GARDEN[MC[t]]})</div>
+      <div class="bar"><i class="a" style="width:${exp.length ? inn.length / exp.length * 100 : 0}%"></i></div>
+      <div class="nums"><span><b>${inn.length}</b> / ${exp.length} da</span><span>${canc.length ? canc.length + " abgesagt" : ""}${mem.some(p => p.src === "nach") ? " · " + mem.filter(p => p.src === "nach").length + " nachgem." : ""}</span></div>
+      <div class="mls">${mls.map(p => `<div><span>★ ${esc(fullName(p))}</span><span class="${status(p) === "in" ? "ok" : "no"}">${status(p) === "in" ? "da " + hhmm(p.d16.ts) : status(p) === "cancel" ? "abgesagt" : "fehlt"}</span></div>`).join("") || '<div class="no">kein Mission Lead</div>'}</div>
+      ${OPENTEAM === t ? `<div class="members">${mem.sort((a, b) => norm(a.nn).localeCompare(norm(b.nn))).map(p => `<div><span>${p.ml ? "★ " : ""}${esc(fullName(p))}</span><span class="${status(p) === "in" ? "ok" : status(p) === "cancel" ? "" : "no"}">${status(p) === "in" ? "da" : status(p) === "cancel" ? "abgesagt" : "offen"}</span></div>`).join("")}</div>` : ""}
+    </div>`;
+  }
+  const noTeam = active().filter(p => !p.team);
+  h += `</div>${noTeam.length ? `<div class="panel" style="margin-top:16px"><h3>Ohne Team (${noTeam.length})</h3>${noTeam.map(p => `<div>${esc(fullName(p))} · ${stBadge(p).replace(/<small>.*?<\/small>/, "")}</div>`).join("")}</div>` : ""}`;
+  $("#teams").innerHTML = h;
+}
+function renderGroups(){
+  let h = `<div class="filters"><span class="note">Donnerstag · Belegung der Gruppen A–E (Gallery Walk).</span></div><div class="tgrid">`;
+  for (const g of "ABCDE"){
+    const mem = active().filter(p => p.grp === g), exp = mem.filter(p => status(p) !== "cancel"), inn = mem.filter(p => status(p) === "in");
+    h += `<div class="tc" data-group="${g}"><h3>Gruppe ${g}<small>${g === "A" ? "Deutsch" : "Englisch"}</small></h3>
+      <div class="bar"><i class="a" style="width:${exp.length ? inn.length / exp.length * 100 : 0}%"></i></div>
+      <div class="nums"><span><b>${inn.length}</b> / ${exp.length} da</span><span>${mem.length - exp.length ? (mem.length - exp.length) + " abgesagt" : ""}</span></div>
+      <div class="members">${mem.filter(p => status(p) !== "in").map(p => `<div><span>${esc(fullName(p))}</span><span class="no">${status(p) === "cancel" ? "abgesagt" : "nicht da"}</span></div>`).join("") || '<div class="note">alle da</div>'}</div></div>`;
+  }
+  $("#teams").innerHTML = h + "</div>";
+}
+
+/* ---------- Auswertung ---------- */
+function renderReport(){
+  const L = active(), c15 = counts(L, "d15"), c16 = counts(L, "d16");
+  const both = L.filter(p => status(p, "d15") === "in" && status(p, "d16") === "in").length;
+  const nach = L.filter(p => p.src === "nach").length;
+  const pct = (a, b) => b ? Math.round(a / b * 100) + " %" : "–";
+  let h = `<div class="rgrid">
+    <div class="rk"><b>${L.length}</b><span>Personen gesamt</span></div>
+    <div class="rk"><b>${c15.in}</b><span>Do da (${pct(c15.in, L.length - c15.cancel)})</span></div>
+    <div class="rk"><b>${c16.in}</b><span>Fr da (${pct(c16.in, L.length - c16.cancel)})</span></div>
+    <div class="rk"><b>${both}</b><span>an beiden Tagen da</span></div>
+    <div class="rk"><b>${c15.absent + c16.open}</b><span>nicht erschienen (Do ${c15.absent} · Fr ${c16.open})</span></div>
+    <div class="rk"><b>${c15.cancel + c16.cancel}</b><span>Absagen (Do ${c15.cancel} · Fr ${c16.cancel})</span></div>
+    <div class="rk"><b>${nach}</b><span>nachgemeldet</span></div></div>`;
+  // Ankunftskurve Freitag
+  const ts = L.filter(p => status(p, "d16") === "in" && p.d16.ts).map(p => new Date(p.d16.ts));
+  if (ts.length){
+    const bins = {}; ts.forEach(d => { const m = d.getHours() * 60 + Math.floor(d.getMinutes() / 5) * 5; bins[m] = (bins[m] || 0) + 1; });
+    const ks = Object.keys(bins).map(Number).sort((a, b) => a - b), lo = ks[0], hi = ks[ks.length - 1], mx = Math.max(...Object.values(bins));
+    let bars = ""; for (let m = lo; m <= hi; m += 5){ const v = bins[m] || 0; bars += `<div style="height:${v / mx * 100}%" title="${hhmm(new Date(2026, 9, 16, 0, m))}: ${v}">${v ? `<b>${v}</b>` : ""}${(m - lo) % 15 === 0 ? `<span>${String(Math.floor(m / 60)).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}</span>` : ""}</div>`; }
+    h += `<div class="panel"><h3>Ankunft Freitag (pro 5 Minuten)</h3><div class="histwrap"><div class="hist">${bars}</div></div></div>`;
+  }
+  const grp = key => {
+    const m = {}; L.forEach(p => { const k = p[key] || "(leer)"; m[k] = m[k] || {n: 0, d15: 0, d16: 0, e15: 0, e16: 0}; const r = m[k]; r.n++;
+      if (status(p, "d15") !== "cancel"){ r.e15++; if (status(p, "d15") === "in") r.d15++; }
+      if (status(p, "d16") !== "cancel"){ r.e16++; if (status(p, "d16") === "in") r.d16++; } });
+    return Object.entries(m).sort((a, b) => b[1].n - a[1].n);
+  };
+  const tbl = (title, key) => `<div class="panel"><h3>${title}</h3><table><tr><th>${title.split(" ")[1] || ""}</th><th class="n">Pers.</th><th class="n">Do da</th><th class="n">Fr da</th></tr>${grp(key).map(([k, r]) =>
+    `<tr><td>${esc(k)}</td><td class="n">${r.n}</td><td class="n">${r.d15}/${r.e15} (${pct(r.d15, r.e15)})</td><td class="n">${r.d16}/${r.e16} (${pct(r.d16, r.e16)})</td></tr>`).join("")}</table></div>`;
+  h += `<div class="two">${tbl("Nach Bereich", "bereich")}${tbl("Nach Lokation", "ort")}</div>`;
+  const miss = L.filter(p => status(p, "d15") === "absent" || status(p, "d16") === "open" || status(p, "d15") === "cancel" || status(p, "d16") === "cancel")
+    .sort((a, b) => (a.bereich || "").localeCompare(b.bereich || "") || norm(a.nn).localeCompare(norm(b.nn)));
+  h += `<div class="panel"><h3>Nicht erschienen / abgesagt (${miss.length})</h3><table><tr><th>Name</th><th>Bereich</th><th>Do</th><th>Fr</th></tr>${miss.map(p =>
+    `<tr><td>${esc(fullName(p))}</td><td>${esc(p.bereich || "")}</td><td>${{in: "da", absent: "nicht da", cancel: "abgesagt"}[status(p, "d15")]}</td><td>${{in: "da", open: "nicht da", cancel: "abgesagt"}[status(p, "d16")]}</td></tr>`).join("")}</table></div>`;
+  h += `<div class="panel"><h3>Export</h3><p class="note">Alle Personen mit Status und Uhrzeit beider Tage als CSV (öffnet in Excel).</p><button class="btn" id="expBtn">CSV exportieren</button></div>`;
+  $("#report").innerHTML = h;
+  $("#expBtn").onclick = exportCSV;
+}
+function exportCSV(){
+  const lbl15 = {in: "da", absent: "nicht erschienen", cancel: "abgesagt"}, lbl16 = {in: "da", open: "nicht erschienen", cancel: "abgesagt"};
+  const rows = [["Vorname","Nachname","Bereich","Lokation","Gruppe (Do)","Team (Fr)","Raum (Fr)","Mission Lead","Quelle","Do Status","Do Uhrzeit","Do erfasst von","Fr Status","Fr Uhrzeit","Fr erfasst von","Fr Schild übergeben"]];
+  [...PEOPLE.values()].sort((a, b) => norm(a.nn).localeCompare(norm(b.nn))).forEach(p => rows.push([p.vn, p.nn, p.bereich, p.ort, p.grp, p.team, p.raum, p.ml ? "ja" : "", p.removed ? "nicht mehr in Liste" : p.src === "nach" ? "nachgemeldet" : "Liste",
+    lbl15[status(p, "d15")], hhmm((p.d15 || {}).ts), (p.d15 || {}).by, lbl16[status(p, "d16")], hhmm((p.d16 || {}).ts), (p.d16 || {}).by, (p.d16 || {}).sign ? "ja" : ""]));
+  const csv = "﻿" + rows.map(r => r.map(v => `"${String(v ?? "").replace(/"/g, '""')}"`).join(";")).join("\r\n");
+  const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv], {type: "text/csv;charset=utf-8"}));
+  a.download = "Juniors-Day-2026_Check-in_" + new Date().toISOString().slice(0, 16).replace(/[:T]/g, "-") + ".csv"; a.click();
+}
+
+/* ---------- Verwaltung ---------- */
+function renderAdmin(){
+  $("#admin").innerHTML = `<div class="two">
+    <div class="panel adm"><h3>Mission Leads – Sammelplatz</h3><p class="note">Dieser Text erscheint im gelben Mission-Lead-Fenster beim Check-in.</p>
+      <label>Sammelplatz</label><input type="text" id="spIn" value="${esc(CONFIG.sammelplatz)}" placeholder="z. B. Lobby, vor der Bühne links">
+      <div style="margin-top:12px"><button class="btn" id="spSave">Speichern</button> <span id="spMsg" class="okmsg"></span></div></div>
+    <div class="panel adm"><h3>Teilnehmerliste importieren</h3>
+      <p class="note">Excel-Datei mit den Spalten Vorname, Nachname, Executivebereich, QR-Gruppe (Do), Freitag-Team, Freitag-Raum, Lokation, Mission Lead.
+      Bestehende Personen werden aktualisiert, ihr Check-in-Status bleibt erhalten. Wer nicht mehr in der Liste steht, wird ausgeblendet (nicht gelöscht). E-Mail-Adressen werden <b>nicht</b> übernommen.</p>
+      <input type="file" id="impFile" accept=".xlsx,.xls"><div id="impMsg" class="note" style="margin-top:10px"></div></div>
+  </div>
+  <div class="panel adm"><h3>Testdaten zurücksetzen</h3><p class="note">Nach einem Probelauf: setzt alle Check-ins des gewählten Tages zurück (Personen bleiben). Zur Sicherheit „zurücksetzen ${DAYLBL[DAY]}“ eintippen.</p>
+    <input type="text" id="rsIn" placeholder="zurücksetzen ${DAYLBL[DAY]}"> <button class="btn red" id="rsBtn" style="margin-top:10px">Tag zurücksetzen</button> <span id="rsMsg" class="okmsg"></span></div>`;
+  $("#spSave").onclick = async () => { await store.saveConfig({sammelplatz: $("#spIn").value.trim()}); $("#spMsg").textContent = "gespeichert"; };
+  $("#impFile").onchange = importFile;
+  $("#rsBtn").onclick = async () => {
+    if ($("#rsIn").value.trim() !== "zurücksetzen " + DAYLBL[DAY]) return $("#rsMsg").textContent = "Text stimmt nicht.";
+    const ops = [...PEOPLE.values()].map(p => ({id: p.id, data: {[DAY]: {}}}));
+    // set with merge would keep subfields; replace the day object explicitly
+    for (const o of ops) await store.update(o.id, {[DAY]: {}});
+    store.log({day: DAY, st: "reset", ts: Date.now(), by: GUIDE});
+    $("#rsMsg").textContent = `${ops.length} Personen für ${DAYLBL[DAY]} zurückgesetzt.`;
+  };
+}
+async function importFile(ev){
+  const f = ev.target.files[0]; if (!f) return;
+  const msg = $("#impMsg"); msg.textContent = "Lese Datei …";
+  try {
+    if (!window.XLSX) await new Promise((res, rej) => { const s = document.createElement("script"); s.src = "https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"; s.onload = res; s.onerror = () => rej(new Error("Excel-Leser konnte nicht geladen werden")); document.head.appendChild(s); });
+    const wb = XLSX.read(await f.arrayBuffer(), {type: "array"});
+    const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {defval: ""});
+    const col = (r, ...names) => { for (const n of names){ const k = Object.keys(r).find(x => norm(x).replace(/\s+/g, "") === norm(n).replace(/\s+/g, "")); if (k) return String(r[k]).trim(); } return ""; };
+    const seen = new Set(), ops = []; let neu = 0, upd = 0, skip = 0;
+    rows.forEach(r => {
+      const vn = col(r, "Vorname"), nn = col(r, "Nachname"); if (!vn || !nn){ skip++; return; }
+      const id = keyOf(vn, nn); if (seen.has(id)){ skip++; return; } seen.add(id);
+      const team = parseInt(col(r, "Freitag-Team").replace(/\D+/g, ""), 10) || null;
+      const grp = col(r, "QR-Gruppe (Do)", "Gruppe").replace(/^Gruppe\s*/i, "");
+      const data = {vn, nn, bereich: col(r, "Executivebereich", "Bereich"), ort: col(r, "Lokation"), grp, team, raum: col(r, "Freitag-Raum"),
+                    ml: /mission\s*lead/i.test(col(r, "Mission Lead")), src: "liste", removed: false};
+      if (!PEOPLE.has(id)){ data.d15 = {}; data.d16 = {}; neu++; } else upd++;
+      ops.push({id, data});
+    });
+    const gone = [...PEOPLE.values()].filter(p => p.src !== "nach" && !seen.has(p.id) && !p.removed);
+    gone.forEach(p => ops.push({id: p.id, data: {removed: true}}));
+    if (!ops.length) throw new Error("Keine Zeilen mit Vor- und Nachname gefunden.");
+    msg.textContent = "Schreibe in die Datenbank …";
+    await store.batch(ops);
+    store.log({st: "import", file: f.name, neu, upd, gone: gone.length, ts: Date.now(), by: GUIDE});
+    msg.innerHTML = `<span class="okmsg">Import fertig:</span> ${neu} neu, ${upd} aktualisiert, ${gone.length} ausgeblendet (nicht mehr in der Liste)${skip ? `, ${skip} Zeilen übersprungen` : ""}.`;
+  } catch(e){ msg.innerHTML = `<span class="err">Fehler: ${esc(e.message)}</span>`; }
+  ev.target.value = "";
+}
+
+/* ===================== UI-Plumbing ===================== */
+function openModal(html){ const m = $("#modal"); m.innerHTML = html; m.hidden = false; m.querySelectorAll("[data-close]").forEach(b => b.onclick = closeModal); }
+function closeModal(){ $("#modal").hidden = true; $("#modal").innerHTML = ""; focusSearch(); }
+let toastT;
+function toast(m, withUndo){
+  const t = $("#toast"); t.innerHTML = `<span>${esc(m)}</span>${withUndo ? '<button id="undoBtn">Rückgängig</button>' : ""}`; t.hidden = false;
+  if (withUndo) $("#undoBtn").onclick = undo;
+  clearTimeout(toastT); toastT = setTimeout(hideToast, withUndo ? 8000 : 3500);
+}
+function hideToast(){ $("#toast").hidden = true; }
+function focusSearch(){ if (TAB === "checkin" && $("#modal").hidden) $("#q").focus(); }
+function clearSearch(){ $("#q").value = ""; render(); focusSearch(); }
+function net(fromCache, pending){
+  const off = !navigator.onLine || fromCache;
+  $("#netdot").classList.toggle("off", off);
+  $("#nettext").textContent = off ? (pending ? "offline – wird nachgetragen" : "offline") : (pending ? "speichere …" : "online");
+}
+window.addEventListener("online", () => net(false, false)); window.addEventListener("offline", () => net(true, false));
+
+document.addEventListener("click", e => {
+  const d = e.target.closest("#days button"); if (d){ DAY = d.dataset.day; ls.set("jd-ci-day", DAY); FILTER = "all"; render(); return focusSearch(); }
+  const tb = e.target.closest("#tabs button"); if (tb){ TAB = tb.dataset.tab; document.querySelectorAll("#tabs button").forEach(b => b.setAttribute("aria-selected", b === tb));
+    ["checkin","teams","report","admin"].forEach(s => $("#" + s).hidden = s !== TAB); ADMIN_DAY = null; render(); return focusSearch(); }
+  const ch = e.target.closest("[data-f]"); if (ch){ FILTER = ch.dataset.f; render(); return focusSearch(); }
+  const mn = e.target.closest("[data-menu]"); if (mn){ e.stopPropagation(); return showMenu(PEOPLE.get(mn.dataset.menu)); }
+  const pc = e.target.closest(".pc.click"); if (pc) return primaryAction(PEOPLE.get(pc.dataset.id));
+  const tc = e.target.closest("[data-team]"); if (tc){ const t = Number(tc.dataset.team); OPENTEAM = OPENTEAM === t ? null : t; return render(); }
+  if (e.target.id === "modal") closeModal();
+});
+$("#q").addEventListener("input", () => render());
+document.addEventListener("keydown", e => {
+  if (!$("#modal").hidden){ if (e.key === "Escape") closeModal(); return; }
+  if (TAB !== "checkin") return;
+  if (e.key === "Escape"){ clearSearch(); }
+  if (e.key === "Enter" && document.activeElement === $("#q")){ const f = document.querySelector(".pc.first.click"); if (f) primaryAction(PEOPLE.get(f.dataset.id)); }
+  if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "z" && lastUndo){ e.preventDefault(); undo(); }
+});
+$("#addBtn").onclick = showAdd;
+$("#logout").onclick = () => store.logout();
+$("#loginForm").addEventListener("submit", async e => {
+  e.preventDefault(); $("#lgErr").textContent = "";
+  GUIDE = $("#lgName").value.trim(); ls.set("jd-ci-guide", GUIDE);
+  try { await store.login($("#lgMail").value.trim(), $("#lgPw").value); }
+  catch(err){ $("#lgErr").textContent = /password|credential|user/i.test(err.code || err.message) ? "E-Mail oder Passwort stimmt nicht." : "Anmeldung fehlgeschlagen: " + err.message; }
+});
+
+/* ===================== Start ===================== */
+store = DEMO ? makeDemoStore() : makeFirebaseStore();
+if (DEMO) document.title += " (DEMO)", document.querySelector(".brand").insertAdjacentHTML("beforeend", ' <span style="background:#c5221f;color:#fff;padding:2px 8px;border-radius:6px;font-size:12px">DEMO – Testdaten</span>');
+$("#lgName").value = GUIDE;
+let listening = false;
+store.onAuth(ok => {
+  $("#login").hidden = ok; $("#tabs").hidden = !ok; $("#hstat").hidden = !ok;
+  ["checkin","teams","report","admin"].forEach(s => $("#" + s).hidden = !ok || s !== TAB);
+  if (ok){
+    if (!GUIDE){ GUIDE = "Event Guide"; }
+    $("#guideName").textContent = "👤 " + GUIDE;
+    if (!listening){ listening = true; store.listen(render); }
+    focusSearch();
+  }
+});
+render();
+</script>
+</body>
+</html>
