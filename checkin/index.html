@@ -434,13 +434,17 @@ function renderCheckin(){
 
 /* ---------- Mission-Lead-Popup ---------- */
 function showML(p){
-  const sp = CONFIG.sammelplatz ? esc(CONFIG.sammelplatz) : "<i>(Sammelplatz in „Verwaltung“ eintragen)</i>";
+  const mates = all().filter(x => x.id !== p.id && x.ml && x.team === p.team && status(x, "d16") === "in");
+  const given = mates.find(x => (x.d16 || {}).sign) || mates[0];
+  const todo = given
+    ? `<div style="background:#fde8e7;color:#c5221f;border-radius:10px;padding:10px 12px;font-weight:700">Achtung: Das Schild für Team ${p.team} wurde schon an ${esc(fullName(given))} übergeben (${hhmm(given.d16.ts)}${given.d16.by ? " · " + esc(given.d16.by) : ""}). Kein zweites Schild ausgeben.</div>
+       <div style="margin-top:10px">Auf den <b>Sammelplatz</b> der Mission Leads hinweisen.</div>`
+    : `<div>1. Schild mit der <b>Teamnummer ${p.team || "?"}</b> übergeben.</div><div>2. Auf den <b>Sammelplatz</b> der Mission Leads hinweisen.</div>`;
   openModal(`<div class="mbox mlbox"><div class="k">★ MISSION LEAD ★</div><div class="team">Team ${p.team || "?"}</div>
     <div class="who">${esc(fullName(p))}</div>
-    <div class="todo"><div>1. Schild mit der <b>Teamnummer ${p.team || "?"}</b> übergeben.</div><div>2. Sammelplatz: <b>${sp}</b></div>
-    <div class="note" style="margin-top:10px">Teamraum ${esc(p.raum || "–")} · Mission Control „${esc(MC[p.team] || "–")}“</div></div>
-    <div class="row"><button class="btn ghost" data-close>Abbrechen</button><button class="btn" id="mlOk">Schild übergeben ✓ einchecken</button></div></div>`);
-  $("#mlOk").onclick = () => { closeModal(); setStatus(p, "in", {sign: true}).then(() => { toast(`Mission Lead ${fullName(p)} eingecheckt · Team ${p.team}`, true); clearSearch(); }); };
+    <div class="todo">${todo}<div class="note" style="margin-top:10px">Teamraum ${esc(p.raum || "–")} · Mission Control „${esc(MC[p.team] || "–")}“</div></div>
+    <div class="row"><button class="btn ghost" data-close>Abbrechen</button><button class="btn" id="mlOk">${given ? "Einchecken ✓" : "Schild übergeben ✓ einchecken"}</button></div></div>`);
+  $("#mlOk").onclick = () => { closeModal(); setStatus(p, "in", {sign: !given}).then(() => { toast(`Mission Lead ${fullName(p)} eingecheckt · Team ${p.team}`, true); clearSearch(); }); };
   $("#mlOk").focus();
 }
 /* ---------- Menü pro Person ---------- */
@@ -618,9 +622,6 @@ function exportCSV(){
 /* ---------- Verwaltung ---------- */
 function renderAdmin(){
   $("#admin").innerHTML = `<div class="two">
-    <div class="panel adm"><h3>Mission Leads – Sammelplatz</h3><p class="note">Dieser Text erscheint im gelben Mission-Lead-Fenster beim Check-in.</p>
-      <label>Sammelplatz</label><input type="text" id="spIn" value="${esc(CONFIG.sammelplatz)}" placeholder="z. B. Lobby, vor der Bühne links">
-      <div style="margin-top:12px"><button class="btn" id="spSave">Speichern</button> <span id="spMsg" class="okmsg"></span></div></div>
     <div class="panel adm"><h3>Teilnehmerliste importieren</h3>
       <p class="note">Excel-Datei mit den Spalten Vorname, Nachname, Executivebereich, QR-Gruppe (Do), Freitag-Team, Freitag-Raum, Lokation, Mission Lead.
       Bestehende Personen werden aktualisiert, ihr Check-in-Status bleibt erhalten. Wer nicht mehr in der Liste steht, wird ausgeblendet (nicht gelöscht). E-Mail-Adressen werden <b>nicht</b> übernommen.</p>
@@ -628,7 +629,6 @@ function renderAdmin(){
   </div>
   <div class="panel adm"><h3>Testdaten zurücksetzen</h3><p class="note">Nach einem Probelauf: setzt alle Check-ins des gewählten Tages zurück (Personen bleiben). Zur Sicherheit „zurücksetzen ${DAYLBL[DAY]}“ eintippen.</p>
     <input type="text" id="rsIn" placeholder="zurücksetzen ${DAYLBL[DAY]}"> <button class="btn red" id="rsBtn" style="margin-top:10px">Tag zurücksetzen</button> <span id="rsMsg" class="okmsg"></span></div>`;
-  $("#spSave").onclick = async () => { await store.saveConfig({sammelplatz: $("#spIn").value.trim()}); $("#spMsg").textContent = "gespeichert"; };
   $("#impFile").onchange = importFile;
   $("#rsBtn").onclick = async () => {
     if ($("#rsIn").value.trim() !== "zurücksetzen " + DAYLBL[DAY]) return $("#rsMsg").textContent = "Text stimmt nicht.";
