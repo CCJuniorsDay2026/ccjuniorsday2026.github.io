@@ -192,9 +192,8 @@ td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
       <form id="loginForm" autocomplete="on">
         <label for="lgName">Dein Name</label>
         <input id="lgName" required placeholder="z. B. Silas" autocomplete="nickname">
-        <label for="lgMail">E-Mail (gemeinsamer Zugang)</label>
-        <input id="lgMail" type="email" required autocomplete="username">
-        <label for="lgPw">Passwort</label>
+        <input id="lgMail" type="hidden" value="checkin@juniorsday2026.de" autocomplete="username">
+        <label for="lgPw">Passwort (gemeinsam für alle Event Guides)</label>
         <input id="lgPw" type="password" required autocomplete="current-password">
         <button type="submit">Anmelden</button>
         <div class="err" id="lgErr"></div>
@@ -235,6 +234,7 @@ td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
 <script>
 /* ===================== Konfiguration ===================== */
 const FIREBASE_CONFIG = null;
+const LOGIN_EMAIL = "checkin@juniorsday2026.de";   // gemeinsamer Firebase-Nutzer, Event Guides tippen nur das Passwort
 const DEMO = new URLSearchParams(location.search).has("demo") || !FIREBASE_CONFIG;
 
 // Teams 1–16: Raum, Garten/Mission Control, Sprache (Stand Running Order)
@@ -697,8 +697,8 @@ $("#logout").onclick = () => store.logout();
 $("#loginForm").addEventListener("submit", async e => {
   e.preventDefault(); $("#lgErr").textContent = "";
   GUIDE = $("#lgName").value.trim(); ls.set("jd-ci-guide", GUIDE);
-  try { await store.login($("#lgMail").value.trim(), $("#lgPw").value); }
-  catch(err){ $("#lgErr").textContent = /password|credential|user/i.test(err.code || err.message) ? "E-Mail oder Passwort stimmt nicht." : "Anmeldung fehlgeschlagen: " + err.message; }
+  try { await store.login(LOGIN_EMAIL, $("#lgPw").value); }
+  catch(err){ $("#lgErr").textContent = /password|credential|user/i.test(err.code || err.message) ? "Das Passwort stimmt nicht." : "Anmeldung fehlgeschlagen: " + err.message; }
 });
 
 /* ===================== Start ===================== */
