@@ -293,6 +293,13 @@ function makeFirebaseStore(){
         await b.commit();
       }
     },
+    async wipe(ids){
+      for (let i = 0; i < ids.length; i += 400){
+        const b = db.batch();
+        ids.slice(i, i + 400).forEach(id => b.delete(db.collection("people").doc(id)));
+        await b.commit();
+      }
+    },
   };
 }
 function makeDemoStore(){
@@ -319,6 +326,7 @@ function makeDemoStore(){
     log: async () => {},
     saveConfig: async c => { Object.assign(CONFIG, c); cb(); },
     batch: async ops => { ops.forEach(o => PEOPLE.set(o.id, Object.assign(PEOPLE.get(o.id) || {id: o.id}, o.data))); cb(); },
+    wipe: async ids => { ids.forEach(id => PEOPLE.delete(id)); cb(); },
   };
 }
 
@@ -628,7 +636,11 @@ function renderAdmin(){
       <input type="file" id="impFile" accept=".xlsx,.xls"><div id="impMsg" class="note" style="margin-top:10px"></div></div>
   </div>
   <div class="panel adm"><h3>Testdaten zurücksetzen</h3><p class="note">Nach einem Probelauf: setzt alle Check-ins des gewählten Tages zurück (Personen bleiben). Zur Sicherheit „zurücksetzen ${DAYLBL[DAY]}“ eintippen.</p>
-    <input type="text" id="rsIn" placeholder="zurücksetzen ${DAYLBL[DAY]}"> <button class="btn red" id="rsBtn" style="margin-top:10px">Tag zurücksetzen</button> <span id="rsMsg" class="okmsg"></span></div>`;
+    <input type="text" id="rsIn" placeholder="zurücksetzen ${DAYLBL[DAY]}"> <button class="btn red" id="rsBtn" style="margin-top:10px">Tag zurücksetzen</button> <span id="rsMsg" class="okmsg"></span></div>
+  <div class="panel adm" style="border:2px solid #c5221f"><h3 style="color:#c5221f">⚠ Alle Teilnehmer löschen</h3>
+    <p class="note"><b>Achtung – kann nicht rückgängig gemacht werden!</b> Löscht <b>alle Personen</b> (auch Nachmeldungen) samt Check-ins für <b>beide Tage</b> – auf allen Geräten gleichzeitig. Danach ist die Liste leer und muss neu importiert werden.
+    Zur Sicherheit „ALLE LÖSCHEN“ eintippen.</p>
+    <input type="text" id="wpIn" placeholder="ALLE LÖSCHEN" autocomplete="off"> <button class="btn red" id="wpBtn" style="margin-top:10px">Teilnehmerliste komplett leeren</button> <span id="wpMsg"></span></div>`;
   $("#impFile").onchange = importFile;
   $("#rsBtn").onclick = async () => {
     if ($("#rsIn").value.trim() !== "zurücksetzen " + DAYLBL[DAY]) return $("#rsMsg").textContent = "Text stimmt nicht.";
@@ -637,6 +649,20 @@ function renderAdmin(){
     for (const o of ops) await store.update(o.id, {[DAY]: {}});
     store.log({day: DAY, st: "reset", ts: Date.now(), by: GUIDE});
     $("#rsMsg").textContent = `${ops.length} Personen für ${DAYLBL[DAY]} zurückgesetzt.`;
+  };
+  $("#wpBtn").onclick = async () => {
+    const m = $("#wpMsg");
+    if ($("#wpIn").value.trim() !== "ALLE LÖSCHEN") return m.innerHTML = '<span class="err">Text stimmt nicht – bitte genau „ALLE LÖSCHEN“ eintippen.</span>';
+    const ids = [...PEOPLE.keys()];
+    if (!ids.length) return m.innerHTML = '<span class="okmsg">Die Liste ist bereits leer.</span>';
+    if (!confirm(`Wirklich alle ${ids.length} Personen und sämtliche Check-ins löschen?\n\nDas kann nicht rückgängig gemacht werden.`)) return;
+    $("#wpBtn").disabled = true; m.textContent = "Lösche …";
+    try {
+      await store.wipe(ids);
+      store.log({st: "wipe", n: ids.length, ts: Date.now(), by: GUIDE});
+      $("#wpIn").value = ""; m.innerHTML = `<span class="okmsg">${ids.length} Personen gelöscht. Die Liste ist leer – jetzt neu importieren.</span>`;
+    } catch(e){ m.innerHTML = `<span class="err">Fehler: ${esc(e.message)}</span>`; }
+    $("#wpBtn").disabled = false;
   };
 }
 async function importFile(ev){
