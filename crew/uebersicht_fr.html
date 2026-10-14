@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#06303a">
+<title>Gesamtübersicht Crew · Fr 16.10.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --p900:#03222a; --p800:#06303a; --p700:#0b4250; --p600:#14596a;
+  --yellow:#ffd200; --text:#fff; --t2:rgba(255,255,255,.78); --t3:rgba(255,255,255,.55);
+  --card:rgba(255,255,255,.07); --line:rgba(255,255,255,.14);
+  --head:"Montserrat",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  --body:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --namew:104px; color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--p800);color:var(--text);font:15px/1.4 var(--body)}
+button{font:inherit;color:inherit;cursor:pointer}
+a{color:inherit}
+.wrap{max-width:1180px;margin:0 auto;padding:0 16px}
+
+/* Kopf */
+header{background:radial-gradient(80% 120% at 50% 0%, #1d5d6b 0%, rgba(6,48,58,0) 70%) var(--p800);padding:calc(14px + env(safe-area-inset-top)) 0 14px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.back{display:inline-flex;align-items:center;gap:6px;text-decoration:none;font:600 13px var(--head);color:var(--t2);
+  border:1px solid var(--line);border-radius:999px;padding:6px 12px;background:rgba(0,0,0,.2)}
+.days{display:flex;background:rgba(0,0,0,.25);border:1px solid var(--line);border-radius:999px;padding:3px}
+.days a{padding:6px 14px;border-radius:999px;font:700 13px var(--head);text-decoration:none;color:var(--t2)}
+.days a.on{background:var(--yellow);color:var(--p900)}
+h1{font:800 clamp(22px,4.5vw,30px)/1.15 var(--head);margin:16px 0 2px}
+.sub{color:var(--t3);font-size:13px}
+
+/* Zeitsteuerung */
+.ctrl{position:sticky;top:0;z-index:20;background:rgba(3,34,42,.92);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.ctrl .wrap{display:flex;align-items:center;gap:10px;padding-top:10px;padding-bottom:10px;flex-wrap:wrap}
+.clock{font:800 28px/1 var(--head);letter-spacing:.02em;min-width:92px;text-align:center}
+.clock small{display:block;font:600 10.5px var(--head);color:var(--t3);letter-spacing:.08em;margin-top:3px;text-transform:uppercase}
+.sbtn{border:1px solid var(--line);background:var(--card);border-radius:10px;padding:7px 10px;font:700 13px var(--head);min-width:44px}
+.sbtn.now{background:var(--yellow);color:var(--p900);border-color:var(--yellow)}
+.sbtn[disabled]{opacity:.35;cursor:default}
+input[type=range]{flex:1 1 220px;accent-color:var(--yellow);height:28px;min-width:160px}
+
+/* Wer ist wo */
+h2{font:800 18px var(--head);margin:24px 0 12px;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+h2 span{font:600 13px var(--body);color:var(--t3)}
+.places{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.pc{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--c);border-radius:14px;padding:12px 14px}
+.pc h3{margin:0 0 8px;font:800 14px var(--head);display:flex;justify-content:space-between;gap:8px}
+.pc h3 b{background:var(--c);color:var(--p900);border-radius:999px;padding:1px 9px;font-size:12px;align-self:center}
+.who{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;padding:7px 0;border-top:1px solid var(--line);cursor:pointer}
+.who:first-of-type{border-top:0;padding-top:0}
+.who .n{font:700 14px var(--head)}
+.who .t{color:var(--t2);font-size:13.5px}
+.who .m{grid-column:2;color:var(--t3);font-size:12px}
+.free{margin-top:12px;color:var(--t3);font-size:13px;line-height:2}
+.chip{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:1px 10px;margin:0 4px 0 0;color:var(--t2);font:600 12px var(--head)}
+
+/* Zeitstrahl */
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;margin:0 0 10px;font-size:12.5px;color:var(--t2)}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:4px;background:var(--c);margin-right:6px;vertical-align:-1px}
+.legend i.pz{background:transparent;border:1.5px dashed rgba(255,255,255,.5)}
+.gscroll{overflow-x:auto;border:1px solid var(--line);border-radius:14px;background:rgba(0,0,0,.15);-webkit-overflow-scrolling:touch}
+.gantt{position:relative}
+.axis{position:sticky;top:0;height:30px;border-bottom:1px solid var(--line);background:var(--p900);z-index:3}
+.axis .lab{position:absolute;top:8px;transform:translateX(-50%);font:700 11px var(--head);color:var(--t3)}
+.row,.grp{display:flex;position:relative}
+.grp{height:28px;align-items:flex-end}
+.grp .nm{font:800 11px var(--head);letter-spacing:.08em;text-transform:uppercase;color:var(--yellow)}
+.nm{position:sticky;left:0;z-index:4;width:var(--namew);flex:0 0 var(--namew);background:var(--p900);padding:0 10px;display:flex;align-items:center;
+  font:700 13px var(--head);border-right:1px solid var(--line)}
+.grp .nm{background:transparent;border-right:0;padding-bottom:4px;width:auto;flex:none;white-space:nowrap}
+.row{height:44px;border-top:1px solid rgba(255,255,255,.06)}
+.lane{position:relative;flex:1 0 auto}
+.bar{position:absolute;top:6px;bottom:6px;border-radius:7px;background:var(--c);color:var(--p900);padding:3px 5px;overflow:hidden;
+  font:700 11px/1.15 var(--head);white-space:nowrap;text-overflow:ellipsis;border:0;text-align:left;min-width:6px}
+.bar small{display:block;font:600 10px var(--body);opacity:.8;overflow:hidden;text-overflow:ellipsis}
+.bar.open{-webkit-mask-image:linear-gradient(90deg,#000 70%,transparent);mask-image:linear-gradient(90deg,#000 70%,transparent)}
+.bar.brk{background:transparent;border:1.5px dashed rgba(255,255,255,.35);color:var(--t3)}
+.bar:focus-visible{outline:2px solid #fff;outline-offset:1px}
+.tick{position:absolute;top:0;bottom:0;width:1px;background:rgba(255,255,255,.06);pointer-events:none}
+.cur{position:absolute;top:0;bottom:0;width:2px;background:var(--yellow);z-index:2;pointer-events:none;box-shadow:0 0 0 1px rgba(3,34,42,.6)}
+.hint{color:var(--t3);font-size:12.5px;margin:8px 2px 0}
+
+/* Detail */
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:50;background:var(--p700);border-top:3px solid var(--c,var(--yellow));
+  border-radius:18px 18px 0 0;padding:16px 18px calc(18px + env(safe-area-inset-bottom));box-shadow:0 -10px 40px rgba(0,0,0,.45);
+  transform:translateY(110%);transition:transform .22s ease,visibility .22s;visibility:hidden;max-height:70vh;overflow:auto}
+.sheet.show{transform:none;visibility:visible}
+.sheet .x{position:absolute;right:12px;top:10px;border:1px solid var(--line);background:var(--card);border-radius:999px;width:34px;height:34px}
+.sheet .who2{font:800 12px var(--head);color:var(--yellow);letter-spacing:.06em;text-transform:uppercase}
+.sheet h4{margin:4px 40px 4px 0;font:800 18px/1.25 var(--head)}
+.sheet .meta{color:var(--t2);font-size:14px}
+.sheet ul{margin:10px 0 0;padding-left:18px;color:var(--t2);font-size:14px}
+.sheet ul li{margin:3px 0}
+footer{color:var(--t3);font-size:12px;text-align:center;padding:28px 16px 40px}
+@media (max-width:560px){ :root{--namew:84px} .clock{font-size:24px;min-width:78px} }
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <div class="top">
+    <a class="back" href="agenda_martin.html">← Meine Agenda</a>
+    <nav class="days" id="days"></nav>
+  </div>
+  <h1>Gesamtübersicht Crew</h1>
+  <div class="sub" id="subline"></div>
+</div></header>
+
+<div class="ctrl"><div class="wrap">
+  <button class="sbtn" id="minus" aria-label="15 Minuten früher">−15</button>
+  <div class="clock" id="clock"></div>
+  <button class="sbtn" id="plus" aria-label="15 Minuten später">+15</button>
+  <input type="range" id="slider" step="5" aria-label="Uhrzeit wählen">
+  <button class="sbtn now" id="nowBtn">Jetzt</button>
+</div></div>
+
+<main class="wrap">
+  <h2>Wer ist wo? <span id="whoSub"></span></h2>
+  <div class="places" id="places"></div>
+  <div class="free" id="free"></div>
+
+  <h2>Zeitstrahl <span>Tippe auf einen Balken für Details · Tippe in den Zeitstrahl, um die Uhrzeit oben zu setzen</span></h2>
+  <div class="legend" id="legend"></div>
+  <div class="gscroll" id="gscroll"><div class="gantt" id="gantt"></div></div>
+  <p class="hint">Verblassende Balken: In der Running Order steht kein Ende – der Eintrag ist hier mit höchstens 45 Minuten dargestellt.</p>
+</main>
+<footer id="foot"></footer>
+
+<div class="sheet" id="sheet" role="dialog" aria-modal="false"><button class="x" id="sx" aria-label="Schließen">✕</button><div id="sbody"></div></div>
+
+<script>
+const DATA = {"key": "fr", "long": "Freitag, 16. Oktober", "short": "Fr 16.10.", "date": "2026-10-16", "stand": "14.10.2026", "people": [{"n": "Camila de las Rosas Pereira Perez", "f": "Camila", "r": "Mission Control", "segs": [{"s": 480, "e": 485, "t": "Vorbereitung Lokation", "w": "Lobby", "k": ["Eintreffen der Helfer", "Check der Besprechungsräume und Gärten"], "p": "Lobby", "sl": "Vorbereitung"}, {"s": 510, "e": 555, "t": "Check-In", "w": "7. OG", "k": ["Es werden kleine, zufällige Gruppen gebildet um zum Kofferraum gebracht zu werden", "Weg in die Gärten", "Stand-by"], "open": true, "p": "Etagen im Tower", "sl": "Check-In"}, {"s": 570, "e": 660, "t": "Mission Control „Scotland Yard“", "w": "Garten 39. OG", "k": ["mit Olivia Süßmann · Das Spiel läuft online bis 11:00 Uhr.", "Team 5 · Englisch", "Team 6 · Englisch", "Team 7 · Englisch", "Team 8 · Englisch"], "p": "Gärten · Mission Control", "sl": "MC Scotland Yard"}, {"s": 660, "e": 670, "t": "Schließfach öffnen", "w": "Etagen gem. Gruppenzuordnung", "k": [], "p": "Sonstiges", "sl": "Schließfach öffnen"}, {"s": 670, "e": 690, "t": "Gruppen Rückkehr in die Lobby", "w": "Lobby", "k": [], "p": "Lobby", "sl": "Rückkehr Lobby"}, {"s": 750, "e": 780, "t": "Essenausgabe", "w": "Plaza", "k": [], "p": "Plaza", "sl": "Essenausgabe"}, {"s": 840, "e": 855, "t": "Get-together Orgateam und Event Guides", "w": "21. OG", "k": ["Gemeinsamer Ausklang, sobald alle Teilnehmer das Gebäude verlassen haben"], "p": "Etagen im Tower", "sl": "Get-together"}]}, {"n": "Jutta Horstkötter", "f": "Jutta", "r": "Mission Control", "segs": [{"s": 450, "e": 480, "t": "Eintreffen der Crew", "w": "", "k": [], "p": "ohne Ortsangabe", "sl": "Eintreffen"}, {"s": 480, "e": 525, "t": "Vorbereitung Lokation", "w": "Lobby", "k": ["Soundcheck"], "open": true, "p": "Lobby", "sl": "Vorbereitung"}, {"s": 540, "e": 560, "t": "Begrüßung", "w": "Lobby", "k": ["Begrüßung, Agenda, Organisatorisches"], "p": "Lobby", "sl": "Begrüßung"}, {"s": 560, "e": 570, "t": "Weg in den Garten", "w": "35. OG", "k": [], "p": "Etagen im Tower", "sl": "Weg in den Garten"}, {"s": 570, "e": 660, "t": "Mission Control „Baker Street“", "w": "Garten 35. OG", "k": ["mit Louis Faltin · Das Spiel läuft online bis 11:00 Uhr.", "Team 1 · Englisch", "Team 2 · Englisch", "Team 3 · Englisch", "Team 4 · Englisch"], "p": "Gärten · Mission Control", "sl": "MC Baker Street"}, {"s": 660, "e": 670, "t": "Schließfach öffnen", "w": "Etagen gem. Gruppenzuordnung", "k": [], "p": "Sonstiges", "sl": "Schließfach öffnen"}, {"s": 670, "e": 690, "t": "Gruppen Rückkehr in die Lobby", "w": "Lobby", "k": [], "p": "Lobby", "sl": "Rückkehr Lobby"}, {"s": 690, "e": 720, "t": "Reconnect Sherlock und Wrap Up", "w": "Lobby", "k": ["Jutta kommt auf die Bühne. Kurze Anleitung, dass das Puzzle an den Metaplanwänden zusammengesetzt werden soll", "Wrap-up, Ankündigung Gruppenfoto, Essen, Verabschiedung"], "p": "Lobby", "sl": "Reconnect Sherlock"}, {"s": 750, "e": 780, "t": "Essenausgabe", "w": "Lobby", "k": ["Event Guides am Check-in-Counter: Hilfe beim Abholen des Gepäcks"], "p": "Lobby", "sl": "Essenausgabe"}, {"s": 840, "e": 900, "t": "Auto ausladen", "w": "21. OG", "k": ["Gemeinsamer Ausklang, sobald alle Teilnehmer das Gebäude verlassen haben"], "p": "Etagen im Tower", "sl": "Auto ausladen"}]}, {"n": "Louis Faltin", "f": "Louis", "r": "Mission Control", "segs": [{"s": 480, "e": 485, "t": "Vorbereitung Lokation", "w": "Lobby", "k": ["Eintreffen der Helfer", "Check der Besprechungsräume und Gärten"], "p": "Lobby", "sl": "Vorbereitung"}, {"s": 510, "e": 555, "t": "Check-In", "w": "7. OG", "k": ["Es werden kleine, zufällige Gruppen gebildet um zum Kofferraum gebracht zu werden", "Weg in die Gärten", "Stand-by"], "open": true, "p": "Etagen im Tower", "sl": "Check-In"}, {"s": 570, "e": 660, "t": "Mission Control „Baker Street“", "w": "Garten 35. OG", "k": ["mit Jutta Horstkötter · Das Spiel läuft online bis 11:00 Uhr.", "Team 1 · Englisch", "Team 2 · Englisch", "Team 3 · Englisch", "Team 4 · Englisch"], "p": "Gärten · Mission Control", "sl": "MC Baker Street"}, {"s": 660, "e": 670, "t": "Schließfach öffnen", "w": "Etagen gem. Gruppenzuordnung", "k": [], "p": "Sonstiges", "sl": "Schließfach öffnen"}, {"s": 670, "e": 690, "t": "Gruppen Rückkehr in die Lobby", "w": "Lobby", "k": [], "p": "Lobby", "sl": "Rückkehr Lobby"}, {"s": 750, "e": 780, "t": "Essenausgabe", "w": "Plaza", "k": [], "p": "Plaza", "sl": "Essenausgabe"}, {"s": 840, "e": 855, "t": "Get-together Orgateam und Event Guides", "w": "21. OG", "k": ["Gemeinsamer Ausklang, sobald alle Teilnehmer das Gebäude verlassen haben"], "p": "Etagen im Tower", "sl": "Get-together"}]}, {"n": "Martin Hohmann", "f": "Martin", "r": "Mission Control", "segs": [{"s": 450, "e": 480, "t": "Vorbereitung Lokation", "w": "Lobby", "k": ["Technik einrichten", "Soundcheck"], "p": "Lobby", "sl": "Vorbereitung"}, {"s": 540, "e": 560, "t": "Begrüßung", "w": "Lobby", "k": ["60 Sekunden Veranstaltungstrailer für Tag 2"], "p": "Lobby", "sl": "Begrüßung"}, {"s": 560, "e": 570, "t": "Weg in den Garten", "w": "27. OG", "k": [], "p": "Etagen im Tower", "sl": "Weg in den Garten"}, {"s": 570, "e": 660, "t": "Mission Control „Charing Cross“", "w": "Garten 27. OG", "k": ["mit Silas Honerkamp · Das Spiel läuft online bis 11:00 Uhr.", "Team 13 · Deutsch", "Team 14 · Deutsch", "Team 15 · Deutsch", "Team 16 · Deutsch"], "p": "Gärten · Mission Control", "sl": "MC Charing Cross"}, {"s": 660, "e": 670, "t": "Schließfach öffnen", "w": "Etagen gem. Gruppenzuordnung", "k": [], "p": "Sonstiges", "sl": "Schließfach öffnen"}, {"s": 670, "e": 690, "t": "Gruppen Rückkehr in die Lobby", "w": "Lobby", "k": [], "p": "Lobby", "sl": "Rückkehr Lobby"}, {"s": 690, "e": 720, "t": "Reconnect Sherlock und Wrap Up", "w": "Lobby", "k": ["Film Reconnect Sherlock"], "p": "Lobby", "sl": "Reconnect Sherlock"}, {"s": 720, "e": 750, "t": "Gruppenfoto", "w": "Treppe", "k": ["Löwenbändigen zum besten Gruppenfoto ever"], "p": "Treppe · Gruppenfoto", "sl": "Gruppenfoto"}, {"s": 750, "e": 780, "t": "Essenausgabe", "w": "Lobby", "k": ["Event Guides am Check-in-Counter: Hilfe beim Abholen des Gepäcks"], "p": "Lobby", "sl": "Essenausgabe"}, {"s": 840, "e": 900, "t": "Auto ausladen", "w": "21. OG", "k": ["Gemeinsamer Ausklang, sobald alle Teilnehmer das Gebäude verlassen haben"], "p": "Etagen im Tower", "sl": "Auto ausladen"}]}, {"n": "Meri Asmelash", "f": "Meri", "r": "Mission Control", "segs": [{"s": 480, "e": 485, "t": "Vorbereitung Lokation", "w": "Lobby", "k": ["Eintreffen der Helfer", "Check der Besprechungsräume und Gärten"], "p": "Lobby", "sl": "Vorbereitung"}, {"s": 510, "e": 555, "t": "Check-In", "w": "7. OG", "k": ["Es werden kleine, zufällige Gruppen gebildet um zum Kofferraum gebracht zu werden", "Weg in die Gärten", "Stand-by"], "open": true, "p": "Etagen im Tower", "sl": "Check-In"}, {"s": 570, "e": 660, "t": "Mission Control „Whitehall“", "w": "Garten 23. OG", "k": ["mit Quirin Frey · Das Spiel läuft online bis 11:00 Uhr.", "Team 9 · Englisch", "Team 10 · Englisch", "Team 11 · Englisch", "Team 12 · Englisch"], "p": "Gärten · Mission Control", "sl": "MC Whitehall"}, {"s": 660, "e": 670, "t": "Schließfach öffnen", "w": "Etagen gem. Gruppenzuordnung", "k": [], "p": "Sonstiges", "sl": "Schließfach öffnen"}, {"s": 670, "e": 690, "t": "Gruppen Rückkehr in die Lobby", "w": "Lobby", "k": [], "p": "Lobby", "sl": "Rückkehr Lobby"}, {"s": 750, "e": 780, "t": "Essenausgabe", "w": "Plaza", "k": [], "p": "Plaza", "sl": "Essenausgabe"}, {"s": 840, "e": 855, "t": "Get-together Orgateam und Event Guides", "w": "21. OG", "k": ["Gemeinsamer Ausklang, sobald alle Teilnehmer das Gebäude verlassen haben"], "p": "Etagen im Tower", "sl": "Get-together"}]}, {"n": "Olivia Süßmann", "f": "Olivia", "r": "Mission Control", "segs": [{"s": 450, "e": 485, "t": "Eintreffen der Crew", "w": "", "k": [], "p": "ohne Ortsangabe", "sl": "Eintreffen"}, {"s": 485, "e": 510, "t": "Vorbereitung Lokation", "w": "Räume gem. Mission Control Zuordnung", "k": ["Check der Besprechungsräume und Gärten"], "p": "Sonstiges", "sl": "Vorbereitung"}, {"s": 510, "e": 540, "t": "Check-In", "w": "Lobby", "k": ["Teilnehmer treffen ein und melden sich am Check-In Schalter", "Mission Leads (32 Personen) wird das Schild mit der Teamnummer übergeben und der spätere Ort genannt, an dem sie sich aufstellen sollen"], "p": "Lobby", "sl": "Check-In"}, {"s": 560, "e": 570, "t": "Weg in den Garten", "w": "39. OG", "k": [], "p": "Etagen im Tower", "sl": "Weg in den Garten"}, {"s": 570, "e": 660, "t": "Mission Control „Scotland Yard“", "w": "Garten 39. OG", "k": ["mit Camila de las Rosas Pereira Perez · Das Spiel läuft online bis 11:00 Uhr.", "Team 5 · Englisch", "Team 6 · Englisch", "Team 7 · Englisch", "Team 8 · Englisch"], "p": "Gärten · Mission Control", "sl": "MC Scotland Yard"}, {"s": 660, "e": 670, "t": "Schließfach öffnen", "w": "Etagen gem. Gruppenzuordnung", "k": [], "p": "Sonstiges", "sl": "Schließfach öffnen"}, {"s": 670, "e": 690, "t": "Gruppen Rückkehr in die Lobby", "w": "Lobby", "k": [], "p": "Lobby", "sl": "Rückkehr Lobby"}, {"s": 750, "e": 780, "t": "Essenausgabe", "w": "Plaza", "k": [], "p": "Plaza", "sl": "Essenausgabe"}, {"s": 840, "e": 900, "t": "Auto ausladen", "w": "21. OG", "k": ["Gemeinsamer Ausklang, sobald alle Teilnehmer das Gebäude verlassen haben"], "p": "Etagen im Tower", "sl": "Auto ausladen"}]}, {"n": "Quirin Frey", "f": "Quirin", "r": "Mission Control", "segs": [{"s": 450, "e": 485, "t": "Eintreffen der Crew", "w": "", "k": [], "p": "ohne Ortsangabe", "sl": "Eintreffen"}, {"s": 485, "e": 495, "t": "Vorbereitung Lokation", "w": "7. OG - Raum 1", "k": ["Check Kofferraum im 7. OG", "Bereitstellung der Teamschilder 1-16"], "p": "Etagen im Tower", "sl": "Vorbereitung"}, {"s": 510, "e": 540, "t": "Check-In", "w": "Lobby", "k": ["Mission Leads (32 Personen) wird das Schild mit der Teamnummer übergeben und der spätere Ort genannt, an dem sie sich aufstellen sollen"], "p": "Lobby", "sl": "Check-In"}, {"s": 560, "e": 570, "t": "Weg in den Garten", "w": "23. OG", "k": [], "p": "Etagen im Tower", "sl": "Weg in den Garten"}, {"s": 570, "e": 660, "t": "Mission Control „Whitehall“", "w": "Garten 23. OG", "k": ["mit Meri Asmelash · Das Spiel läuft online bis 11:00 Uhr.", "Team 9 · Englisch", "Team 10 · Englisch", "Team 11 · Englisch", "Team 12 · Englisch"], "p": "Gärten · Mission Control", "sl": "MC Whitehall"}, {"s": 660, "e": 670, "t": "Schließfach öffnen", "w": "Etagen gem. Gruppenzuordnung", "k": [], "p": "Sonstiges", "sl": "Schließfach öffnen"}, {"s": 670, "e": 690, "t": "Gruppen Rückkehr in die Lobby", "w": "Lobby", "k": [], "p": "Lobby", "sl": "Rückkehr Lobby"}, {"s": 720, "e": 750, "t": "Gruppenfoto", "w": "Treppe", "k": ["Löwenbändigen zum besten Gruppenfoto ever"], "p": "Treppe · Gruppenfoto", "sl": "Gruppenfoto"}, {"s": 750, "e": 780, "t": "Essenausgabe", "w": "Plaza", "k": [], "p": "Plaza", "sl": "Essenausgabe"}, {"s": 840, "e": 900, "t": "Auto ausladen", "w": "21. OG", "k": ["Gemeinsamer Ausklang, sobald alle Teilnehmer das Gebäude verlassen haben"], "p": "Etagen im Tower", "sl": "Auto ausladen"}]}, {"n": "Silas Honerkamp", "f": "Silas", "r": "Mission Control", "segs": [{"s": 480, "e": 485, "t": "Vorbereitung Lokation", "w": "Lobby", "k": ["Eintreffen der Helfer", "Check der Besprechungsräume und Gärten"], "p": "Lobby", "sl": "Vorbereitung"}, {"s": 510, "e": 555, "t": "Check-In", "w": "7. OG", "k": ["Es werden kleine, zufällige Gruppen gebildet um zum Kofferraum gebracht zu werden", "Weg in die Gärten", "Stand-by"], "open": true, "p": "Etagen im Tower", "sl": "Check-In"}, {"s": 570, "e": 660, "t": "Mission Control „Charing Cross“", "w": "Garten 27. OG", "k": ["mit Martin Hohmann · Das Spiel läuft online bis 11:00 Uhr.", "Team 13 · Deutsch", "Team 14 · Deutsch", "Team 15 · Deutsch", "Team 16 · Deutsch"], "p": "Gärten · Mission Control", "sl": "MC Charing Cross"}, {"s": 660, "e": 670, "t": "Schließfach öffnen", "w": "Etagen gem. Gruppenzuordnung", "k": [], "p": "Sonstiges", "sl": "Schließfach öffnen"}, {"s": 670, "e": 690, "t": "Gruppen Rückkehr in die Lobby", "w": "Lobby", "k": [], "p": "Lobby", "sl": "Rückkehr Lobby"}, {"s": 750, "e": 780, "t": "Essenausgabe", "w": "Plaza", "k": [], "p": "Plaza", "sl": "Essenausgabe"}, {"s": 840, "e": 855, "t": "Get-together Orgateam und Event Guides", "w": "21. OG", "k": ["Gemeinsamer Ausklang, sobald alle Teilnehmer das Gebäude verlassen haben"], "p": "Etagen im Tower", "sl": "Get-together"}]}, {"n": "Martha Heß", "f": "Martha", "r": "Orga & Event Guides", "segs": [{"s": 495, "e": 510, "t": "Vorbereitung Lokation", "w": "Lobby", "k": ["Eintreffen"], "p": "Lobby", "sl": "Vorbereitung"}, {"s": 510, "e": 540, "t": "Check-In", "w": "Lobby", "k": ["Teilnehmer treffen ein und melden sich am Check-In Schalter", "Mission Leads (32 Personen) wird das Schild mit der Teamnummer übergeben und der spätere Ort genannt, an dem sie sich aufstellen sollen", "Nachzügler mit Gepäck werden zum Kofferraum im 7. OG begleitet"], "p": "Lobby", "sl": "Check-In"}, {"s": 540, "e": 690, "t": "Stand-by", "w": "Lobby", "k": ["Aufbau Metaplanwände auf der Bühne"], "p": "Lobby", "sl": "Stand-by"}, {"s": 750, "e": 780, "t": "Essenausgabe", "w": "Plaza", "k": [], "p": "Plaza", "sl": "Essenausgabe"}, {"s": 840, "e": 900, "t": "Auto ausladen", "w": "21. OG", "k": ["Gemeinsamer Ausklang, sobald alle Teilnehmer das Gebäude verlassen haben"], "p": "Etagen im Tower", "sl": "Auto ausladen"}]}], "off": ["Carmen Müller", "David Dähn", "Frank von Cukrowicz", "Marcel Bischof", "Michael Alt", "Paul Hoffmann", "Stefan Dippold", "Thomas Müldner", "Torben Pape"], "other": "uebersicht_do.html"};
+const COL = {"Wallstreet · Plenum":"#ffd200","Penthouse":"#c9e46c","Rooftop / High Line":"#7fd6c2","Upper East Side":"#5fb3c9",
+  "Steuerfachschule":"#f6a26f","Lobby":"#ffd200","Gärten · Mission Control":"#c9e46c","Plaza":"#f6a26f","Treppe · Gruppenfoto":"#c3a6f5",
+  "Etagen im Tower":"#5fb3c9","Sonstiges":"#a9bcc0","ohne Ortsangabe":"#71878d","Pause":"transparent"};
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const hm = m => String(Math.floor(m / 60)).padStart(2, "0") + ":" + String(m % 60).padStart(2, "0");
+const P = DATA.people;
+const all = P.flatMap(p => p.segs);
+const T0 = Math.floor(Math.min(...all.map(s => s.s)) / 60) * 60, T1 = Math.ceil(Math.max(...all.map(s => s.e)) / 60) * 60;
+const PX = 2.4;                       // Pixel pro Minute im Zeitstrahl
+let T = null;
+
+$("#days").innerHTML = `<a href="uebersicht_do.html" class="${DATA.key === "do" ? "on" : ""}">Do 15.10.</a><a href="uebersicht_fr.html" class="${DATA.key === "fr" ? "on" : ""}">Fr 16.10.</a>`;
+$("#subline").textContent = `${DATA.long} · ${P.length} Personen eingeplant · aus der Running Order`;
+$("#foot").textContent = `Gesamtübersicht aus der Running Order. Stand: ${DATA.stand}`;
+
+/* ---------- Wer ist wo ---------- */
+const ORDER = Object.keys(COL);
+function renderWho(){
+  const at = [], free = [];
+  P.forEach(p => {
+    const s = p.segs.find(x => x.s <= T && T < x.e);
+    if (s && !s.brk) at.push({p, s}); else {
+      const nx = p.segs.find(x => x.s > T && !x.brk);
+      free.push({p, nx, brk: s && s.brk});
+    }
+  });
+  const by = {};
+  at.forEach(o => (by[o.s.p] = by[o.s.p] || []).push(o));
+  const keys = Object.keys(by).sort((a, b) => ORDER.indexOf(a) - ORDER.indexOf(b));
+  $("#whoSub").textContent = `um ${hm(T)} Uhr · ${at.length} im Einsatz`;
+  $("#places").innerHTML = keys.length ? keys.map(k => `<section class="pc" style="--c:${COL[k] || "#a9bcc0"}">
+      <h3><span>${esc(k)}</span><b>${by[k].length}</b></h3>
+      ${by[k].map(({p, s}) => `<div class="who" data-p="${esc(p.n)}" data-s="${s.s}"><span class="n">${esc(p.f)}</span><span class="t">${esc(s.t)}</span>
+        <span class="m">${esc(s.w || "")}${s.w ? " · " : ""}bis ${hm(s.e)}${s.open ? " (Ende offen)" : ""}</span></div>`).join("")}
+    </section>`).join("") : `<div class="pc" style="--c:#71878d">Zu dieser Uhrzeit hat niemand einen Eintrag in der Running Order.</div>`;
+  const fr = free.map(o => `<span class="chip" title="${o.nx ? "nächster Eintrag " + hm(o.nx.s) : ""}">${esc(o.p.f)}${o.brk ? " · Pause" : ""}${o.nx ? " · ab " + hm(o.nx.s) : " · fertig"}</span>`).join("");
+  const off = DATA.off.length ? `<br>Heute nicht eingeplant: ${DATA.off.map(n => `<span class="chip">${esc(n.split(" ")[0])}</span>`).join("")}` : "";
+  $("#free").innerHTML = (fr ? `Ohne Eintrag um ${hm(T)}: ${fr}` : "") + off;
+}
+
+/* ---------- Zeitstrahl ---------- */
+function renderGantt(){
+  const W = (T1 - T0) * PX, used = new Set(all.map(s => s.p));
+  $("#legend").innerHTML = ORDER.filter(k => used.has(k)).map(k => `<span><i class="${k === "Pause" ? "pz" : ""}" style="--c:${COL[k]}"></i>${esc(k)}</span>`).join("");
+  let h = `<div class="axis" style="width:calc(var(--namew) + ${W}px)"><div style="position:absolute;left:var(--namew);right:0;top:0;bottom:0">`;
+  for (let m = T0; m <= T1; m += 30) h += `<span class="lab" style="left:${(m - T0) * PX}px">${m % 60 ? "" : hm(m)}</span>`;
+  h += `</div></div>`;
+  let grp = null;
+  P.forEach(p => {
+    if (p.r !== grp){ grp = p.r; h += `<div class="grp"><div class="nm">${esc(grp)}</div></div>`; }
+    h += `<div class="row"><div class="nm" title="${esc(p.n)}">${esc(p.f)}</div><div class="lane" style="width:${W}px">`;
+    for (let m = T0; m <= T1; m += 60) h += `<div class="tick" style="left:${(m - T0) * PX}px"></div>`;
+    p.segs.forEach((s, i) => {
+      const w = Math.max((s.e - s.s) * PX - 2, 6);
+      h += `<button class="bar${s.open ? " open" : ""}${s.brk ? " brk" : ""}" style="left:${(s.s - T0) * PX}px;width:${w}px;--c:${COL[s.p] || "#a9bcc0"}"
+        data-p="${esc(p.n)}" data-s="${s.s}" title="${hm(s.s)}–${hm(s.e)} ${esc(s.t)}">${w > 26 ? esc(s.sl || s.t) : ""}${w > 84 ? `<small>${hm(s.s)}–${hm(s.e)}${s.w ? " · " + esc(s.w) : ""}</small>` : ""}</button>`;
+    });
+    h += `</div></div>`;
+  });
+  h += `<div class="cur" id="cur"></div>`;
+  $("#gantt").style.width = `calc(var(--namew) + ${W}px)`;
+  $("#gantt").innerHTML = h;
+}
+function placeCursor(scroll){
+  const nw = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--namew"));
+  const x = nw + (T - T0) * PX;
+  $("#cur").style.left = x + "px";
+  if (scroll){ const g = $("#gscroll"); g.scrollLeft = Math.max(0, x - nw - g.clientWidth * 0.35); }
+}
+
+/* ---------- Uhrzeit ---------- */
+const sl = $("#slider"); sl.min = T0; sl.max = T1;
+function nowMin(){ const d = new Date(); const iso = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+  return iso === DATA.date ? d.getHours() * 60 + d.getMinutes() : null; }
+function setT(m, scroll){
+  T = Math.min(Math.max(m, T0), T1 - 1); sl.value = T;
+  const n = nowMin(), live = n !== null && Math.abs(n - T) < 1;
+  $("#clock").innerHTML = `${hm(T)}<small>${live ? "jetzt" : "Uhr"}</small>`;
+  renderWho(); placeCursor(scroll);
+}
+$("#minus").onclick = () => setT(T - 15, true);
+$("#plus").onclick = () => setT(T + 15, true);
+sl.oninput = () => setT(+sl.value, false);
+const n0 = nowMin();
+$("#nowBtn").disabled = n0 === null || n0 < T0 || n0 > T1;
+$("#nowBtn").title = $("#nowBtn").disabled ? "Nur am Veranstaltungstag während des Programms" : "";
+$("#nowBtn").onclick = () => setT(nowMin(), true);
+$("#gantt").addEventListener("click", ev => {
+  const b = ev.target.closest(".bar");
+  if (b) return openSheet(b.dataset.p, +b.dataset.s);
+  const lane = ev.target.closest(".lane"); if (!lane) return;
+  const r = lane.getBoundingClientRect(); setT(Math.round((T0 + (ev.clientX - r.left) / PX) / 5) * 5, false);
+});
+$("#places").addEventListener("click", ev => { const w = ev.target.closest(".who"); if (w) openSheet(w.dataset.p, +w.dataset.s); });
+
+/* ---------- Detail ---------- */
+function openSheet(name, start){
+  const p = P.find(x => x.n === name), s = p.segs.find(x => x.s === start);
+  const idx = p.segs.indexOf(s), nx = p.segs.slice(idx + 1).find(x => !x.brk);
+  $("#sheet").style.setProperty("--c", COL[s.p] && s.p !== "Pause" ? COL[s.p] : "#ffd200");
+  $("#sbody").innerHTML = `<div class="who2">${esc(p.n)} · ${esc(p.r)}</div><h4>${esc(s.t)}</h4>
+    <div class="meta">${hm(s.s)}–${hm(s.e)} Uhr${s.open ? " (Ende offen)" : ""}${s.w ? " · " + esc(s.w) : ""}</div>
+    ${s.k.length ? `<ul>${s.k.map(k => `<li>${esc(k)}</li>`).join("")}</ul>` : ""}
+    ${nx ? `<div class="meta" style="margin-top:12px;color:var(--t3)">Danach: ${hm(nx.s)} ${esc(nx.t)}${nx.w ? " · " + esc(nx.w) : ""}</div>` : ""}`;
+  $("#sheet").classList.add("show");
+}
+$("#sx").onclick = () => $("#sheet").classList.remove("show");
+document.addEventListener("keydown", e => { if (e.key === "Escape") $("#sheet").classList.remove("show"); });
+
+renderGantt();
+const firstBusy = Math.min(...all.filter(s => !s.brk).map(s => s.s));
+setT(n0 !== null && n0 >= T0 && n0 <= T1 ? n0 : firstBusy, true);
+addEventListener("resize", () => placeCursor(false));
+</script>
+</body>
+</html>

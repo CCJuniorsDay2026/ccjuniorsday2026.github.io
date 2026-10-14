@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#06303a">
+<title>Gesamtübersicht Crew · Do 15.10.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --p900:#03222a; --p800:#06303a; --p700:#0b4250; --p600:#14596a;
+  --yellow:#ffd200; --text:#fff; --t2:rgba(255,255,255,.78); --t3:rgba(255,255,255,.55);
+  --card:rgba(255,255,255,.07); --line:rgba(255,255,255,.14);
+  --head:"Montserrat",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  --body:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --namew:104px; color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--p800);color:var(--text);font:15px/1.4 var(--body)}
+button{font:inherit;color:inherit;cursor:pointer}
+a{color:inherit}
+.wrap{max-width:1180px;margin:0 auto;padding:0 16px}
+
+/* Kopf */
+header{background:radial-gradient(80% 120% at 50% 0%, #1d5d6b 0%, rgba(6,48,58,0) 70%) var(--p800);padding:calc(14px + env(safe-area-inset-top)) 0 14px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.back{display:inline-flex;align-items:center;gap:6px;text-decoration:none;font:600 13px var(--head);color:var(--t2);
+  border:1px solid var(--line);border-radius:999px;padding:6px 12px;background:rgba(0,0,0,.2)}
+.days{display:flex;background:rgba(0,0,0,.25);border:1px solid var(--line);border-radius:999px;padding:3px}
+.days a{padding:6px 14px;border-radius:999px;font:700 13px var(--head);text-decoration:none;color:var(--t2)}
+.days a.on{background:var(--yellow);color:var(--p900)}
+h1{font:800 clamp(22px,4.5vw,30px)/1.15 var(--head);margin:16px 0 2px}
+.sub{color:var(--t3);font-size:13px}
+
+/* Zeitsteuerung */
+.ctrl{position:sticky;top:0;z-index:20;background:rgba(3,34,42,.92);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.ctrl .wrap{display:flex;align-items:center;gap:10px;padding-top:10px;padding-bottom:10px;flex-wrap:wrap}
+.clock{font:800 28px/1 var(--head);letter-spacing:.02em;min-width:92px;text-align:center}
+.clock small{display:block;font:600 10.5px var(--head);color:var(--t3);letter-spacing:.08em;margin-top:3px;text-transform:uppercase}
+.sbtn{border:1px solid var(--line);background:var(--card);border-radius:10px;padding:7px 10px;font:700 13px var(--head);min-width:44px}
+.sbtn.now{background:var(--yellow);color:var(--p900);border-color:var(--yellow)}
+.sbtn[disabled]{opacity:.35;cursor:default}
+input[type=range]{flex:1 1 220px;accent-color:var(--yellow);height:28px;min-width:160px}
+
+/* Wer ist wo */
+h2{font:800 18px var(--head);margin:24px 0 12px;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+h2 span{font:600 13px var(--body);color:var(--t3)}
+.places{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.pc{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--c);border-radius:14px;padding:12px 14px}
+.pc h3{margin:0 0 8px;font:800 14px var(--head);display:flex;justify-content:space-between;gap:8px}
+.pc h3 b{background:var(--c);color:var(--p900);border-radius:999px;padding:1px 9px;font-size:12px;align-self:center}
+.who{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;padding:7px 0;border-top:1px solid var(--line);cursor:pointer}
+.who:first-of-type{border-top:0;padding-top:0}
+.who .n{font:700 14px var(--head)}
+.who .t{color:var(--t2);font-size:13.5px}
+.who .m{grid-column:2;color:var(--t3);font-size:12px}
+.free{margin-top:12px;color:var(--t3);font-size:13px;line-height:2}
+.chip{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:1px 10px;margin:0 4px 0 0;color:var(--t2);font:600 12px var(--head)}
+
+/* Zeitstrahl */
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;margin:0 0 10px;font-size:12.5px;color:var(--t2)}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:4px;background:var(--c);margin-right:6px;vertical-align:-1px}
+.legend i.pz{background:transparent;border:1.5px dashed rgba(255,255,255,.5)}
+.gscroll{overflow-x:auto;border:1px solid var(--line);border-radius:14px;background:rgba(0,0,0,.15);-webkit-overflow-scrolling:touch}
+.gantt{position:relative}
+.axis{position:sticky;top:0;height:30px;border-bottom:1px solid var(--line);background:var(--p900);z-index:3}
+.axis .lab{position:absolute;top:8px;transform:translateX(-50%);font:700 11px var(--head);color:var(--t3)}
+.row,.grp{display:flex;position:relative}
+.grp{height:28px;align-items:flex-end}
+.grp .nm{font:800 11px var(--head);letter-spacing:.08em;text-transform:uppercase;color:var(--yellow)}
+.nm{position:sticky;left:0;z-index:4;width:var(--namew);flex:0 0 var(--namew);background:var(--p900);padding:0 10px;display:flex;align-items:center;
+  font:700 13px var(--head);border-right:1px solid var(--line)}
+.grp .nm{background:transparent;border-right:0;padding-bottom:4px;width:auto;flex:none;white-space:nowrap}
+.row{height:44px;border-top:1px solid rgba(255,255,255,.06)}
+.lane{position:relative;flex:1 0 auto}
+.bar{position:absolute;top:6px;bottom:6px;border-radius:7px;background:var(--c);color:var(--p900);padding:3px 5px;overflow:hidden;
+  font:700 11px/1.15 var(--head);white-space:nowrap;text-overflow:ellipsis;border:0;text-align:left;min-width:6px}
+.bar small{display:block;font:600 10px var(--body);opacity:.8;overflow:hidden;text-overflow:ellipsis}
+.bar.open{-webkit-mask-image:linear-gradient(90deg,#000 70%,transparent);mask-image:linear-gradient(90deg,#000 70%,transparent)}
+.bar.brk{background:transparent;border:1.5px dashed rgba(255,255,255,.35);color:var(--t3)}
+.bar:focus-visible{outline:2px solid #fff;outline-offset:1px}
+.tick{position:absolute;top:0;bottom:0;width:1px;background:rgba(255,255,255,.06);pointer-events:none}
+.cur{position:absolute;top:0;bottom:0;width:2px;background:var(--yellow);z-index:2;pointer-events:none;box-shadow:0 0 0 1px rgba(3,34,42,.6)}
+.hint{color:var(--t3);font-size:12.5px;margin:8px 2px 0}
+
+/* Detail */
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:50;background:var(--p700);border-top:3px solid var(--c,var(--yellow));
+  border-radius:18px 18px 0 0;padding:16px 18px calc(18px + env(safe-area-inset-bottom));box-shadow:0 -10px 40px rgba(0,0,0,.45);
+  transform:translateY(110%);transition:transform .22s ease,visibility .22s;visibility:hidden;max-height:70vh;overflow:auto}
+.sheet.show{transform:none;visibility:visible}
+.sheet .x{position:absolute;right:12px;top:10px;border:1px solid var(--line);background:var(--card);border-radius:999px;width:34px;height:34px}
+.sheet .who2{font:800 12px var(--head);color:var(--yellow);letter-spacing:.06em;text-transform:uppercase}
+.sheet h4{margin:4px 40px 4px 0;font:800 18px/1.25 var(--head)}
+.sheet .meta{color:var(--t2);font-size:14px}
+.sheet ul{margin:10px 0 0;padding-left:18px;color:var(--t2);font-size:14px}
+.sheet ul li{margin:3px 0}
+footer{color:var(--t3);font-size:12px;text-align:center;padding:28px 16px 40px}
+@media (max-width:560px){ :root{--namew:84px} .clock{font-size:24px;min-width:78px} }
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <div class="top">
+    <a class="back" href="agenda_martin.html">← Meine Agenda</a>
+    <nav class="days" id="days"></nav>
+  </div>
+  <h1>Gesamtübersicht Crew</h1>
+  <div class="sub" id="subline"></div>
+</div></header>
+
+<div class="ctrl"><div class="wrap">
+  <button class="sbtn" id="minus" aria-label="15 Minuten früher">−15</button>
+  <div class="clock" id="clock"></div>
+  <button class="sbtn" id="plus" aria-label="15 Minuten später">+15</button>
+  <input type="range" id="slider" step="5" aria-label="Uhrzeit wählen">
+  <button class="sbtn now" id="nowBtn">Jetzt</button>
+</div></div>
+
+<main class="wrap">
+  <h2>Wer ist wo? <span id="whoSub"></span></h2>
+  <div class="places" id="places"></div>
+  <div class="free" id="free"></div>
+
+  <h2>Zeitstrahl <span>Tippe auf einen Balken für Details · Tippe in den Zeitstrahl, um die Uhrzeit oben zu setzen</span></h2>
+  <div class="legend" id="legend"></div>
+  <div class="gscroll" id="gscroll"><div class="gantt" id="gantt"></div></div>
+  <p class="hint">Verblassende Balken: In der Running Order steht kein Ende – der Eintrag ist hier mit höchstens 45 Minuten dargestellt.</p>
+</main>
+<footer id="foot"></footer>
+
+<div class="sheet" id="sheet" role="dialog" aria-modal="false"><button class="x" id="sx" aria-label="Schließen">✕</button><div id="sbody"></div></div>
+
+<script>
+const DATA = {"key": "do", "long": "Donnerstag, 15. Oktober", "short": "Do 15.10.", "date": "2026-10-15", "stand": "14.10.2026", "people": [{"n": "Carmen Müller", "f": "Carmen", "r": "Orga & Bühne", "segs": [{"s": 810, "e": 820, "t": "Eintreffen der Speaker und Setup", "w": "Raum Wallstreet · 7. OG", "k": ["Eintreffen", "Carmen Müller und Jutta Horstkötter erhalten Mikrofone", "Stand-by"], "p": "Wallstreet · Plenum", "sl": "Setup"}, {"s": 840, "e": 850, "t": "Begrüßung", "w": "Raum Wallstreet · 7. OG", "k": ["Carmen kommt auf die Bühne"], "p": "Wallstreet · Plenum", "sl": "Begrüßung"}, {"s": 850, "e": 867, "t": "Executive Keynote", "w": "Raum Wallstreet · 7. OG", "k": ["Keynote durch Carmen Müller", "Interview Jutta", "Abgang von der Bühne"], "p": "Wallstreet · Plenum", "sl": "Executive Keynote"}]}, {"n": "David Dähn", "f": "David", "r": "Orga & Bühne", "segs": [{"s": 1080, "e": 1140, "t": "AI-Keynote", "w": "Raum Wallstreet · 7. OG", "k": ["Eintreffen", "David Dähn erhält Mikrofon"], "p": "Wallstreet · Plenum", "sl": "AI-Keynote"}]}, {"n": "Martin Hohmann", "f": "Martin", "r": "Orga & Bühne", "segs": [{"s": 600, "e": 610, "t": "Eintreffen der Crew", "w": "Upper East Side", "k": ["Briefing"], "p": "Upper East Side", "sl": "Eintreffen"}, {"s": 610, "e": 655, "t": "Vorbereitung Lokation", "w": "Raum Wallstreet · 7. OG", "k": ["Technik-Einrichten"], "open": true, "p": "Wallstreet · Plenum", "sl": "Vorbereitung"}, {"s": 805, "e": 835, "t": "Eintreffen der Speaker und Setup", "w": "Raum Wallstreet · 7. OG", "k": ["Carmen Müller und Jutta Horstkötter erhalten Mikrofone"], "p": "Wallstreet · Plenum", "sl": "Setup"}, {"s": 840, "e": 851, "t": "Begrüßung", "w": "Raum Wallstreet · 7. OG", "k": ["Einführung von Sherlock; kurzes Video mit Begrüßung"], "p": "Wallstreet · Plenum", "sl": "Begrüßung"}, {"s": 1095, "e": 1140, "t": "AI-Keynote", "w": "Raum Wallstreet · 7. OG", "k": ["Technik-Check und Einrichtung"], "p": "Wallstreet · Plenum", "sl": "AI-Keynote"}, {"s": 1140, "e": 1170, "t": "Wrap-up, Verabschiedung und Protocol-16-Cliffhanger", "w": "Raum Wallstreet · 7. OG", "k": ["Protocol-16-Cliffhanger"], "p": "Wallstreet · Plenum", "sl": "Wrap-up"}, {"s": 1350, "e": 1380, "t": "Ende der Veranstaltung Tag 1", "w": "Upper East Side", "k": ["Beladen der Autos mit Materialien aus nicht genutzten Räumen", "Abbau restliche Materialien"], "p": "Upper East Side", "sl": "Abbau"}]}, {"n": "Olivia Süßmann", "f": "Olivia", "r": "Orga & Bühne", "segs": [{"s": 600, "e": 610, "t": "Eintreffen der Crew", "w": "Upper East Side", "k": ["Briefing"], "p": "Upper East Side", "sl": "Eintreffen"}, {"s": 610, "e": 780, "t": "Vorbereitung Lokation", "w": "Hörsaal 1, Hörsaal 2, Hörsaal 3 · Steuerfachschule", "k": ["Namensschilder bereitstellen getrennt von Lanyards", "Garderobe checken", "Steuerfachschule Dr. Endriss", "Weg zum Upper East Side"], "p": "Steuerfachschule", "sl": "Vorbereitung"}, {"s": 780, "e": 900, "t": "Stand-by Nähe Eingang wegen Nachzüglern", "w": "Eingang · 7. OG", "k": ["Teilnehmer erhalten das Namensschild"], "p": "Upper East Side", "sl": "Stand-by Nähe Eingang wegen Nachzüglern"}, {"s": 945, "e": 1080, "t": "Aufbruch Commerzbank Tower wegen Aufbau für Freitag", "w": "Commerzbank Tower", "k": ["Aufbau Mission Game", "Rückkehr aus dem Commerzbank Tower"], "p": "Sonstiges", "sl": "Aufbruch Commerzbank Tower wegen Aufbau für Freitag"}, {"s": 1110, "e": 1140, "t": "AI-Keynote", "w": "Raum Wallstreet · 7. OG", "k": ["Publikumsfragen 2 Mikrofone"], "p": "Wallstreet · Plenum", "sl": "AI-Keynote"}, {"s": 1350, "e": 1380, "t": "Ende der Veranstaltung Tag 1", "w": "Upper East Side", "k": ["Beladen der Autos mit Materialien aus nicht genutzten Räumen", "Abbau restliche Materialien"], "p": "Upper East Side", "sl": "Abbau"}]}, {"n": "Quirin Frey", "f": "Quirin", "r": "Orga & Bühne", "segs": [{"s": 600, "e": 610, "t": "Eintreffen der Crew", "w": "Upper East Side", "k": ["Briefing"], "p": "Upper East Side", "sl": "Eintreffen"}, {"s": 610, "e": 655, "t": "Vorbereitung Lokation", "w": "Eingang Upper East Side / Rooftop · 8. OG", "k": ["Commerzbank Branding"], "open": true, "p": "Rooftop / High Line", "sl": "Vorbereitung"}, {"s": 781, "e": 810, "t": "Eintreffen der Speaker und Setup", "w": "Raum Wallstreet · 7. OG", "k": ["Eintreffen der Speaker", "Begehung Upper East Side", "Backstage ins Plenum"], "p": "Wallstreet · Plenum", "sl": "Setup"}]}, {"n": "Camila de las Rosas Pereira Perez", "f": "Camila", "r": "Event Guides", "segs": [{"s": 720, "e": 785, "t": "Vorbereitung Lokation", "w": "Eingang · 7. OG", "k": ["Eintreffen Helfer", "Steuerfachschule Dr. Endriss", "Weg zum Upper East Side"], "p": "Upper East Side", "sl": "Vorbereitung"}, {"s": 790, "e": 810, "t": "Eintreffen der Speaker und Setup", "w": "Steuerfachschule", "k": ["Begehung Steuerfachschule", "Weg zum Upper East Side"], "p": "Steuerfachschule", "sl": "Setup"}, {"s": 885, "e": 910, "t": "Runde 1 · Thema 3: MSB Direkt", "w": "Hörsaal 1 · Steuerfachschule", "k": ["Gruppe C · Vortrag auf Englisch · Referenten: Marcel Bischof", "Setup", "Timekeeper-Signal (5 Minuten vor Ende)"], "p": "Steuerfachschule", "sl": "R1 · Th. 3"}, {"s": 920, "e": 945, "t": "Runde 2 · Thema 5: Loan Pilot", "w": "Hörsaal 1 · Steuerfachschule", "k": ["Gruppe C · Vortrag auf Englisch · Referenten: Torben Pape", "Setup", "Timekeeper-Signal (5 Minuten vor Ende)"], "p": "Steuerfachschule", "sl": "R2 · Th. 5"}, {"s": 955, "e": 980, "t": "Runde 3 · Thema 4: FX LiveTrader", "w": "Hörsaal 1 · Steuerfachschule", "k": ["Gruppe C · Vortrag auf Englisch · Referenten: Thomas Müldner", "Setup", "Timekeeper-Signal (5 Minuten vor Ende)"], "p": "Steuerfachschule", "sl": "R3 · Th. 4"}, {"s": 1000, "e": 1025, "t": "Runde 4 · Thema 3: MSB Direkt", "w": "Hörsaal 1 · Steuerfachschule", "k": ["Gruppe A · Vortrag auf Deutsch · Referenten: Marcel Bischof", "Setup", "Timekeeper-Signal (5 Minuten vor Ende)"], "p": "Steuerfachschule", "sl": "R4 · Th. 3"}, {"s": 1035, "e": 1060, "t": "Runde 5 · Thema 4: FX LiveTrader", "w": "Hörsaal 1 · Steuerfachschule", "k": ["Gruppe A · Vortrag auf Deutsch · Referenten: Thomas Müldner", "Setup", "Timekeeper-Signal (5 Minuten vor Ende)"], "p": "Steuerfachschule", "sl": "R5 · Th. 4"}, {"s": 1070, "e": 1095, "t": "Runde 6 · Thema 5: Loan Pilot", "w": "Hörsaal 1 · Steuerfachschule", "k": ["Gruppe A · Vortrag auf Deutsch · Referenten: Torben Pape", "Setup", "Timekeeper-Signal (5 Minuten vor Ende)"], "p": "Steuerfachschule", "sl": "R6 · Th. 5"}, {"s": 1110, "e": 1140, "t": "Einsammeln Gläser und Getränke", "w": "Steuerfachschule", "k": ["Abbau Beachflag und sonstiges Commerzbank Branding", "Material etc. aus Steuerfachschule in Upper East Side lagern"], "p": "Steuerfachschule", "sl": "Einsammeln Gläser und Getränke"}, {"s": 1350, "e": 1380, "t": "Ende der Veranstaltung Tag 1", "w": "Upper East Side", "k": ["Beladen der Autos mit Materialien aus nicht genutzten Räumen", "Abbau restliche Materialien"], "p": "Upper East Side", "sl": "Abbau"}]}, {"n": "Jutta Horstkötter", "f": "Jutta", "r": "Event Guides", "segs": [{"s": 600, "e": 610, "t": "Eintreffen der Crew", "w": "Upper East Side", "k": ["Briefing"], "p": "Upper East Side", "sl": "Eintreffen"}, {"s": 720, "e": 750, "t": "Vorbereitung Lokation", "w": "Rooftop · 8. OG", "k": ["Pizza"], "p": "Rooftop / High Line", "sl": "Vorbereitung"}, {"s": 781, "e": 810, "t": "Eintreffen der Speaker und Setup", "w": "Raum Wallstreet · 7. OG", "k": ["Eintreffen der Speaker", "Begehung Upper East Side", "Quirin: Backstage ins Plenum", "Eintreffen Carmen Müller", "Carmen Müller und Jutta Horstkötter erhalten Mikrofone"], "p": "Wallstreet · Plenum", "sl": "Setup"}, {"s": 835, "e": 851, "t": "Begrüßung", "w": "Raum Wallstreet · 7. OG", "k": ["Ankommen im Tagungsraum", "Begrüßung, Agenda, Organisatorisches", "Ankündigung Carmen", "Abgang von der Bühne"], "p": "Wallstreet · Plenum", "sl": "Begrüßung"}, {"s": 860, "e": 866, "t": "Executive Keynote", "w": "Raum Wallstreet · 7. OG", "k": ["Interview Jutta", "Jutta gibt Carmen den Lunchpot"], "p": "Wallstreet · Plenum", "sl": "Executive Keynote"}, {"s": 885, "e": 910, "t": "Runde 1 · Thema 2: FK Centerlogik & FMS Live", "w": "Raum Wallstreet · 7. OG", "k": ["Gruppe B · Vortrag auf Englisch · Referenten: Frank von Cukrowicz, Michael Alt", "Setup", "Timekeeper-Signal (5 Minuten vor Ende)"], "p": "Wallstreet · Plenum", "sl": "R1 · Th. 2"}, {"s": 920, "e": 945, "t": "Runde 2 · Thema 1: Digital Corporate Banking", "w": "Raum Wallstreet · 7. OG", "k": ["Gruppe B · Vortrag auf Englisch · Referenten: Stefan Dippold, Paul Hoffmann", "Setup", "Timekeeper-Signal (5 Minuten vor Ende)"], "p": "Wallstreet · Plenum", "sl": "R2 · Th. 1"}, {"s": 1035, "e": 1060, "t": "Runde 5 · Thema 2: FK Centerlogik & FMS Live", "w": "Raum Wallstreet · 7. OG", "k": ["Gruppe C, D, E · Vortrag auf Englisch · Referenten: Frank von Cukrowicz, Michael Alt", "Setup", "Hinweis auf nächsten Durchlauf an Referenten", "Timekeeper-Signal (5 Minuten vor Ende)"], "p": "Wallstreet · Plenum", "sl": "R5 · Th. 2"}, {"s": 1070, "e": 1095, "t": "Runde 6 · Thema 1: Digital Corporate Banking", "w": "Raum Wallstreet · 7. OG", "k": ["Gruppe C, D, E · Vortrag auf Englisch · Referenten: Stefan Dippold, Paul Hoffmann", "Setup", "Hinweis auf nächsten Durchlauf an Referenten", "Timekeeper-Signal (5 Minuten vor Ende)"], "p": "Wallstreet · Plenum", "sl": "R6 · Th. 1"}, {"s": 1095, "e": 1140, "t": "AI-Keynote", "w": "Raum Wallstreet · 7. OG", "k": ["Eintreffen David Dähn", "David Dähn erhält Mikrofon", "Setup", "Kurzes Welcome Back und Dank an die Referenten", "Start Präsentation AI-Keynote", "Publikumsfragen 2 Mikrofone"], "p": "Wallstreet · Plenum", "sl": "AI-Keynote"}, {"s": 1140, "e": 1170, "t": "Wrap-up, Verabschiedung und Protocol-16-Cliffhanger", "w": "Raum Wallstreet · 7. OG", "k": ["Wrap-up, Ausblick auf den Nächsten Tag, Ankündigung Dinner"], "p": "Wallstreet · Plenum", "sl": "Wrap-up"}, {"s": 1350, "e": 1380, "t": "Ende der Veranstaltung Tag 1", "w": "Upper East Side", "k": ["Beladen der Autos mit Materialien aus nicht genutzten Räumen", "Abbau restliche Materialien"], "p": "Upper East Side", "sl": "Abbau"}]}, {"n": "Louis Faltin", "f": "Louis", "r": "Event Guides", "segs": [{"s": 720, "e": 785, "t": "Vorbereitung Lokation", "w": "Eingang · 7. OG", "k": ["Eintreffen Helfer", "Steuerfachschule Dr. Endriss", "Weg zum Upper East Side"], "p": "Upper East Side", "sl": "Vorbereitung"}, {"s": 790, "e": 810, "t": "Eintreffen der Speaker und Setup", "w": "Steuerfachschule", "k": ["Begehung Steuerfachschule", "Weg zum Upper East Side"], "p": "Steuerfachschule", "sl": "Setup"}, {"s": 885, "e": 910, "t": "Runde 1 · Thema 4: FX LiveTrader", "w": "Hörsaal 2 · Steuerfachschule", "k": ["Gruppe D · Vortrag auf Englisch · Referenten: Thomas Müldner", "Setup", "Timekeeper-Signal (5 Minuten vor Ende)"], "p": "Steuerfachschule", "sl": "R1 · Th. 4"}, {"s": 920, "e": 945, "t": "Runde 2 · Thema 3: MSB Direkt", "w": "Hörsaal 2 · Steuerfachschule", "k": ["Gruppe D · Vortrag auf Englisch · Referenten: Marcel Bischof", "Setup", "Timekeeper-Signal (5 Minuten vor Ende)"], "p": "Steuerfachschule", "sl": "R2 · Th. 3"}, {"s": 955, "e": 980, "t": "Runde 3 · Thema 5: Loan Pilot", "w": "Hörsaal 2 · Steuerfachschule", "k": ["Gruppe D · Vortrag auf Englisch · Referenten: Torben Pape", "Setup", "Timekeeper-Signal (5 Minuten vor Ende)"], "p": "Steuerfachschule", "sl": "R3 · Th. 5"}, {"s": 1000, "e": 1025, "t": "Runde 4 · Thema 4: FX LiveTrader", "w": "Hörsaal 2 · Steuerfachschule", "k": ["Gruppe B · Vortrag auf Englisch · Referenten: Thomas Müldner", "Setup", "Timekeeper-Signal (5 Minuten vor Ende)"], "p": "Steuerfachschule", "sl": "R4 · Th. 4"}, {"s": 1035, "e": 1060, "t": "Runde 5 · Thema 5: Loan Pilot", "w": "Hörsaal 2 · Steuerfachschule", "k": ["Gruppe B · Vortrag auf Englisch · Referenten: Torben Pape", "Setup", "Hinweis auf nächsten Durchlauf an Referenten", "Timekeeper-Signal (5 Minuten vor Ende)"], "p": "Steuerfachschule", "sl": "R5 · Th. 5"}, {"s": 1070, "e": 1095, "t": "Runde 6 · Thema 3: MSB Direkt", "w": "Hörsaal 2 · Steuerfachschule", "k": ["Gruppe B · Vortrag auf Englisch · Referenten: Marcel Bischof", "Setup", "Hinweis auf nächsten Durchlauf an Referenten", "Timekeeper-Signal (5 Minuten vor Ende)"], "p": "Steuerfachschule", "sl": "R6 · Th. 3"}, {"s": 1110, "e": 1140, "t": "Einsammeln Gläser und Getränke", "w": "Steuerfachschule", "k": ["Abbau Beachflag und sonstiges Commerzbank Branding", "Material etc. aus Steuerfachschule in Upper East Side lagern"], "p": "Steuerfachschule", "sl": "Einsammeln Gläser und Getränke"}, {"s": 1350, "e": 1380, "t": "Ende der Veranstaltung Tag 1", "w": "Upper East Side", "k": ["Beladen der Autos mit Materialien aus nicht genutzten Räumen", "Abbau restliche Materialien"], "p": "Upper East Side", "sl": "Abbau"}]}, {"n": "Martha Heß", "f": "Martha", "r": "Event Guides", "segs": [{"s": 600, "e": 610, "t": "Eintreffen der Crew", "w": "Upper East Side", "k": ["Briefing"], "p": "Upper East Side", "sl": "Eintreffen"}, {"s": 610, "e": 780, "t": "Vorbereitung Lokation", "w": "Hörsaal 1, Hörsaal 2, Hörsaal 3 · Steuerfachschule", "k": ["Namensschilder bereitstellen getrennt von Lanyards", "Garderobe checken", "Steuerfachschule Dr. Endriss", "Weg zum Upper East Side"], "p": "Steuerfachschule", "sl": "Vorbereitung"}, {"s": 780, "e": 855, "t": "Check-In", "w": "Eingang · 7. OG", "k": ["Teilnehmer erhalten das Namensschild"], "p": "Upper East Side", "sl": "Check-In"}, {"s": 885, "e": 910, "t": "Runde 1 · Thema 1: Digital Corporate Banking", "w": "Penthouse · 9. OG", "k": ["Gruppe A · Vortrag auf Deutsch · Referenten: Stefan Dippold, Paul Hoffmann", "Setup", "Timekeeper-Signal (5 Minuten vor Ende)"], "p": "Penthouse", "sl": "R1 · Th. 1"}, {"s": 920, "e": 945, "t": "Runde 2 · Thema 2: FK Centerlogik & FMS Live", "w": "Penthouse · 9. OG", "k": ["Gruppe A · Vortrag auf Deutsch · Referenten: Frank von Cukrowicz, Michael Alt", "Setup", "Timekeeper-Signal (5 Minuten vor Ende)"], "p": "Penthouse", "sl": "R2 · Th. 2"}, {"s": 945, "e": 1080, "t": "Aufbruch Commerzbank Tower wegen Aufbau für Freitag", "w": "Commerzbank Tower", "k": ["Aufbau Mission Game", "Party oder Hans Günther?"], "p": "Sonstiges", "sl": "Aufbruch Commerzbank Tower wegen Aufbau für Freitag"}]}, {"n": "Meri Asmelash", "f": "Meri", "r": "Event Guides", "segs": [{"s": 720, "e": 785, "t": "Vorbereitung Lokation", "w": "Eingang · 7. OG", "k": ["Eintreffen Helfer", "Steuerfachschule Dr. Endriss", "Weg zum Upper East Side"], "p": "Upper East Side", "sl": "Vorbereitung"}, {"s": 790, "e": 810, "t": "Eintreffen der Speaker und Setup", "w": "Steuerfachschule", "k": ["Begehung Steuerfachschule", "Weg zum Upper East Side"], "p": "Steuerfachschule", "sl": "Setup"}, {"s": 885, "e": 910, "t": "Runde 1 · Thema 5: Loan Pilot", "w": "Hörsaal 3 · Steuerfachschule", "k": ["Gruppe E · Vortrag auf Englisch · Referenten: Torben Pape", "Setup", "Timekeeper-Signal (5 Minuten vor Ende)"], "p": "Steuerfachschule", "sl": "R1 · Th. 5"}, {"s": 920, "e": 945, "t": "Runde 2 · Thema 4: FX LiveTrader", "w": "Hörsaal 3 · Steuerfachschule", "k": ["Gruppe E · Vortrag auf Englisch · Referenten: Thomas Müldner", "Setup", "Timekeeper-Signal (5 Minuten vor Ende)"], "p": "Steuerfachschule", "sl": "R2 · Th. 4"}, {"s": 955, "e": 980, "t": "Runde 3 · Thema 3: MSB Direkt", "w": "Hörsaal 3 · Steuerfachschule", "k": ["Gruppe E · Vortrag auf Englisch · Referenten: Marcel Bischof", "Setup", "Timekeeper-Signal (5 Minuten vor Ende)"], "p": "Steuerfachschule", "sl": "R3 · Th. 3"}, {"s": 1110, "e": 1140, "t": "Einsammeln Gläser und Getränke", "w": "Steuerfachschule", "k": ["Abbau Beachflag und sonstiges Commerzbank Branding", "Material etc. aus Steuerfachschule in Upper East Side lagern"], "p": "Steuerfachschule", "sl": "Einsammeln Gläser und Getränke"}, {"s": 1350, "e": 1380, "t": "Ende der Veranstaltung Tag 1", "w": "Upper East Side", "k": ["Beladen der Autos mit Materialien aus nicht genutzten Räumen", "Abbau restliche Materialien"], "p": "Upper East Side", "sl": "Abbau"}]}, {"n": "Silas Honerkamp", "f": "Silas", "r": "Event Guides", "segs": [{"s": 720, "e": 785, "t": "Vorbereitung Lokation", "w": "Eingang · 7. OG", "k": ["Eintreffen Helfer", "Steuerfachschule Dr. Endriss", "Weg zum Upper East Side"], "p": "Upper East Side", "sl": "Vorbereitung"}, {"s": 790, "e": 810, "t": "Eintreffen der Speaker und Setup", "w": "Steuerfachschule", "k": ["Begehung Steuerfachschule", "Weg zum Upper East Side"], "p": "Steuerfachschule", "sl": "Setup"}, {"s": 885, "e": 910, "t": "Runde 1 · Thema 3: MSB Direkt", "w": "Hörsaal 1 · Steuerfachschule", "k": ["Gruppe C · Vortrag auf Englisch · Referenten: Marcel Bischof", "Setup", "Timekeeper-Signal (5 Minuten vor Ende)"], "p": "Steuerfachschule", "sl": "R1 · Th. 3"}, {"s": 920, "e": 945, "t": "Runde 2 · Thema 5: Loan Pilot", "w": "Hörsaal 1 · Steuerfachschule", "k": ["Gruppe C · Vortrag auf Englisch · Referenten: Torben Pape", "Setup", "Timekeeper-Signal (5 Minuten vor Ende)"], "p": "Steuerfachschule", "sl": "R2 · Th. 5"}, {"s": 955, "e": 980, "t": "Runde 3 · Thema 4: FX LiveTrader", "w": "Hörsaal 1 · Steuerfachschule", "k": ["Gruppe C · Vortrag auf Englisch · Referenten: Thomas Müldner", "Setup", "Timekeeper-Signal (5 Minuten vor Ende)"], "p": "Steuerfachschule", "sl": "R3 · Th. 4"}, {"s": 1000, "e": 1025, "t": "Runde 4 · Thema 3: MSB Direkt", "w": "Hörsaal 1 · Steuerfachschule", "k": ["Gruppe A · Vortrag auf Deutsch · Referenten: Marcel Bischof", "Setup", "Timekeeper-Signal (5 Minuten vor Ende)"], "p": "Steuerfachschule", "sl": "R4 · Th. 3"}, {"s": 1035, "e": 1060, "t": "Runde 5 · Thema 4: FX LiveTrader", "w": "Hörsaal 1 · Steuerfachschule", "k": ["Gruppe A · Vortrag auf Deutsch · Referenten: Thomas Müldner", "Setup", "Timekeeper-Signal (5 Minuten vor Ende)"], "p": "Steuerfachschule", "sl": "R5 · Th. 4"}, {"s": 1070, "e": 1095, "t": "Runde 6 · Thema 5: Loan Pilot", "w": "Hörsaal 1 · Steuerfachschule", "k": ["Gruppe A · Vortrag auf Deutsch · Referenten: Torben Pape", "Setup", "Timekeeper-Signal (5 Minuten vor Ende)"], "p": "Steuerfachschule", "sl": "R6 · Th. 5"}, {"s": 1110, "e": 1140, "t": "Einsammeln Gläser und Getränke", "w": "Steuerfachschule", "k": ["Abbau Beachflag und sonstiges Commerzbank Branding", "Material etc. aus Steuerfachschule in Upper East Side lagern"], "p": "Steuerfachschule", "sl": "Einsammeln Gläser und Getränke"}, {"s": 1350, "e": 1380, "t": "Ende der Veranstaltung Tag 1", "w": "Upper East Side", "k": ["Beladen der Autos mit Materialien aus nicht genutzten Räumen", "Abbau restliche Materialien"], "p": "Upper East Side", "sl": "Abbau"}]}, {"n": "Frank von Cukrowicz", "f": "Frank", "r": "Referent:innen", "segs": [{"s": 780, "e": 810, "t": "Eintreffen der Speaker und Setup", "w": "Raum Wallstreet · 7. OG", "k": ["Eintreffen der Speaker", "Begehung Upper East Side"], "p": "Wallstreet · Plenum", "sl": "Setup"}, {"s": 885, "e": 910, "t": "Runde 1 · Thema 2: FK Centerlogik & FMS Live", "w": "Raum Wallstreet · 7. OG", "k": ["Gruppe B · Vortrag auf Englisch · mit Michael Alt", "Referenten wechseln an ihre Station", "Dein Vortrag"], "p": "Wallstreet · Plenum", "sl": "R1 · Th. 2"}, {"s": 920, "e": 945, "t": "Runde 2 · Thema 2: FK Centerlogik & FMS Live", "w": "Penthouse · 9. OG", "k": ["Gruppe A · Vortrag auf Deutsch · mit Michael Alt", "Referenten wechseln an ihre Station", "Dein Vortrag"], "p": "Penthouse", "sl": "R2 · Th. 2"}, {"s": 945, "e": 1025, "t": "Pause (kein Vortrag)", "w": "", "k": [], "p": "Pause", "brk": true, "sl": "Pause"}, {"s": 1035, "e": 1060, "t": "Runde 5 · Thema 2: FK Centerlogik & FMS Live", "w": "Raum Wallstreet · 7. OG", "k": ["Gruppe C, D, E · Vortrag auf Englisch · mit Michael Alt", "Referenten wechseln an ihre Station", "Dein Vortrag"], "p": "Wallstreet · Plenum", "sl": "R5 · Th. 2"}, {"s": 1060, "e": 1095, "t": "Pause (kein Vortrag)", "w": "", "k": [], "p": "Pause", "brk": true, "sl": "Pause"}, {"s": 1095, "e": 1110, "t": "Ende Gallery Walk", "w": "Raum Wallstreet · 7. OG", "k": [], "p": "Wallstreet · Plenum", "sl": "Ende Gallery Walk"}, {"s": 1110, "e": 1140, "t": "AI-Keynote", "w": "Raum Wallstreet · 7. OG", "k": ["Kurzes Welcome Back und Dank an die Referenten"], "p": "Wallstreet · Plenum", "sl": "AI-Keynote"}]}, {"n": "Marcel Bischof", "f": "Marcel", "r": "Referent:innen", "segs": [{"s": 780, "e": 810, "t": "Eintreffen der Speaker und Setup", "w": "Raum Wallstreet · 7. OG", "k": ["Eintreffen der Speaker", "Begehung Steuerfachschule", "Weg zum Upper East Side"], "p": "Wallstreet · Plenum", "sl": "Setup"}, {"s": 885, "e": 910, "t": "Runde 1 · Thema 3: MSB Direkt", "w": "Hörsaal 1 · Steuerfachschule", "k": ["Gruppe C · Vortrag auf Englisch", "Referenten wechseln an ihre Station", "Dein Vortrag"], "p": "Steuerfachschule", "sl": "R1 · Th. 3"}, {"s": 920, "e": 945, "t": "Runde 2 · Thema 3: MSB Direkt", "w": "Hörsaal 2 · Steuerfachschule", "k": ["Gruppe D · Vortrag auf Englisch", "Referenten wechseln an ihre Station", "Dein Vortrag"], "p": "Steuerfachschule", "sl": "R2 · Th. 3"}, {"s": 955, "e": 980, "t": "Runde 3 · Thema 3: MSB Direkt", "w": "Hörsaal 3 · Steuerfachschule", "k": ["Gruppe E · Vortrag auf Englisch", "Referenten wechseln an ihre Station", "Dein Vortrag"], "p": "Steuerfachschule", "sl": "R3 · Th. 3"}, {"s": 1000, "e": 1025, "t": "Runde 4 · Thema 3: MSB Direkt", "w": "Hörsaal 1 · Steuerfachschule", "k": ["Gruppe A · Vortrag auf Deutsch", "Referenten wechseln an ihre Station", "Dein Vortrag"], "p": "Steuerfachschule", "sl": "R4 · Th. 3"}, {"s": 1025, "e": 1060, "t": "Pause (kein Vortrag)", "w": "", "k": [], "p": "Pause", "brk": true, "sl": "Pause"}, {"s": 1070, "e": 1095, "t": "Runde 6 · Thema 3: MSB Direkt", "w": "Hörsaal 2 · Steuerfachschule", "k": ["Gruppe B · Vortrag auf Englisch", "Referenten wechseln an ihre Station", "Dein Vortrag"], "p": "Steuerfachschule", "sl": "R6 · Th. 3"}, {"s": 1095, "e": 1110, "t": "Ende Gallery Walk", "w": "Raum Wallstreet · 7. OG", "k": [], "p": "Wallstreet · Plenum", "sl": "Ende Gallery Walk"}, {"s": 1110, "e": 1140, "t": "AI-Keynote", "w": "Raum Wallstreet · 7. OG", "k": ["Kurzes Welcome Back und Dank an die Referenten"], "p": "Wallstreet · Plenum", "sl": "AI-Keynote"}]}, {"n": "Michael Alt", "f": "Michael", "r": "Referent:innen", "segs": [{"s": 780, "e": 810, "t": "Eintreffen der Speaker und Setup", "w": "Raum Wallstreet · 7. OG", "k": ["Eintreffen der Speaker", "Begehung Upper East Side"], "p": "Wallstreet · Plenum", "sl": "Setup"}, {"s": 885, "e": 910, "t": "Runde 1 · Thema 2: FK Centerlogik & FMS Live", "w": "Raum Wallstreet · 7. OG", "k": ["Gruppe B · Vortrag auf Englisch · mit Frank von Cukrowicz", "Referenten wechseln an ihre Station", "Dein Vortrag"], "p": "Wallstreet · Plenum", "sl": "R1 · Th. 2"}, {"s": 920, "e": 945, "t": "Runde 2 · Thema 2: FK Centerlogik & FMS Live", "w": "Penthouse · 9. OG", "k": ["Gruppe A · Vortrag auf Deutsch · mit Frank von Cukrowicz", "Referenten wechseln an ihre Station", "Dein Vortrag"], "p": "Penthouse", "sl": "R2 · Th. 2"}, {"s": 945, "e": 1025, "t": "Pause (kein Vortrag)", "w": "", "k": [], "p": "Pause", "brk": true, "sl": "Pause"}, {"s": 1035, "e": 1060, "t": "Runde 5 · Thema 2: FK Centerlogik & FMS Live", "w": "Raum Wallstreet · 7. OG", "k": ["Gruppe C, D, E · Vortrag auf Englisch · mit Frank von Cukrowicz", "Referenten wechseln an ihre Station", "Dein Vortrag"], "p": "Wallstreet · Plenum", "sl": "R5 · Th. 2"}, {"s": 1060, "e": 1095, "t": "Pause (kein Vortrag)", "w": "", "k": [], "p": "Pause", "brk": true, "sl": "Pause"}, {"s": 1095, "e": 1110, "t": "Ende Gallery Walk", "w": "Raum Wallstreet · 7. OG", "k": [], "p": "Wallstreet · Plenum", "sl": "Ende Gallery Walk"}, {"s": 1110, "e": 1140, "t": "AI-Keynote", "w": "Raum Wallstreet · 7. OG", "k": ["Kurzes Welcome Back und Dank an die Referenten"], "p": "Wallstreet · Plenum", "sl": "AI-Keynote"}]}, {"n": "Paul Hoffmann", "f": "Paul", "r": "Referent:innen", "segs": [{"s": 780, "e": 810, "t": "Eintreffen der Speaker und Setup", "w": "Raum Wallstreet · 7. OG", "k": ["Eintreffen der Speaker", "Begehung Upper East Side"], "p": "Wallstreet · Plenum", "sl": "Setup"}, {"s": 885, "e": 910, "t": "Runde 1 · Thema 1: Digital Corporate Banking", "w": "Penthouse · 9. OG", "k": ["Gruppe A · Vortrag auf Deutsch · mit Stefan Dippold", "Referenten wechseln an ihre Station", "Dein Vortrag"], "p": "Penthouse", "sl": "R1 · Th. 1"}, {"s": 920, "e": 945, "t": "Runde 2 · Thema 1: Digital Corporate Banking", "w": "Raum Wallstreet · 7. OG", "k": ["Gruppe B · Vortrag auf Englisch · mit Stefan Dippold", "Referenten wechseln an ihre Station", "Dein Vortrag"], "p": "Wallstreet · Plenum", "sl": "R2 · Th. 1"}, {"s": 945, "e": 1060, "t": "Pause (kein Vortrag)", "w": "", "k": [], "p": "Pause", "brk": true, "sl": "Pause"}, {"s": 1070, "e": 1095, "t": "Runde 6 · Thema 1: Digital Corporate Banking", "w": "Raum Wallstreet · 7. OG", "k": ["Gruppe C, D, E · Vortrag auf Englisch · mit Stefan Dippold", "Referenten wechseln an ihre Station", "Dein Vortrag"], "p": "Wallstreet · Plenum", "sl": "R6 · Th. 1"}, {"s": 1095, "e": 1110, "t": "Ende Gallery Walk", "w": "Raum Wallstreet · 7. OG", "k": [], "p": "Wallstreet · Plenum", "sl": "Ende Gallery Walk"}, {"s": 1110, "e": 1140, "t": "AI-Keynote", "w": "Raum Wallstreet · 7. OG", "k": ["Kurzes Welcome Back und Dank an die Referenten"], "p": "Wallstreet · Plenum", "sl": "AI-Keynote"}]}, {"n": "Stefan Dippold", "f": "Stefan", "r": "Referent:innen", "segs": [{"s": 780, "e": 810, "t": "Eintreffen der Speaker und Setup", "w": "Raum Wallstreet · 7. OG", "k": ["Eintreffen der Speaker", "Begehung Upper East Side"], "p": "Wallstreet · Plenum", "sl": "Setup"}, {"s": 885, "e": 910, "t": "Runde 1 · Thema 1: Digital Corporate Banking", "w": "Penthouse · 9. OG", "k": ["Gruppe A · Vortrag auf Deutsch · mit Paul Hoffmann", "Referenten wechseln an ihre Station", "Dein Vortrag"], "p": "Penthouse", "sl": "R1 · Th. 1"}, {"s": 920, "e": 945, "t": "Runde 2 · Thema 1: Digital Corporate Banking", "w": "Raum Wallstreet · 7. OG", "k": ["Gruppe B · Vortrag auf Englisch · mit Paul Hoffmann", "Referenten wechseln an ihre Station", "Dein Vortrag"], "p": "Wallstreet · Plenum", "sl": "R2 · Th. 1"}, {"s": 945, "e": 1060, "t": "Pause (kein Vortrag)", "w": "", "k": [], "p": "Pause", "brk": true, "sl": "Pause"}, {"s": 1070, "e": 1095, "t": "Runde 6 · Thema 1: Digital Corporate Banking", "w": "Raum Wallstreet · 7. OG", "k": ["Gruppe C, D, E · Vortrag auf Englisch · mit Paul Hoffmann", "Referenten wechseln an ihre Station", "Dein Vortrag"], "p": "Wallstreet · Plenum", "sl": "R6 · Th. 1"}, {"s": 1095, "e": 1110, "t": "Ende Gallery Walk", "w": "Raum Wallstreet · 7. OG", "k": [], "p": "Wallstreet · Plenum", "sl": "Ende Gallery Walk"}, {"s": 1110, "e": 1140, "t": "AI-Keynote", "w": "Raum Wallstreet · 7. OG", "k": ["Kurzes Welcome Back und Dank an die Referenten"], "p": "Wallstreet · Plenum", "sl": "AI-Keynote"}]}, {"n": "Thomas Müldner", "f": "Thomas", "r": "Referent:innen", "segs": [{"s": 780, "e": 810, "t": "Eintreffen der Speaker und Setup", "w": "Raum Wallstreet · 7. OG", "k": ["Eintreffen der Speaker", "Begehung Steuerfachschule", "Weg zum Upper East Side"], "p": "Wallstreet · Plenum", "sl": "Setup"}, {"s": 885, "e": 910, "t": "Runde 1 · Thema 4: FX LiveTrader", "w": "Hörsaal 2 · Steuerfachschule", "k": ["Gruppe D · Vortrag auf Englisch", "Referenten wechseln an ihre Station", "Dein Vortrag"], "p": "Steuerfachschule", "sl": "R1 · Th. 4"}, {"s": 920, "e": 945, "t": "Runde 2 · Thema 4: FX LiveTrader", "w": "Hörsaal 3 · Steuerfachschule", "k": ["Gruppe E · Vortrag auf Englisch", "Referenten wechseln an ihre Station", "Dein Vortrag"], "p": "Steuerfachschule", "sl": "R2 · Th. 4"}, {"s": 955, "e": 980, "t": "Runde 3 · Thema 4: FX LiveTrader", "w": "Hörsaal 1 · Steuerfachschule", "k": ["Gruppe C · Vortrag auf Englisch", "Referenten wechseln an ihre Station", "Dein Vortrag"], "p": "Steuerfachschule", "sl": "R3 · Th. 4"}, {"s": 1000, "e": 1025, "t": "Runde 4 · Thema 4: FX LiveTrader", "w": "Hörsaal 2 · Steuerfachschule", "k": ["Gruppe B · Vortrag auf Englisch", "Referenten wechseln an ihre Station", "Dein Vortrag"], "p": "Steuerfachschule", "sl": "R4 · Th. 4"}, {"s": 1035, "e": 1060, "t": "Runde 5 · Thema 4: FX LiveTrader", "w": "Hörsaal 1 · Steuerfachschule", "k": ["Gruppe A · Vortrag auf Deutsch", "Referenten wechseln an ihre Station", "Dein Vortrag"], "p": "Steuerfachschule", "sl": "R5 · Th. 4"}, {"s": 1060, "e": 1095, "t": "Pause (kein Vortrag)", "w": "", "k": [], "p": "Pause", "brk": true, "sl": "Pause"}, {"s": 1095, "e": 1110, "t": "Ende Gallery Walk", "w": "Raum Wallstreet · 7. OG", "k": [], "p": "Wallstreet · Plenum", "sl": "Ende Gallery Walk"}, {"s": 1110, "e": 1140, "t": "AI-Keynote", "w": "Raum Wallstreet · 7. OG", "k": ["Kurzes Welcome Back und Dank an die Referenten"], "p": "Wallstreet · Plenum", "sl": "AI-Keynote"}]}, {"n": "Torben Pape", "f": "Torben", "r": "Referent:innen", "segs": [{"s": 780, "e": 810, "t": "Eintreffen der Speaker und Setup", "w": "Raum Wallstreet · 7. OG", "k": ["Eintreffen der Speaker", "Begehung Steuerfachschule", "Weg zum Upper East Side"], "p": "Wallstreet · Plenum", "sl": "Setup"}, {"s": 885, "e": 910, "t": "Runde 1 · Thema 5: Loan Pilot", "w": "Hörsaal 3 · Steuerfachschule", "k": ["Gruppe E · Vortrag auf Englisch", "Referenten wechseln an ihre Station", "Dein Vortrag"], "p": "Steuerfachschule", "sl": "R1 · Th. 5"}, {"s": 920, "e": 945, "t": "Runde 2 · Thema 5: Loan Pilot", "w": "Hörsaal 1 · Steuerfachschule", "k": ["Gruppe C · Vortrag auf Englisch", "Referenten wechseln an ihre Station", "Dein Vortrag"], "p": "Steuerfachschule", "sl": "R2 · Th. 5"}, {"s": 955, "e": 980, "t": "Runde 3 · Thema 5: Loan Pilot", "w": "Hörsaal 2 · Steuerfachschule", "k": ["Gruppe D · Vortrag auf Englisch", "Referenten wechseln an ihre Station", "Dein Vortrag"], "p": "Steuerfachschule", "sl": "R3 · Th. 5"}, {"s": 980, "e": 1025, "t": "Pause (kein Vortrag)", "w": "", "k": [], "p": "Pause", "brk": true, "sl": "Pause"}, {"s": 1035, "e": 1060, "t": "Runde 5 · Thema 5: Loan Pilot", "w": "Hörsaal 2 · Steuerfachschule", "k": ["Gruppe B · Vortrag auf Englisch", "Dein Vortrag"], "p": "Steuerfachschule", "sl": "R5 · Th. 5"}, {"s": 1070, "e": 1095, "t": "Runde 6 · Thema 5: Loan Pilot", "w": "Hörsaal 1 · Steuerfachschule", "k": ["Gruppe A · Vortrag auf Deutsch", "Referenten wechseln an ihre Station", "Dein Vortrag"], "p": "Steuerfachschule", "sl": "R6 · Th. 5"}, {"s": 1095, "e": 1110, "t": "Ende Gallery Walk", "w": "Raum Wallstreet · 7. OG", "k": [], "p": "Wallstreet · Plenum", "sl": "Ende Gallery Walk"}, {"s": 1110, "e": 1140, "t": "AI-Keynote", "w": "Raum Wallstreet · 7. OG", "k": ["Kurzes Welcome Back und Dank an die Referenten"], "p": "Wallstreet · Plenum", "sl": "AI-Keynote"}]}], "off": [], "other": "uebersicht_fr.html"};
+const COL = {"Wallstreet · Plenum":"#ffd200","Penthouse":"#c9e46c","Rooftop / High Line":"#7fd6c2","Upper East Side":"#5fb3c9",
+  "Steuerfachschule":"#f6a26f","Lobby":"#ffd200","Gärten · Mission Control":"#c9e46c","Plaza":"#f6a26f","Treppe · Gruppenfoto":"#c3a6f5",
+  "Etagen im Tower":"#5fb3c9","Sonstiges":"#a9bcc0","ohne Ortsangabe":"#71878d","Pause":"transparent"};
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const hm = m => String(Math.floor(m / 60)).padStart(2, "0") + ":" + String(m % 60).padStart(2, "0");
+const P = DATA.people;
+const all = P.flatMap(p => p.segs);
+const T0 = Math.floor(Math.min(...all.map(s => s.s)) / 60) * 60, T1 = Math.ceil(Math.max(...all.map(s => s.e)) / 60) * 60;
+const PX = 2.4;                       // Pixel pro Minute im Zeitstrahl
+let T = null;
+
+$("#days").innerHTML = `<a href="uebersicht_do.html" class="${DATA.key === "do" ? "on" : ""}">Do 15.10.</a><a href="uebersicht_fr.html" class="${DATA.key === "fr" ? "on" : ""}">Fr 16.10.</a>`;
+$("#subline").textContent = `${DATA.long} · ${P.length} Personen eingeplant · aus der Running Order`;
+$("#foot").textContent = `Gesamtübersicht aus der Running Order. Stand: ${DATA.stand}`;
+
+/* ---------- Wer ist wo ---------- */
+const ORDER = Object.keys(COL);
+function renderWho(){
+  const at = [], free = [];
+  P.forEach(p => {
+    const s = p.segs.find(x => x.s <= T && T < x.e);
+    if (s && !s.brk) at.push({p, s}); else {
+      const nx = p.segs.find(x => x.s > T && !x.brk);
+      free.push({p, nx, brk: s && s.brk});
+    }
+  });
+  const by = {};
+  at.forEach(o => (by[o.s.p] = by[o.s.p] || []).push(o));
+  const keys = Object.keys(by).sort((a, b) => ORDER.indexOf(a) - ORDER.indexOf(b));
+  $("#whoSub").textContent = `um ${hm(T)} Uhr · ${at.length} im Einsatz`;
+  $("#places").innerHTML = keys.length ? keys.map(k => `<section class="pc" style="--c:${COL[k] || "#a9bcc0"}">
+      <h3><span>${esc(k)}</span><b>${by[k].length}</b></h3>
+      ${by[k].map(({p, s}) => `<div class="who" data-p="${esc(p.n)}" data-s="${s.s}"><span class="n">${esc(p.f)}</span><span class="t">${esc(s.t)}</span>
+        <span class="m">${esc(s.w || "")}${s.w ? " · " : ""}bis ${hm(s.e)}${s.open ? " (Ende offen)" : ""}</span></div>`).join("")}
+    </section>`).join("") : `<div class="pc" style="--c:#71878d">Zu dieser Uhrzeit hat niemand einen Eintrag in der Running Order.</div>`;
+  const fr = free.map(o => `<span class="chip" title="${o.nx ? "nächster Eintrag " + hm(o.nx.s) : ""}">${esc(o.p.f)}${o.brk ? " · Pause" : ""}${o.nx ? " · ab " + hm(o.nx.s) : " · fertig"}</span>`).join("");
+  const off = DATA.off.length ? `<br>Heute nicht eingeplant: ${DATA.off.map(n => `<span class="chip">${esc(n.split(" ")[0])}</span>`).join("")}` : "";
+  $("#free").innerHTML = (fr ? `Ohne Eintrag um ${hm(T)}: ${fr}` : "") + off;
+}
+
+/* ---------- Zeitstrahl ---------- */
+function renderGantt(){
+  const W = (T1 - T0) * PX, used = new Set(all.map(s => s.p));
+  $("#legend").innerHTML = ORDER.filter(k => used.has(k)).map(k => `<span><i class="${k === "Pause" ? "pz" : ""}" style="--c:${COL[k]}"></i>${esc(k)}</span>`).join("");
+  let h = `<div class="axis" style="width:calc(var(--namew) + ${W}px)"><div style="position:absolute;left:var(--namew);right:0;top:0;bottom:0">`;
+  for (let m = T0; m <= T1; m += 30) h += `<span class="lab" style="left:${(m - T0) * PX}px">${m % 60 ? "" : hm(m)}</span>`;
+  h += `</div></div>`;
+  let grp = null;
+  P.forEach(p => {
+    if (p.r !== grp){ grp = p.r; h += `<div class="grp"><div class="nm">${esc(grp)}</div></div>`; }
+    h += `<div class="row"><div class="nm" title="${esc(p.n)}">${esc(p.f)}</div><div class="lane" style="width:${W}px">`;
+    for (let m = T0; m <= T1; m += 60) h += `<div class="tick" style="left:${(m - T0) * PX}px"></div>`;
+    p.segs.forEach((s, i) => {
+      const w = Math.max((s.e - s.s) * PX - 2, 6);
+      h += `<button class="bar${s.open ? " open" : ""}${s.brk ? " brk" : ""}" style="left:${(s.s - T0) * PX}px;width:${w}px;--c:${COL[s.p] || "#a9bcc0"}"
+        data-p="${esc(p.n)}" data-s="${s.s}" title="${hm(s.s)}–${hm(s.e)} ${esc(s.t)}">${w > 26 ? esc(s.sl || s.t) : ""}${w > 84 ? `<small>${hm(s.s)}–${hm(s.e)}${s.w ? " · " + esc(s.w) : ""}</small>` : ""}</button>`;
+    });
+    h += `</div></div>`;
+  });
+  h += `<div class="cur" id="cur"></div>`;
+  $("#gantt").style.width = `calc(var(--namew) + ${W}px)`;
+  $("#gantt").innerHTML = h;
+}
+function placeCursor(scroll){
+  const nw = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--namew"));
+  const x = nw + (T - T0) * PX;
+  $("#cur").style.left = x + "px";
+  if (scroll){ const g = $("#gscroll"); g.scrollLeft = Math.max(0, x - nw - g.clientWidth * 0.35); }
+}
+
+/* ---------- Uhrzeit ---------- */
+const sl = $("#slider"); sl.min = T0; sl.max = T1;
+function nowMin(){ const d = new Date(); const iso = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+  return iso === DATA.date ? d.getHours() * 60 + d.getMinutes() : null; }
+function setT(m, scroll){
+  T = Math.min(Math.max(m, T0), T1 - 1); sl.value = T;
+  const n = nowMin(), live = n !== null && Math.abs(n - T) < 1;
+  $("#clock").innerHTML = `${hm(T)}<small>${live ? "jetzt" : "Uhr"}</small>`;
+  renderWho(); placeCursor(scroll);
+}
+$("#minus").onclick = () => setT(T - 15, true);
+$("#plus").onclick = () => setT(T + 15, true);
+sl.oninput = () => setT(+sl.value, false);
+const n0 = nowMin();
+$("#nowBtn").disabled = n0 === null || n0 < T0 || n0 > T1;
+$("#nowBtn").title = $("#nowBtn").disabled ? "Nur am Veranstaltungstag während des Programms" : "";
+$("#nowBtn").onclick = () => setT(nowMin(), true);
+$("#gantt").addEventListener("click", ev => {
+  const b = ev.target.closest(".bar");
+  if (b) return openSheet(b.dataset.p, +b.dataset.s);
+  const lane = ev.target.closest(".lane"); if (!lane) return;
+  const r = lane.getBoundingClientRect(); setT(Math.round((T0 + (ev.clientX - r.left) / PX) / 5) * 5, false);
+});
+$("#places").addEventListener("click", ev => { const w = ev.target.closest(".who"); if (w) openSheet(w.dataset.p, +w.dataset.s); });
+
+/* ---------- Detail ---------- */
+function openSheet(name, start){
+  const p = P.find(x => x.n === name), s = p.segs.find(x => x.s === start);
+  const idx = p.segs.indexOf(s), nx = p.segs.slice(idx + 1).find(x => !x.brk);
+  $("#sheet").style.setProperty("--c", COL[s.p] && s.p !== "Pause" ? COL[s.p] : "#ffd200");
+  $("#sbody").innerHTML = `<div class="who2">${esc(p.n)} · ${esc(p.r)}</div><h4>${esc(s.t)}</h4>
+    <div class="meta">${hm(s.s)}–${hm(s.e)} Uhr${s.open ? " (Ende offen)" : ""}${s.w ? " · " + esc(s.w) : ""}</div>
+    ${s.k.length ? `<ul>${s.k.map(k => `<li>${esc(k)}</li>`).join("")}</ul>` : ""}
+    ${nx ? `<div class="meta" style="margin-top:12px;color:var(--t3)">Danach: ${hm(nx.s)} ${esc(nx.t)}${nx.w ? " · " + esc(nx.w) : ""}</div>` : ""}`;
+  $("#sheet").classList.add("show");
+}
+$("#sx").onclick = () => $("#sheet").classList.remove("show");
+document.addEventListener("keydown", e => { if (e.key === "Escape") $("#sheet").classList.remove("show"); });
+
+renderGantt();
+const firstBusy = Math.min(...all.filter(s => !s.brk).map(s => s.s));
+setT(n0 !== null && n0 >= T0 && n0 <= T1 ? n0 : firstBusy, true);
+addEventListener("resize", () => placeCursor(false));
+</script>
+</body>
+</html>
